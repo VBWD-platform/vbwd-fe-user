@@ -1,0 +1,10 @@
+{
+  "cms": {
+    "loading": "Loading…",
+    "notFound": "Page not found.",
+    "allCategories": "All",
+    "noPages": "No pages available.",
+    "readMore": "Read more",
+    "category": "Category"
+  }
+}

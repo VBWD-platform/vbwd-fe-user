@@ -41,13 +41,16 @@
             {{ $t('nav.dashboard') }}
           </router-link>
 
-          <!-- Taro Plugin -->
+          <!-- Plugin sidebar nav items (registered dynamically by plugins) -->
           <router-link
-            to="/dashboard/taro"
+            v-for="item in sidebarNavItems"
+            :key="item.pluginName"
+            :to="item.to"
             class="nav-item"
+            :data-testid="item.testId"
             @click="closeMobileMenu"
           >
-            {{ $t('nav.taro') }}
+            {{ $t(item.labelKey) }}
           </router-link>
 
           <!-- Store (Plans, Tokens, Add-Ons) -->
@@ -136,17 +139,6 @@
               </router-link>
             </div>
           </div>
-
-          <!-- Chat Plugin (if enabled) -->
-          <router-link
-            v-if="enabledPlugins.has('chat')"
-            to="/dashboard/chat"
-            class="nav-item"
-            data-testid="nav-chat"
-            @click="closeMobileMenu"
-          >
-            {{ $t('nav.chat') }}
-          </router-link>
         </nav>
       </div>
 
@@ -288,14 +280,17 @@
             >
               {{ $t('nav.profile') }}
             </router-link>
-            <button
-              v-if="enabledPlugins.has('theme-switcher')"
-              class="user-dropdown-item appearance-btn"
-              data-testid="appearance-menu-item"
-              @click="openAppearance"
+            <!-- Plugin user-menu items (registered dynamically by plugins) -->
+            <router-link
+              v-for="item in menuNavItems"
+              :key="item.pluginName"
+              :to="item.to"
+              class="user-dropdown-item"
+              :data-testid="item.testId"
+              @click="closeUserMenu"
             >
-              {{ $t('nav.appearance') }}
-            </button>
+              {{ $t(item.labelKey) }}
+            </router-link>
             <button
               class="user-dropdown-item logout-btn"
               data-testid="logout-button"
@@ -323,13 +318,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, inject, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCartStore } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
+import { userNavRegistry } from '@/plugins/userNavRegistry';
 
-const enabledPlugins = inject<Set<string>>('enabledPlugins', new Set());
 const router = useRouter();
+
+const sidebarNavItems = computed(() => userNavRegistry.getSidebarItems());
+const menuNavItems = computed(() => userNavRegistry.getMenuItems());
 
 // Cart store
 const cartStoreRaw = useCartStore();
@@ -388,11 +386,6 @@ function toggleUserMenu() {
 function closeUserMenu() {
   showUserMenu.value = false;
   closeMobileMenu();
-}
-
-function openAppearance() {
-  closeUserMenu();
-  router.push('/dashboard/appearance');
 }
 
 function goToCheckout() {

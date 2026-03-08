@@ -29,7 +29,7 @@ initLocale();
     // Get enabled plugins based on plugins.json configuration
     let plugins: IPlugin[] = [];
     try {
-      plugins = getEnabledPlugins();
+      plugins = await getEnabledPlugins();
       console.log(`[VBWD] Using ${plugins.length} enabled plugin(s)`);
     } catch (error) {
       console.error('[VBWD] Failed to load plugins, continuing without plugins:', error);

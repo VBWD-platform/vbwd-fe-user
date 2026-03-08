@@ -1,4 +1,5 @@
 import { type IPlugin, type IPlatformSDK } from 'vbwd-view-component';
+import { userNavRegistry } from '@/plugins/userNavRegistry';
 import en from './locales/en.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
@@ -38,10 +39,17 @@ export const taroPlugin: IPlugin = {
   },
 
   activate() {
+    userNavRegistry.register({
+      pluginName: 'taro',
+      to: '/dashboard/taro',
+      labelKey: 'nav.taro',
+      testId: 'nav-taro',
+    });
     console.log('Taro plugin activated');
   },
 
   deactivate() {
+    userNavRegistry.unregister('taro');
     console.log('Taro plugin deactivated');
   },
 };

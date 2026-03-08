@@ -1,4 +1,5 @@
 import type { IPlugin, IPlatformSDK } from 'vbwd-view-component';
+import { userNavRegistry } from '@/plugins/userNavRegistry';
 import en from './locales/en.json';
 import de from './locales/de.json';
 import es from './locales/es.json';
@@ -34,9 +35,16 @@ export const chatPlugin: IPlugin = {
 
   activate() {
     this._active = true;
+    userNavRegistry.register({
+      pluginName: 'chat',
+      to: '/dashboard/chat',
+      labelKey: 'nav.chat',
+      testId: 'nav-chat',
+    });
   },
 
   deactivate() {
     this._active = false;
+    userNavRegistry.unregister('chat');
   },
 };

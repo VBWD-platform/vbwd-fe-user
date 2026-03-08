@@ -25,5 +25,8 @@
         "description": "Tonos cálidos naranjas y tierra"
       }
     }
+  },
+  "nav": {
+    "appearance": "Apariencia"
   }
 }

@@ -25,5 +25,8 @@
         "description": "温暖的橙色和土色调"
       }
     }
+  },
+  "nav": {
+    "appearance": "外观"
   }
 }

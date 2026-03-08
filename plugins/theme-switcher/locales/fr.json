@@ -25,5 +25,8 @@
         "description": "Tons chauds oranges et terre"
       }
     }
+  },
+  "nav": {
+    "appearance": "Apparence"
   }
 }

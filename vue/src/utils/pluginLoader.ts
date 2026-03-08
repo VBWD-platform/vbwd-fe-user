@@ -2,16 +2,16 @@ import type { IPlugin } from 'vbwd-view-component';
 import pluginsManifest from '@plugins/plugins.json';
 
 /**
- * Plugin Registry - Controls which hardcoded plugins are used
+ * Plugin Registry - Controls which plugins are loaded
  *
- * Plugins MUST be imported statically for bundling, but we use
- * plugins.json to control which ones are registered and activated.
+ * Plugins are discovered dynamically from plugins.json.
+ * Only enabled plugins are loaded and registered.
+ * Core does NOT import from plugins — plugins depend on core.
  *
  * To add a new plugin:
  * 1. Create the plugin in /plugins/{name}/
- * 2. Add static import below
- * 3. Add to pluginMap
- * 4. Add entry to plugins.json with enabled: true
+ * 2. Export the plugin from index.ts (default or named export)
+ * 3. Add entry to plugins.json with enabled: true
  */
 
 interface PluginManifest {
@@ -23,40 +23,15 @@ interface PluginManifest {
   }>;
 }
 
-// ============================================================================
-// STATIC PLUGIN IMPORTS - All available plugins must be imported here
-// These are bundled at build time, not dynamically loaded at runtime
-// ============================================================================
-import { landing1Plugin } from '@plugins/landing1';
-import { checkoutPlugin } from '@plugins/checkout';
-import { stripePaymentPlugin } from '@plugins/stripe-payment';
-import { paypalPaymentPlugin } from '@plugins/paypal-payment';
-import { yookassaPaymentPlugin } from '@plugins/yookassa-payment';
-import { themeSwitcherPlugin } from '@plugins/theme-switcher';
-import { chatPlugin } from '@plugins/chat';
-import { taroPlugin } from '@plugins/taro';
-
-// Map of all available plugins
-const pluginMap: Record<string, IPlugin> = {
-  landing1: landing1Plugin,
-  checkout: checkoutPlugin,
-  'stripe-payment': stripePaymentPlugin,
-  'paypal-payment': paypalPaymentPlugin,
-  'yookassa-payment': yookassaPaymentPlugin,
-  'theme-switcher': themeSwitcherPlugin,
-  chat: chatPlugin,
-  taro: taroPlugin,
-};
+// Vite statically analyses import.meta.glob at build time and includes all
+// matching modules in the bundle — no runtime dynamic import needed.
+const pluginModules = import.meta.glob<any>('../../../plugins/*/index.ts', { eager: false });
 
 /**
- * Get enabled plugins based on plugins.json configuration
- *
- * Plugins are always bundled, but only enabled ones are registered.
- * To enable/disable plugins, edit plugins.json without touching code.
- *
- * @returns Array of enabled plugin objects
+ * Get enabled plugins based on plugins.json configuration.
+ * Plugins are dynamically loaded; only enabled ones are instantiated.
  */
-export function getEnabledPlugins(): IPlugin[] {
+export async function getEnabledPlugins(): Promise<IPlugin[]> {
   try {
     const manifest: PluginManifest = pluginsManifest as PluginManifest;
     const enabledPlugins: IPlugin[] = [];
@@ -67,14 +42,38 @@ export function getEnabledPlugins(): IPlugin[] {
         continue;
       }
 
-      const plugin = pluginMap[pluginName];
-      if (!plugin) {
-        console.warn(`[PluginRegistry] Plugin '${pluginName}' in manifest not found in plugin map. Skipping.`);
+      // Find the module loader for this plugin
+      const matchingKey = Object.keys(pluginModules).find(key =>
+        key.includes(`/${pluginName}/index.ts`)
+      );
+
+      if (!matchingKey) {
+        console.warn(`[PluginRegistry] Plugin module not found for: ${pluginName}`);
         continue;
       }
 
-      console.debug(`[PluginRegistry] Enabled plugin: ${plugin.name} (v${plugin.version || 'unknown'})`);
-      enabledPlugins.push(plugin);
+      try {
+        const pluginModule = await pluginModules[matchingKey]();
+
+        // Prefer default export; fall back to the first named export that satisfies IPlugin
+        // (has an `install` method). This supports both export styles without forcing every
+        // plugin to change its export signature.
+        const plugin: IPlugin =
+          pluginModule.default ??
+          (Object.values(pluginModule) as unknown[]).find(
+            (v): v is IPlugin => !!v && typeof v === 'object' && typeof (v as IPlugin).install === 'function'
+          );
+
+        if (!plugin) {
+          console.warn(`[PluginRegistry] Plugin '${pluginName}' has no IPlugin export. Skipping.`);
+          continue;
+        }
+
+        console.debug(`[PluginRegistry] Loaded plugin: ${plugin.name} v${plugin.version}`);
+        enabledPlugins.push(plugin);
+      } catch (error) {
+        console.warn(`[PluginRegistry] Failed to load plugin '${pluginName}':`, error);
+      }
     }
 
     console.log(`[PluginRegistry] Total enabled plugins: ${enabledPlugins.length}`);
@@ -86,8 +85,7 @@ export function getEnabledPlugins(): IPlugin[] {
 }
 
 /**
- * Get list of enabled plugin names from manifest
- * Useful for checking if specific plugins are enabled
+ * Get list of enabled plugin names from manifest.
  */
 export function getEnabledPluginNames(): Set<string> {
   try {
@@ -101,11 +99,4 @@ export function getEnabledPluginNames(): Set<string> {
     console.error('[PluginRegistry] Failed to get enabled plugin names:', error);
     return new Set();
   }
-}
-
-/**
- * @deprecated Use getEnabledPlugins() instead
- */
-export async function loadEnabledPlugins(): Promise<IPlugin[]> {
-  return getEnabledPlugins();
 }

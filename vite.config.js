@@ -15,6 +15,10 @@ export default defineConfig({
   },
   server: {
     allowedHosts: true,
+    hmr: {
+      path: '/__vite_hmr',
+      clientPort: 8080,
+    },
     proxy: {
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://host.docker.internal:5000',

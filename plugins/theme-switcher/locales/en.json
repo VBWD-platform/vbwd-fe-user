@@ -25,5 +25,8 @@
         "description": "Warm orange and earth tones"
       }
     }
+  },
+  "nav": {
+    "appearance": "Appearance"
   }
 }

@@ -13,5 +13,8 @@
     "configError": "Chat is not configured. Please contact the administrator.",
     "model": "Model",
     "emptyState": "Start a conversation by typing a message below."
+  },
+  "nav": {
+    "chat": "Chat"
   }
 }

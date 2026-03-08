@@ -1,4 +1,5 @@
 import type { IPlugin, IPlatformSDK } from 'vbwd-view-component';
+import { userNavRegistry } from '@/plugins/userNavRegistry';
 import { themePresets } from './presets';
 import { applyTheme } from './apply-theme';
 import en from './locales/en.json';
@@ -43,10 +44,18 @@ export const themeSwitcherPlugin: IPlugin = {
     if (preset) {
       applyTheme(preset);
     }
+    userNavRegistry.register({
+      pluginName: 'theme-switcher',
+      to: '/dashboard/appearance',
+      labelKey: 'nav.appearance',
+      testId: 'appearance-menu-item',
+      placement: 'menu',
+    });
   },
 
   deactivate() {
     this._active = false;
+    userNavRegistry.unregister('theme-switcher');
     const defaultPreset = themePresets.find(p => p.id === 'default');
     if (defaultPreset) {
       applyTheme(defaultPreset);
