@@ -1,8 +1,10 @@
 <template>
-  <!-- HTML widget: raw HTML from content_html -->
+  <!-- HTML widget: decoded from content_json.content (base64) + source_css -->
   <div v-if="widget.widget_type === 'html'" class="cms-widget cms-widget--html">
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <div v-html="widget.content_html ?? ''" />
+    <component :is="'style'" v-if="widgetCss">{{ widgetCss }}</component>
+    <!-- eslint-disable-next-line vue/no-v-html -->
+    <div v-html="widgetHtml" />
   </div>
 
   <!-- Menu widget: render as nav -->
@@ -66,6 +68,20 @@ import type { CmsWidgetData, CmsMenuItemData } from '../stores/useCmsStore';
 const props = defineProps<{
   widget: CmsWidgetData;
 }>();
+
+// ── HTML widget helpers ────────────────────────────────────────────────────────
+
+const widgetHtml = computed(() => {
+  const b64 = (props.widget.content_json as any)?.content;
+  if (!b64) return '';
+  try {
+    return decodeURIComponent(escape(atob(b64)));
+  } catch {
+    return b64;
+  }
+});
+
+const widgetCss = computed(() => props.widget.source_css ?? '');
 
 // ── Menu helpers ───────────────────────────────────────────────────────────────
 

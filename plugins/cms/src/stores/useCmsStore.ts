@@ -57,7 +57,7 @@ export interface CmsWidgetData {
   name: string;
   widget_type: 'html' | 'menu' | 'slideshow';
   content_json: Record<string, unknown> | null;
-  content_html: string | null;
+  source_css: string | null;
   menu_items?: CmsMenuItemData[];
 }
 
