@@ -130,9 +130,13 @@ function toggleSub(e: Event, id: string) {
   else openSubs.value.push(id);
 }
 
-function onEsc(e: KeyboardEvent) { if (e.key === 'Escape') menuOpen.value = false; }
-onMounted(() => document.addEventListener('keydown', onEsc));
-onUnmounted(() => document.removeEventListener('keydown', onEsc));
+function onEsc(e: KeyboardEvent) { if (e.key === 'Escape') { menuOpen.value = false; openSubs.value = []; } }
+function onDocClick(e: MouseEvent) {
+  const nav = (e.target as Element).closest('.cms-widget--menu');
+  if (!nav) { openSubs.value = []; menuOpen.value = false; }
+}
+onMounted(() => { document.addEventListener('keydown', onEsc); document.addEventListener('click', onDocClick); });
+onUnmounted(() => { document.removeEventListener('keydown', onEsc); document.removeEventListener('click', onDocClick); });
 
 // ── Slideshow helpers ──────────────────────────────────────────────────────────
 
@@ -153,13 +157,10 @@ function nextSlide() {
 
 <style scoped>
 .cms-widget--html { width: 100%; }
-/* Menu — structural only; appearance controlled by widget source_css */
+/* Menu — structural only; ALL display logic in widget source_css */
 .cms-widget--menu { width: 100%; position: relative; }
 .cms-menu { list-style: none; margin: 0; padding: 0; }
 .cms-menu__sub { list-style: none; margin: 0; padding: 0; }
-/* Burger button — hidden by default, source_css shows it on mobile */
-.cms-burger { display: none; }
-.cms-menu-overlay { display: none; }
 
 /* Slideshow */
 .cms-slideshow { position: relative; overflow: hidden; }
