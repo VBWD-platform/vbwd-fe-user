@@ -8,7 +8,7 @@
   </div>
 
   <!-- Menu widget: render as nav (supports source_css for full burger-menu styling) -->
-  <nav v-else-if="widget.widget_type === 'menu'" class="cms-widget cms-widget--menu">
+  <nav v-else-if="widget.widget_type === 'menu'" class="cms-widget cms-widget--menu" :class="widget.slug ? `cms-widget--${widget.slug}` : ''">
     <component :is="'style'" v-if="widgetCss">{{ widgetCss }}</component>
     <button
       class="cms-burger"
@@ -155,10 +155,56 @@ function nextSlide() {
 }
 </script>
 
+<!-- Global defaults for menu widgets.
+     These are intentionally non-scoped so widget source_css (injected later
+     in the body) can override them at the same specificity via cascade order. -->
+<style>
+/* ── Base: shared across all screen sizes ─────────────────── */
+.cms-widget--menu { display: flex; align-items: center; position: relative; z-index: 200; }
+.cms-menu { list-style: none; margin: 0; padding: 0; }
+.cms-menu__item { position: relative; }
+.cms-menu__link { display: flex; align-items: center; gap: 0.25rem; padding: 0.5rem 1rem; color: inherit; text-decoration: none; font-weight: 500; white-space: nowrap; cursor: pointer; user-select: none; }
+.cms-menu__link:hover { opacity: 0.75; }
+.cms-menu__sub { display: none; list-style: none; margin: 0; padding: 0.25rem 0; }
+.cms-menu__sub--open { display: block; }
+.cms-menu__sub .cms-menu__link { padding: 0.45rem 1rem; font-size: 0.9rem; }
+.cms-menu__arrow { font-size: 0.7rem; opacity: 0.55; transition: transform 0.2s; display: inline-block; }
+.cms-menu__arrow--open { transform: rotate(180deg); }
+
+/* Burger spans */
+.cms-burger { background: transparent; border: none; cursor: pointer; padding: 6px; border-radius: 6px; color: inherit; display: none; flex-direction: column; justify-content: center; gap: 5px; width: 40px; height: 40px; flex-shrink: 0; }
+.cms-burger span { display: block; width: 22px; height: 2px; background: currentColor; border-radius: 2px; transition: transform 0.25s, opacity 0.2s; transform-origin: center; }
+.cms-burger--open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.cms-burger--open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.cms-burger--open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+/* Overlay */
+.cms-menu-overlay { display: none; }
+.cms-menu-overlay--open { display: block; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 250; }
+
+/* ── Desktop: horizontal row ──────────────────────────────── */
+@media (min-width: 769px) {
+  .cms-menu { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .cms-menu__sub { position: absolute; top: 100%; left: 0; background: var(--color-surface, #fff); border: 1px solid var(--color-border, #e5e7eb); border-radius: 6px; min-width: 160px; z-index: 300; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+}
+
+/* ── Mobile: burger drawer ────────────────────────────────── */
+@media (max-width: 768px) {
+  .cms-burger { display: flex; }
+  .cms-menu { display: flex; flex-direction: column; align-items: stretch; position: fixed; top: 0; right: -100%; width: min(300px, 85vw); height: 100dvh; background: var(--color-bg, #fff); padding: 4rem 0 2rem; overflow-y: auto; z-index: 300; transition: right 0.28s ease; box-shadow: -4px 0 20px rgba(0,0,0,0.15); }
+  .cms-menu--open { right: 0; }
+  .cms-menu__item { position: static; border-bottom: 1px solid var(--color-border, #e5e7eb); }
+  .cms-menu__link { padding: 0.9rem 1.5rem; font-size: 1rem; justify-content: space-between; white-space: normal; }
+  .cms-menu__sub { position: static; box-shadow: none; border: none; border-radius: 0; max-height: 0; overflow: hidden; display: block; transition: max-height 0.25s ease; }
+  .cms-menu__sub--open { max-height: 400px; }
+  .cms-menu__sub .cms-menu__link { padding-left: 2.5rem; font-size: 0.9rem; opacity: 0.85; }
+}
+</style>
+
 <style scoped>
 .cms-widget--html { width: 100%; }
-/* Menu — structural only; ALL display logic in widget source_css */
-.cms-widget--menu { width: 100%; position: relative; }
+/* Menu scoped — structural containment only */
+.cms-widget--menu { width: 100%; }
 .cms-menu { list-style: none; margin: 0; padding: 0; }
 .cms-menu__sub { list-style: none; margin: 0; padding: 0; }
 
