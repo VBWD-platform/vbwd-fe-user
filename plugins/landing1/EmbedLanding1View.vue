@@ -6,6 +6,7 @@
   >
     <Landing1View
       :embed-mode="true"
+      :category="category"
       @plan-selected="onPlanSelected"
     />
   </div>
@@ -27,6 +28,10 @@ const themeClass = computed(() => {
   const theme = typeof route.query.theme === 'string' ? route.query.theme : 'light';
   return allowedThemes.includes(theme) ? `vbwd-embed--${theme}` : 'vbwd-embed--light';
 });
+
+const category = computed(() =>
+  typeof route.query.category === 'string' ? route.query.category : ''
+);
 
 onMounted(() => {
   const queryLocale = typeof route.query.locale === 'string' ? route.query.locale : 'en';

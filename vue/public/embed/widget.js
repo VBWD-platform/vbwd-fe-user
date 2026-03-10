@@ -1,19 +1,21 @@
 (function() {
   'use strict';
 
-  // Find our script tag to read data attributes
-  var scripts = document.querySelectorAll('script[data-origin]');
+  // Find our script tag — supports both data-origin and data-embed selectors
+  var scripts = document.querySelectorAll('script[data-origin], script[data-embed]');
   var scriptTag = scripts[scripts.length - 1];
 
   if (!scriptTag) {
-    console.error('[VBWD] Widget script must have a data-origin attribute');
+    console.error('[VBWD] Widget script must have a data-origin or data-embed attribute');
     return;
   }
 
-  var origin = scriptTag.getAttribute('data-origin') || '';
+  // Default origin to current page origin so widgets work without hardcoded URLs
+  var origin = scriptTag.getAttribute('data-origin') || window.location.origin;
   var embed = scriptTag.getAttribute('data-embed') || 'landing1';
   var locale = scriptTag.getAttribute('data-locale') || 'en';
   var theme = scriptTag.getAttribute('data-theme') || 'light';
+  var category = scriptTag.getAttribute('data-category') || '';
   var containerId = scriptTag.getAttribute('data-container') || 'vbwd-iframe';
   var height = scriptTag.getAttribute('data-height') || '600';
 
@@ -34,7 +36,8 @@
 
   // Build iframe URL
   var iframeSrc = origin + '/embed/' + encodeURIComponent(embed) +
-    '?locale=' + encodeURIComponent(locale) + '&theme=' + encodeURIComponent(theme);
+    '?locale=' + encodeURIComponent(locale) + '&theme=' + encodeURIComponent(theme) +
+    (category ? '&category=' + encodeURIComponent(category) : '');
 
   // Create iframe
   var iframe = document.createElement('iframe');

@@ -1,5 +1,5 @@
 <template>
-  <div class="conversation-box">
+  <div ref="boxEl" class="conversation-box">
     <div
       v-for="(msg, idx) in messages"
       :key="idx"
@@ -16,6 +16,7 @@
 </template>
 
 <script setup lang="ts">
+import { ref, watch, nextTick } from 'vue';
 import type { ConversationMessage } from '@/stores';
 import FormattedMessage from './FormattedMessage.vue';
 
@@ -23,7 +24,13 @@ interface Props {
   messages: ConversationMessage[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+const boxEl = ref<HTMLElement | null>(null);
+
+watch(() => props.messages.length, async () => {
+  await nextTick();
+  if (boxEl.value) boxEl.value.scrollTop = boxEl.value.scrollHeight;
+});
 </script>
 
 <style scoped>

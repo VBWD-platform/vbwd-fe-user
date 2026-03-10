@@ -101,6 +101,7 @@ export interface TarifPlan {
 
 const props = defineProps<{
   embedMode?: boolean;
+  category?: string;
 }>();
 
 const emit = defineEmits<{
@@ -118,7 +119,10 @@ async function loadPlans() {
   loading.value = true;
   error.value = null;
   try {
-    const response = await fetch('/api/v1/tarif-plans');
+    const url = props.category
+      ? `/api/v1/tarif-plans?category=${encodeURIComponent(props.category)}`
+      : '/api/v1/tarif-plans';
+    const response = await fetch(url);
     if (!response.ok) throw new Error('Failed to load plans');
     const data = await response.json();
     plans.value = (data.plans || []).filter((p: TarifPlan) => p.is_active !== false);
