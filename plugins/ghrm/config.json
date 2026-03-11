@@ -1,0 +1,22 @@
+{
+  "catalogue_route_prefix": {
+    "type": "string",
+    "default": "/software",
+    "description": "URL prefix for the software catalogue pages"
+  },
+  "packages_per_page": {
+    "type": "number",
+    "default": 20,
+    "description": "Number of packages shown per catalogue page"
+  },
+  "related_packages_limit": {
+    "type": "number",
+    "default": 4,
+    "description": "Maximum number of related packages shown on a detail page"
+  },
+  "show_in_nav": {
+    "type": "boolean",
+    "default": true,
+    "description": "Show Software link in the main user navigation"
+  }
+}

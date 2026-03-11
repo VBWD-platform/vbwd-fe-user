@@ -139,7 +139,10 @@ run_unit() {
     cd "$REPO_DIR"
 
     echo "Running unit tests..."
-    if npx vitest run vue/tests/unit/ 2>&1 | tail -20; then
+    VITEST_OUT=$(npx vitest run vue/tests/unit/ 2>&1)
+    VITEST_EXIT=$?
+    echo "$VITEST_OUT" | tail -20
+    if [[ "$VITEST_EXIT" == "0" ]]; then
         print_success "Unit tests passed"
     else
         print_error "Unit tests failed"

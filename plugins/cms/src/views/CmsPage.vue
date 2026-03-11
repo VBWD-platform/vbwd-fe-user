@@ -1,10 +1,16 @@
 <template>
   <div class="cms-page">
-    <div v-if="store.loading" class="cms-page__loading">
+    <div
+      v-if="store.loading"
+      class="cms-page__loading"
+    >
       {{ $t('cms.loading') }}
     </div>
 
-    <div v-else-if="store.error || !store.currentPage" class="cms-page__not-found">
+    <div
+      v-else-if="store.error || !store.currentPage"
+      class="cms-page__not-found"
+    >
       {{ $t('cms.notFound') }}
     </div>
 
@@ -17,10 +23,18 @@
     </template>
 
     <!-- Fallback: simple article rendering (no layout) -->
-    <article v-else class="cms-page__content">
-      <h1 class="cms-page__title">{{ store.currentPage.name }}</h1>
+    <article
+      v-else
+      class="cms-page__content"
+    >
+      <h1 class="cms-page__title">
+        {{ store.currentPage.name }}
+      </h1>
       <!-- eslint-disable vue/no-v-html -->
-      <div class="cms-page__body" v-html="renderedHtml" />
+      <div
+        class="cms-page__body"
+        v-html="renderedHtml"
+      />
       <!-- eslint-enable vue/no-v-html -->
     </article>
   </div>

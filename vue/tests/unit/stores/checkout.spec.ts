@@ -50,7 +50,7 @@ describe('CheckoutStore', () => {
     it('populates bundles and addons from cart', async () => {
       mockCartItems = [
         {
-          type: 'token_bundle',
+          type: 'TOKEN_BUNDLE',
           id: 'bundle-1',
           name: '1000 Tokens',
           price: 10,
@@ -58,7 +58,7 @@ describe('CheckoutStore', () => {
           metadata: { token_amount: 1000, currency: 'USD' }
         },
         {
-          type: 'addon',
+          type: 'ADD_ON',
           id: 'addon-1',
           name: 'Priority Support',
           price: 15,
@@ -83,7 +83,7 @@ describe('CheckoutStore', () => {
     it('loads plan from cart when present', async () => {
       mockCartItems = [
         {
-          type: 'plan',
+          type: 'PLAN',
           id: 'plan-slug-1',
           name: 'Pro Plan',
           price: 29,

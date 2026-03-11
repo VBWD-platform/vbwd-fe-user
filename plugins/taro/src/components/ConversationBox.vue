@@ -1,5 +1,8 @@
 <template>
-  <div ref="boxEl" class="conversation-box">
+  <div
+    ref="boxEl"
+    class="conversation-box"
+  >
     <div
       v-for="(msg, idx) in messages"
       :key="idx"

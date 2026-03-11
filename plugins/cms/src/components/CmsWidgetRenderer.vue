@@ -1,15 +1,33 @@
 <template>
   <!-- HTML widget: decoded from content_json.content (base64) + source_css -->
-  <div v-if="widget.widget_type === 'html'" ref="htmlWidgetEl" class="cms-widget cms-widget--html">
+  <div
+    v-if="widget.widget_type === 'html'"
+    ref="htmlWidgetEl"
+    class="cms-widget cms-widget--html"
+  >
     <!-- eslint-disable-next-line vue/no-v-html -->
-    <component :is="'style'" v-if="widgetCss">{{ widgetCss }}</component>
+    <component
+      :is="'style'"
+      v-if="widgetCss"
+    >
+      {{ widgetCss }}
+    </component>
     <!-- eslint-disable-next-line vue/no-v-html -->
     <div v-html="widgetHtml" />
   </div>
 
   <!-- Menu widget: render as nav (supports source_css for full burger-menu styling) -->
-  <nav v-else-if="widget.widget_type === 'menu'" class="cms-widget cms-widget--menu" :class="widget.slug ? `cms-widget--${widget.slug}` : ''">
-    <component :is="'style'" v-if="widgetCss">{{ widgetCss }}</component>
+  <nav
+    v-else-if="widget.widget_type === 'menu'"
+    class="cms-widget cms-widget--menu"
+    :class="widget.slug ? `cms-widget--${widget.slug}` : ''"
+  >
+    <component
+      :is="'style'"
+      v-if="widgetCss"
+    >
+      {{ widgetCss }}
+    </component>
     <button
       class="cms-burger"
       :class="{ 'cms-burger--open': menuOpen }"
@@ -24,7 +42,10 @@
       :class="{ 'cms-menu-overlay--open': menuOpen }"
       @click="menuOpen = false"
     />
-    <ul class="cms-menu" :class="{ 'cms-menu--open': menuOpen }">
+    <ul
+      class="cms-menu"
+      :class="{ 'cms-menu--open': menuOpen }"
+    >
       <li
         v-for="item in rootItems"
         :key="item.id"
@@ -38,15 +59,27 @@
           @click="childrenOf(item.id).length ? toggleSub($event, item.id) : undefined"
         >
           {{ item.label }}
-          <span v-if="childrenOf(item.id).length" class="cms-menu__arrow" :class="{ 'cms-menu__arrow--open': openSubs.includes(item.id) }">▾</span>
+          <span
+            v-if="childrenOf(item.id).length"
+            class="cms-menu__arrow"
+            :class="{ 'cms-menu__arrow--open': openSubs.includes(item.id) }"
+          >▾</span>
         </a>
         <ul
           v-if="childrenOf(item.id).length"
           class="cms-menu__sub"
           :class="{ 'cms-menu__sub--open': openSubs.includes(item.id) }"
         >
-          <li v-for="child in childrenOf(item.id)" :key="child.id" class="cms-menu__item">
-            <a :href="itemHref(child)" :target="child.target || '_self'" class="cms-menu__link">
+          <li
+            v-for="child in childrenOf(item.id)"
+            :key="child.id"
+            class="cms-menu__item"
+          >
+            <a
+              :href="itemHref(child)"
+              :target="child.target || '_self'"
+              class="cms-menu__link"
+            >
               {{ child.label }}
             </a>
           </li>
@@ -56,30 +89,52 @@
   </nav>
 
   <!-- Slideshow widget: simple image carousel -->
-  <div v-else-if="widget.widget_type === 'slideshow'" class="cms-widget cms-widget--slideshow">
-    <div v-if="!slideshowImages.length" class="cms-slideshow--empty" />
-    <div v-else class="cms-slideshow">
+  <div
+    v-else-if="widget.widget_type === 'slideshow'"
+    class="cms-widget cms-widget--slideshow"
+  >
+    <div
+      v-if="!slideshowImages.length"
+      class="cms-slideshow--empty"
+    />
+    <div
+      v-else
+      class="cms-slideshow"
+    >
       <div
         v-for="(img, idx) in slideshowImages"
         :key="idx"
         class="cms-slide"
         :class="{ 'cms-slide--active': idx === activeSlide }"
       >
-        <img :src="img.url" :alt="img.alt || ''" class="cms-slide__img">
-        <p v-if="img.caption" class="cms-slide__caption">{{ img.caption }}</p>
+        <img
+          :src="img.url"
+          :alt="img.alt || ''"
+          class="cms-slide__img"
+        >
+        <p
+          v-if="img.caption"
+          class="cms-slide__caption"
+        >
+          {{ img.caption }}
+        </p>
       </div>
       <button
         v-if="slideshowImages.length > 1"
         class="cms-slide__prev"
         type="button"
         @click="prevSlide"
-      >‹</button>
+      >
+        ‹
+      </button>
       <button
         v-if="slideshowImages.length > 1"
         class="cms-slide__next"
         type="button"
         @click="nextSlide"
-      >›</button>
+      >
+        ›
+      </button>
     </div>
   </div>
 </template>

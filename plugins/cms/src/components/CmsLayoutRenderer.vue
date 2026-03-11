@@ -1,6 +1,12 @@
 <template>
-  <div class="cms-layout" :class="`cms-layout--${layout.slug}`">
-    <template v-for="area in layout.areas" :key="area.name">
+  <div
+    class="cms-layout"
+    :class="`cms-layout--${layout.slug}`"
+  >
+    <template
+      v-for="area in layout.areas"
+      :key="area.name"
+    >
       <!-- Content area: render page TipTap content -->
       <main
         v-if="area.type === 'content'"
@@ -8,7 +14,11 @@
       >
         <div class="container">
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div ref="contentAreaEl" class="cms-page__body" v-html="contentHtml" />
+          <div
+            ref="contentAreaEl"
+            class="cms-page__body"
+            v-html="contentHtml"
+          />
         </div>
       </main>
 

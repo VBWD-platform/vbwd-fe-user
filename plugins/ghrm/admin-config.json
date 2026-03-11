@@ -1,0 +1,33 @@
+{
+  "tabs": [
+    {
+      "label": "Catalogue Display",
+      "fields": [
+        {
+          "name": "catalogue_route_prefix",
+          "type": "string",
+          "label": "Catalogue Route Prefix",
+          "description": "URL prefix for the software catalogue. Default: /software"
+        },
+        {
+          "name": "packages_per_page",
+          "type": "number",
+          "label": "Packages Per Page",
+          "description": "Number of packages shown per catalogue page"
+        },
+        {
+          "name": "related_packages_limit",
+          "type": "number",
+          "label": "Related Packages Limit",
+          "description": "Maximum number of related packages shown on a detail page"
+        },
+        {
+          "name": "show_in_nav",
+          "type": "boolean",
+          "label": "Show in Navigation",
+          "description": "Show Software link in the main user navigation menu"
+        }
+      ]
+    }
+  ]
+}
