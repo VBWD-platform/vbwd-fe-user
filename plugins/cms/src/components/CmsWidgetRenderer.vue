@@ -1,4 +1,16 @@
 <template>
+  <!-- Vue component widget: rendered from registry by component name -->
+  <component
+    :is="resolvedVueComponent"
+    v-if="widget.widget_type === 'vue-component' && resolvedVueComponent"
+    v-bind="(widget.content_json as any)?.props || {}"
+    class="cms-widget cms-widget--vue"
+  />
+  <div
+    v-else-if="widget.widget_type === 'vue-component'"
+    class="cms-widget cms-widget--vue cms-widget--vue-missing"
+  />
+
   <!-- HTML widget: decoded from content_json.content (base64) + source_css -->
   <div
     v-if="widget.widget_type === 'html'"
@@ -141,7 +153,15 @@
 
 <script setup lang="ts">
 import { computed, ref, watch, onMounted, onUnmounted, nextTick } from 'vue';
+import type { Component } from 'vue';
 import type { CmsWidgetData, CmsMenuItemData } from '../stores/useCmsStore';
+import { resolveCmsVueComponent } from '../registry/vueComponentRegistry';
+
+const resolvedVueComponent = computed<Component | undefined>(() => {
+  if (props.widget.widget_type !== 'vue-component') return undefined;
+  const name = (props.widget.content_json as any)?.component;
+  return name ? resolveCmsVueComponent(name) : undefined;
+});
 
 const props = defineProps<{
   widget: CmsWidgetData;

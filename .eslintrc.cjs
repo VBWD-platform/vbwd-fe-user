@@ -18,12 +18,13 @@ module.exports = {
     '@typescript-eslint/no-unused-vars': 'off',
     '@typescript-eslint/ban-types': 'off',
     'no-unused-vars': 'off',
-    'vue/multi-word-component-names': 'off'
+    'vue/multi-word-component-names': 'off',
+    'no-console': ['error', { allow: ['warn', 'error'] }]
   },
   env: {
     browser: true,
     es2022: true,
     node: true
   },
-  ignorePatterns: ['node_modules/', 'dist/', 'vbwd-fe-core/']
+  ignorePatterns: ['node_modules/', 'dist/', 'vbwd-fe-core/', 'vue/tests/e2e/']
 };

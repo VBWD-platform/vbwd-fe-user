@@ -6,7 +6,7 @@ export function useAnalytics() {
   const track = (event: string, data: Record<string, unknown> = {}) => {
     // Log to console in development
     if (import.meta.env.DEV) {
-      console.log('[Analytics]', event, data);
+      console.warn('[Analytics]', event, data);
     }
 
     // Send to analytics provider (example: GA4)

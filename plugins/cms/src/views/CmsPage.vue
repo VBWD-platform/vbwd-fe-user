@@ -46,8 +46,12 @@ import { useRoute } from 'vue-router';
 import { useCmsStore } from '../stores/useCmsStore';
 import CmsLayoutRenderer from '../components/CmsLayoutRenderer.vue';
 
+const props = defineProps<{ slug?: string }>();
+
 const route = useRoute();
 const store = useCmsStore();
+
+const effectiveSlug = computed(() => props.slug ?? (route.params.slug as string));
 
 // ── TipTap JSON → HTML renderer (no external dependency) ─────────────────────
 
@@ -188,8 +192,12 @@ watch(() => store.currentStyleCss, (css) => {
   applyPageStyle(css ?? null);
 });
 
+watch(effectiveSlug, (slug) => {
+  store.fetchPage(slug);
+});
+
 onMounted(() => {
-  store.fetchPage(route.params.slug as string);
+  store.fetchPage(effectiveSlug.value);
 });
 
 onUnmounted(() => {

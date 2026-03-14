@@ -12,14 +12,14 @@ export const cmsPlugin: IPlugin = {
       path: '/:slug(.+)',
       name: 'cms-page',
       component: () => import('./src/views/CmsPage.vue'),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: false, cmsLayout: true },
     });
 
     sdk.addRoute({
       path: '/pages',
       name: 'cms-page-index',
       component: () => import('./src/views/CmsPageIndex.vue'),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: false, cmsLayout: true },
     });
 
     sdk.addTranslations('en', en);

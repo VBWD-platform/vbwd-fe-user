@@ -1,5 +1,6 @@
 import type { IPlugin, IPlatformSDK } from 'vbwd-view-component';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
+import { registerCmsVueComponent } from '../cms/src/registry/vueComponentRegistry';
 import en from './locales/en.json';
 
 export const ghrmPlugin: IPlugin = {
@@ -11,32 +12,44 @@ export const ghrmPlugin: IPlugin = {
   install(sdk: IPlatformSDK) {
     sdk.addTranslations('en', en);
 
-    // Public catalogue routes
+    // Register GHRM Vue components into the CMS widget registry
+    Promise.all([
+      import('./src/views/GhrmCatalogueContent.vue'),
+      import('./src/views/GhrmPackageDetail.vue'),
+    ]).then(([catalogue, detail]) => {
+      registerCmsVueComponent('GhrmCatalogueContent', catalogue.default);
+      registerCmsVueComponent('GhrmPackageDetail', detail.default);
+    });
+
+    // Public catalogue routes — all rendered via CmsPage with the appropriate page slug
     sdk.addRoute({
       path: '/category',
       name: 'ghrm-category-index',
-      component: () => import('./src/views/GhrmCategoryIndex.vue'),
-      meta: { requiresAuth: false },
+      component: () => import('../cms/src/views/CmsPage.vue'),
+      props: { slug: 'category' },
+      meta: { requiresAuth: false, cmsLayout: true },
     });
     sdk.addRoute({
       path: '/category/:category_slug',
       name: 'ghrm-package-list',
-      component: () => import('./src/views/GhrmPackageList.vue'),
-      meta: { requiresAuth: false },
+      component: () => import('../cms/src/views/CmsPage.vue'),
+      props: (route: any) => ({ slug: `category/${route.params.category_slug}` }),
+      meta: { requiresAuth: false, cmsLayout: true },
     });
     sdk.addRoute({
       path: '/category/:category_slug/:package_slug',
       name: 'ghrm-package-detail',
-      component: () => import('./src/views/GhrmPackageDetail.vue'),
-      meta: { requiresAuth: false },
+      component: () => import('../cms/src/views/CmsPage.vue'),
+      props: { slug: 'ghrm-software-detail' },
+      meta: { requiresAuth: false, cmsLayout: true },
     });
     sdk.addRoute({
-      path: '/software/search',
+      path: '/category/search',
       name: 'ghrm-search',
       component: () => import('./src/views/GhrmSearch.vue'),
-      meta: { requiresAuth: false },
+      meta: { requiresAuth: false, cmsLayout: true },
     });
-    // OAuth callback (no layout needed — handled inline in component)
+    // OAuth callback
     sdk.addRoute({
       path: '/ghrm/auth/github/callback',
       name: 'ghrm-oauth-callback',

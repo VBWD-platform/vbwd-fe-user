@@ -1,4 +1,10 @@
 {
   "landing1": {},
-  "checkout": {}
+  "checkout": {},
+  "ghrm": {
+    "catalogue_route_prefix": "/category",
+    "packages_per_page": 20,
+    "related_packages_limit": 4,
+    "show_in_nav": true
+  }
 }

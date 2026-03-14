@@ -58,6 +58,14 @@
         </div>
       </div>
 
+      <!-- Description -->
+      <p
+        v-if="pkg.description"
+        class="ghrm-detail-description"
+      >
+        {{ pkg.description }}
+      </p>
+
       <!-- Tabs -->
       <div class="ghrm-tabs">
         <div class="ghrm-tabs__bar">
@@ -154,7 +162,18 @@
 
           <!-- Install -->
           <template v-else-if="activeTab === 'install'">
-            <template v-if="!accessStatus?.connected">
+            <template v-if="!authStore.isAuthenticated">
+              <p class="ghrm-muted">
+                {{ $t('ghrm.loginToInstall') }}
+              </p>
+              <router-link
+                to="/login"
+                class="ghrm-cta-btn"
+              >
+                {{ $t('ghrm.login') }}
+              </router-link>
+            </template>
+            <template v-else-if="!accessStatus?.connected">
               <p class="ghrm-muted">
                 {{ $t('ghrm.connectGithubToInstall') }}
               </p>
@@ -204,6 +223,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from 'vbwd-view-component';
 import { useGhrmStore } from '../stores/useGhrmStore';
 import GhrmMarkdownRenderer from '../components/GhrmMarkdownRenderer.vue';
 import GhrmVersionsTable from '../components/GhrmVersionsTable.vue';
@@ -212,6 +232,7 @@ import GhrmGithubConnectButton from '../components/GhrmGithubConnectButton.vue';
 
 const route = useRoute();
 const store = useGhrmStore();
+const authStore = useAuthStore();
 
 const categorySlug = computed(() => route.params.category_slug as string);
 const packageSlug = computed(() => route.params.package_slug as string);
@@ -232,11 +253,14 @@ const tabs = [
 
 async function load() {
   await store.fetchPackage(packageSlug.value);
-  await Promise.all([
+  const promises: Promise<unknown>[] = [
     store.fetchRelated(packageSlug.value),
     store.fetchVersions(packageSlug.value),
-    store.fetchAccessStatus(),
-  ]);
+  ];
+  if (authStore.isAuthenticated) {
+    promises.push(store.fetchAccessStatus());
+  }
+  await Promise.all(promises);
   if (isSubscribed.value) {
     store.fetchInstallInstructions(packageSlug.value);
   }
@@ -248,7 +272,8 @@ watch(packageSlug, load);
 
 <style scoped>
 .ghrm-detail { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
-.ghrm-detail-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 32px; flex-wrap: wrap; }
+.ghrm-detail-header { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+.ghrm-detail-description { color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 28px; }
 .ghrm-detail-icon { width: 80px; height: 80px; object-fit: contain; border-radius: 12px; border: 1px solid #e9ecef; flex-shrink: 0; }
 .ghrm-detail-meta { flex: 1; }
 .ghrm-detail-name { font-size: 1.8rem; color: #2c3e50; margin: 0 0 4px; }

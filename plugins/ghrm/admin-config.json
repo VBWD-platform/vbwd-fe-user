@@ -1,30 +1,38 @@
 {
   "tabs": [
     {
+      "id": "catalogdisplay",
       "label": "Catalogue Display",
       "fields": [
         {
-          "name": "catalogue_route_prefix",
-          "type": "string",
-          "label": "Catalogue Route Prefix",
-          "description": "URL prefix for the software catalogue. Default: /software"
+          "key": "catalogue_route_prefix",
+          "label": "Catalogue Route Prefix (read-only)",
+          "component": "input",
+          "inputType": "text",
+          "description": "Fixed at /category — routes are registered at app boot and cannot be changed at runtime"
         },
         {
-          "name": "packages_per_page",
-          "type": "number",
+          "key": "packages_per_page",
           "label": "Packages Per Page",
+          "component": "input",
+          "inputType": "number",
+          "min": 1,
+          "max": 100,
           "description": "Number of packages shown per catalogue page"
         },
         {
-          "name": "related_packages_limit",
-          "type": "number",
+          "key": "related_packages_limit",
           "label": "Related Packages Limit",
+          "component": "input",
+          "inputType": "number",
+          "min": 0,
+          "max": 20,
           "description": "Maximum number of related packages shown on a detail page"
         },
         {
-          "name": "show_in_nav",
-          "type": "boolean",
+          "key": "show_in_nav",
           "label": "Show in Navigation",
+          "component": "checkbox",
           "description": "Show Software link in the main user navigation menu"
         }
       ]

@@ -19,7 +19,7 @@ export const landing1Plugin: IPlugin = {
       path: '/landing1',
       name: 'landing1',
       component: () => import('./Landing1View.vue') as Promise<{ default: unknown }>,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false, cmsLayout: true }
     });
 
     sdk.addRoute({

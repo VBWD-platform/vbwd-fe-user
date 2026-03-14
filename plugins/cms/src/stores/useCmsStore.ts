@@ -55,7 +55,7 @@ export interface CmsWidgetData {
   id: string;
   slug: string;
   name: string;
-  widget_type: 'html' | 'menu' | 'slideshow';
+  widget_type: 'html' | 'menu' | 'slideshow' | 'vue-component';
   content_json: Record<string, unknown> | null;
   source_css: string | null;
   menu_items?: CmsMenuItemData[];
@@ -104,7 +104,7 @@ export const useCmsStore = defineStore('cms-user', {
   actions: {
     async fetchCategories() {
       try {
-        const res = await (api as any).get('/cms/categories');
+        const res = await api.get<any>('/cms/categories');
         this.categories = res.items ?? res ?? [];
       } catch (e) {
         console.warn('[CMS] fetchCategories failed', e);
@@ -115,7 +115,7 @@ export const useCmsStore = defineStore('cms-user', {
       this.loading = true;
       this.error = null;
       try {
-        const res = await (api as any).get('/cms/pages', { params });
+        const res = await api.get<any>('/cms/pages', { params });
         this.pageList = res;
       } catch (e: any) {
         this.error = e?.message ?? 'Failed to load pages';
@@ -131,7 +131,7 @@ export const useCmsStore = defineStore('cms-user', {
       this.currentLayout = null;
       this.currentStyleCss = null;
       try {
-        const res = await (api as any).get(`/cms/pages/${slug}`);
+        const res = await api.get<any>(`/cms/pages/${slug}`);
         this.currentPage = res;
         // Eagerly fetch layout and style when present
         const layoutId = (res as any).layout_id;
@@ -149,7 +149,7 @@ export const useCmsStore = defineStore('cms-user', {
 
     async fetchLayout(id: string) {
       try {
-        const res = await (api as any).get(`/cms/layouts/${id}`);
+        const res = await api.get<any>(`/cms/layouts/${id}`);
         this.currentLayout = res;
       } catch (e) {
         console.warn('[CMS] fetchLayout failed', e);
@@ -158,8 +158,9 @@ export const useCmsStore = defineStore('cms-user', {
 
     async fetchStyleCss(id: string) {
       try {
-        const res = await (api as any).get(`/cms/styles/${id}/css`, { responseType: 'text' });
-        this.currentStyleCss = typeof res === 'string' ? res : '';
+        const resp = await fetch(`/api/v1/cms/styles/${id}/css`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        this.currentStyleCss = await resp.text();
       } catch (e) {
         console.warn('[CMS] fetchStyleCss failed', e);
       }

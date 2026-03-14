@@ -45,11 +45,9 @@ export const taroPlugin: IPlugin = {
       labelKey: 'nav.taro',
       testId: 'nav-taro',
     });
-    console.log('Taro plugin activated');
   },
 
   deactivate() {
     userNavRegistry.unregister('taro');
-    console.log('Taro plugin deactivated');
   },
 };

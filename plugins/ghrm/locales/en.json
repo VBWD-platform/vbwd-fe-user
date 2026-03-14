@@ -25,6 +25,8 @@
     "noChangelog": "No changelog available.",
     "noDocs": "No documentation available.",
     "noOverview": "No overview available.",
+    "loginToInstall": "Log in to get install instructions.",
+    "login": "Log In",
     "connectGithubToInstall": "Connect your GitHub account to get install instructions.",
     "subscribeToContinue": "Subscribe to get access to this package.",
     "oauthSuccess": "GitHub account connected successfully!",

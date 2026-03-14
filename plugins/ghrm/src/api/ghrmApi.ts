@@ -34,6 +34,7 @@ export interface GhrmPackage {
   id: string;
   slug: string;
   name: string;
+  description: string | null;
   author_name: string | null;
   icon_url: string | null;
   github_owner: string;
@@ -85,7 +86,15 @@ export interface GhrmAccessStatus {
   grace_expires_at?: string | null;
 }
 
+export interface GhrmCategory {
+  slug: string;
+  label: string;
+}
+
 export const ghrmApi = {
+  getCategories(): Promise<{ categories: GhrmCategory[] }> {
+    return get(`${API}/categories`);
+  },
   listPackages(params: Record<string, string> = {}): Promise<GhrmPaginated<GhrmPackageListItem>> {
     return get(`${API}/packages`, params);
   },

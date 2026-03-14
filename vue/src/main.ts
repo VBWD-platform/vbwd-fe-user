@@ -30,7 +30,7 @@ initLocale();
     let plugins: IPlugin[] = [];
     try {
       plugins = await getEnabledPlugins();
-      console.log(`[VBWD] Using ${plugins.length} enabled plugin(s)`);
+      console.warn(`[VBWD] Using ${plugins.length} enabled plugin(s)`);
     } catch (error) {
       console.error('[VBWD] Failed to load plugins, continuing without plugins:', error);
     }

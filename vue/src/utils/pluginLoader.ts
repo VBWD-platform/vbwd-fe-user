@@ -38,7 +38,7 @@ export async function getEnabledPlugins(): Promise<IPlugin[]> {
 
     for (const [pluginName, pluginConfig] of Object.entries(manifest.plugins)) {
       if (!pluginConfig.enabled) {
-        console.debug(`[PluginRegistry] Skipping disabled plugin: ${pluginName}`);
+        console.warn(`[PluginRegistry] Skipping disabled plugin: ${pluginName}`);
         continue;
       }
 
@@ -69,14 +69,14 @@ export async function getEnabledPlugins(): Promise<IPlugin[]> {
           continue;
         }
 
-        console.debug(`[PluginRegistry] Loaded plugin: ${plugin.name} v${plugin.version}`);
+        console.warn(`[PluginRegistry] Loaded plugin: ${plugin.name} v${plugin.version}`);
         enabledPlugins.push(plugin);
       } catch (error) {
         console.warn(`[PluginRegistry] Failed to load plugin '${pluginName}':`, error);
       }
     }
 
-    console.log(`[PluginRegistry] Total enabled plugins: ${enabledPlugins.length}`);
+    console.warn(`[PluginRegistry] Total enabled plugins: ${enabledPlugins.length}`);
     return enabledPlugins;
   } catch (error) {
     console.error('[PluginRegistry] Failed to get enabled plugins:', error);

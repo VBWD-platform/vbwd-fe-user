@@ -3,12 +3,12 @@
     <!-- Embed routes: no layout, no session modal -->
     <router-view v-if="isEmbedRoute" />
 
-    <!-- Authenticated routes: full layout -->
-    <UserLayout v-else-if="isAuthenticated">
+    <!-- Routes that need the site layout (authenticated users OR public pages with layout) -->
+    <UserLayout v-else-if="showLayout">
       <router-view />
     </UserLayout>
 
-    <!-- Public routes: no layout -->
+    <!-- Bare public routes: login, oauth callbacks, etc. -->
     <router-view v-else />
 
     <!-- Session Expired Modal (hidden in embed mode) -->
@@ -26,8 +26,16 @@ const route = useRoute();
 
 const isEmbedRoute = computed(() => route.meta.embed === true);
 
-const isAuthenticated = computed(() => {
-  return route.meta.requiresAuth !== false && localStorage.getItem('auth_token');
+// cmsLayout routes manage their own page chrome via GhrmLayoutWrapper / CMS layouts.
+// They must never be wrapped in UserLayout, even when the user is authenticated.
+const isCmsLayoutRoute = computed(() => route.meta.cmsLayout === true);
+
+// Show UserLayout when: user is authenticated, OR the route explicitly opts in to the layout
+// (publicLayout: true) for unauthenticated visitors on CMS/plugin pages.
+const showLayout = computed(() => {
+  if (isEmbedRoute.value) return false;
+  if (isCmsLayoutRoute.value) return false;
+  return !!(localStorage.getItem('auth_token') || route.meta.publicLayout === true);
 });
 </script>
 

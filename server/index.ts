@@ -33,7 +33,7 @@ const service = new PluginConfigService(PLUGINS_DIR);
 app.use('/_plugins', createPluginRoutes(service));
 
 app.listen(PLUGIN_API_PORT, '0.0.0.0', () => {
-  console.log(`[Plugin API] Listening on port ${PLUGIN_API_PORT}`);
+  console.warn(`[Plugin API] Listening on port ${PLUGIN_API_PORT}`);
 });
 
 export { app };
