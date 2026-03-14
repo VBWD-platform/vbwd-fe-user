@@ -160,34 +160,6 @@
             <GhrmVersionsTable :versions="store.versions" />
           </template>
 
-          <!-- Install -->
-          <template v-else-if="activeTab === 'install'">
-            <template v-if="!authStore.isAuthenticated">
-              <p class="ghrm-muted">
-                {{ $t('ghrm.loginToInstall') }}
-              </p>
-              <router-link
-                to="/login"
-                class="ghrm-cta-btn"
-              >
-                {{ $t('ghrm.login') }}
-              </router-link>
-            </template>
-            <template v-else-if="!accessStatus?.connected">
-              <p class="ghrm-muted">
-                {{ $t('ghrm.connectGithubToInstall') }}
-              </p>
-              <GhrmGithubConnectButton />
-            </template>
-            <template v-else-if="store.installInstructions">
-              <GhrmInstallInstructions :instructions="store.installInstructions" />
-            </template>
-            <template v-else>
-              <p class="ghrm-muted">
-                {{ $t('ghrm.subscribeToContinue') }}
-              </p>
-            </template>
-          </template>
         </div>
       </div>
 
@@ -227,7 +199,6 @@ import { useAuthStore } from 'vbwd-view-component';
 import { useGhrmStore } from '../stores/useGhrmStore';
 import GhrmMarkdownRenderer from '../components/GhrmMarkdownRenderer.vue';
 import GhrmVersionsTable from '../components/GhrmVersionsTable.vue';
-import GhrmInstallInstructions from '../components/GhrmInstallInstructions.vue';
 import GhrmGithubConnectButton from '../components/GhrmGithubConnectButton.vue';
 
 const route = useRoute();
@@ -248,7 +219,6 @@ const tabs = [
   { id: 'changelog', label: 'Changelog' },
   { id: 'docs', label: 'Documentation' },
   { id: 'versions', label: 'Versions' },
-  { id: 'install', label: 'Install' },
 ];
 
 async function load() {
@@ -261,9 +231,6 @@ async function load() {
     promises.push(store.fetchAccessStatus());
   }
   await Promise.all(promises);
-  if (isSubscribed.value) {
-    store.fetchInstallInstructions(packageSlug.value);
-  }
 }
 
 onMounted(load);
