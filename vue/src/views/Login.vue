@@ -44,11 +44,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api, clearSessionExpiry } from '@/api';
 
 const router = useRouter();
+const route = useRoute();
 
 const email = ref('');
 const password = ref('');
@@ -77,11 +78,13 @@ async function handleLogin() {
     // Clear any session expired state
     clearSessionExpiry();
 
-    // Redirect to stored destination or dashboard
-    const redirectPath = sessionStorage.getItem('redirect_after_login');
+    // Redirect to stored destination or dashboard (?redirect= param takes priority)
+    const raw = (route.query.redirect as string) || sessionStorage.getItem('redirect_after_login') || '';
     sessionStorage.removeItem('redirect_after_login');
+    // Never chain back into /login (prevents double-redirect loops)
+    const redirectPath = raw && !raw.startsWith('/login') ? raw : '/dashboard';
 
-    router.push(redirectPath || '/dashboard');
+    router.push(redirectPath);
   } catch (err) {
     error.value = (err as Error).message || t('login.errors.loginFailed');
   } finally {

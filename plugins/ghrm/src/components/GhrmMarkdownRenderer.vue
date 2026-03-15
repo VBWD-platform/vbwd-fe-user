@@ -13,25 +13,16 @@ import DOMPurify from 'dompurify';
 
 const props = defineProps<{ content: string }>();
 
-// Open external links in a new tab
-const renderer = new marked.Renderer();
-const _linkRenderer = renderer.link.bind(renderer);
-renderer.link = (token) => {
-  const html = _linkRenderer(token);
-  return token.href?.startsWith('http')
-    ? html.replace('<a ', '<a target="_blank" rel="noopener noreferrer" ')
-    : html;
-};
-
-marked.setOptions({ gfm: true, breaks: true });
-marked.use({ renderer });
-
 const html = computed((): string => {
   if (!props.content) return '';
-  const raw = marked.parse(props.content) as string;
-  return DOMPurify.sanitize(raw, {
-    ADD_ATTR: ['target', 'rel'],
-  });
+  const raw = marked.parse(props.content, { gfm: true, breaks: true }) as string;
+  // Add target=_blank to external links via post-processing — avoids marked v17
+  // renderer override pitfall where this.parser is undefined inside a bound link fn.
+  const withTargets = raw.replace(
+    /<a href="(https?:\/\/[^"]*)"/g,
+    '<a href="$1" target="_blank" rel="noopener noreferrer"',
+  );
+  return DOMPurify.sanitize(withTargets, { ADD_ATTR: ['target', 'rel'] });
 });
 </script>
 

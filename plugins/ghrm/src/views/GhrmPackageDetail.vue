@@ -223,11 +223,6 @@ const tabs = [
 
 function handleGetPackage() {
   if (!pkg.value) return;
-  if (!authStore.isAuthenticated) {
-    sessionStorage.setItem('redirect_after_login', route.fullPath);
-    router.push('/login');
-    return;
-  }
   router.push({
     path: '/checkout',
     query: {

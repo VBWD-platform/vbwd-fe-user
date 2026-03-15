@@ -10,11 +10,10 @@ vi.mock('vue-i18n', () => ({
 
 const mockPush = vi.fn()
 let mockRouteParams: Record<string, string> = {}
-let mockRouteFullPath = '/category/backend/loopai-core'
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mockPush }),
-  useRoute: () => ({ params: mockRouteParams, query: {}, fullPath: mockRouteFullPath }),
+  useRoute: () => ({ params: mockRouteParams, query: {}, fullPath: '/category/backend/loopai-core', path: '/category/backend/loopai-core' }),
 }))
 
 const mockFetchPackage = vi.fn()
@@ -87,9 +86,7 @@ function mountDetail(isAuthenticated: boolean) {
 describe('GhrmPackageDetail — Get Package button', () => {
   beforeEach(() => {
     mockPush.mockClear()
-    sessionStorage.clear()
     mockRouteParams = { category_slug: 'backend', package_slug: 'loopai-core' }
-    mockRouteFullPath = '/category/backend/loopai-core'
   })
 
   it('renders Get Package button when not subscribed', () => {
@@ -97,14 +94,20 @@ describe('GhrmPackageDetail — Get Package button', () => {
     expect(wrapper.find('[data-testid="ghrm-get-package-btn"]').exists()).toBe(true)
   })
 
-  it('redirects anonymous user to /login and stores redirect path in sessionStorage', async () => {
+  it('navigates to /checkout for anonymous users without requiring login', async () => {
     const wrapper = mountDetail(false)
     await wrapper.find('[data-testid="ghrm-get-package-btn"]').trigger('click')
-    expect(sessionStorage.getItem('redirect_after_login')).toBe('/category/backend/loopai-core')
-    expect(mockPush).toHaveBeenCalledWith('/login')
+    expect(mockPush).toHaveBeenCalledWith({
+      path: '/checkout',
+      query: {
+        tarif_plan_id: 'plan-uuid-999',
+        package_name: 'LoopAI Core',
+        package_slug: 'loopai-core',
+      },
+    })
   })
 
-  it('navigates authenticated user to /checkout with correct tariff_plan_id', async () => {
+  it('navigates to /checkout for authenticated users', async () => {
     const wrapper = mountDetail(true)
     await wrapper.find('[data-testid="ghrm-get-package-btn"]').trigger('click')
     expect(mockPush).toHaveBeenCalledWith({
