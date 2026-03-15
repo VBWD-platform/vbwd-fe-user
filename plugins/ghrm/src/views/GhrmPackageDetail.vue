@@ -199,7 +199,6 @@ import { useAuthStore } from 'vbwd-view-component';
 import { useGhrmStore } from '../stores/useGhrmStore';
 import GhrmMarkdownRenderer from '../components/GhrmMarkdownRenderer.vue';
 import GhrmVersionsTable from '../components/GhrmVersionsTable.vue';
-import GhrmGithubConnectButton from '../components/GhrmGithubConnectButton.vue';
 
 const route = useRoute();
 const router = useRouter();

@@ -43,5 +43,10 @@
     "vite": "^5.0.8",
     "vitest": "^1.1.0",
     "vue-tsc": "^2.0.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.57.1",
+    "@rollup/rollup-linux-x64-musl": "4.57.1",
+    "@rollup/rollup-linux-arm64-gnu": "4.57.1"
   }
 }
