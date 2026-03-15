@@ -1,4 +1,5 @@
 import type { IPlugin, IPlatformSDK } from 'vbwd-view-component';
+import { registerCmsVueComponent } from './src/registry/vueComponentRegistry';
 import en from './locales/en.json';
 
 export const cmsPlugin: IPlugin = {
@@ -8,6 +9,10 @@ export const cmsPlugin: IPlugin = {
   _active: false,
 
   install(sdk: IPlatformSDK) {
+    // Register built-in CMS vue-component widgets
+    import('./src/components/CmsBreadcrumb.vue').then((m) => {
+      registerCmsVueComponent('CmsBreadcrumb', m.default);
+    });
     sdk.addRoute({
       path: '/:slug(.+)',
       name: 'cms-page',

@@ -1,7 +1,9 @@
 <template>
   <div class="ghrm-github-access-tab">
     <div class="access-section">
-      <h3 class="section-title">GitHub Connection</h3>
+      <h3 class="section-title">
+        GitHub Connection
+      </h3>
       <GhrmGithubConnectButton />
     </div>
 
@@ -17,7 +19,9 @@
       v-else-if="store.accessStatus"
       class="access-section"
     >
-      <h3 class="section-title">Access Status</h3>
+      <h3 class="section-title">
+        Access Status
+      </h3>
 
       <div
         v-if="!store.accessStatus.connected"

@@ -4,6 +4,7 @@
     :is="resolvedVueComponent"
     v-if="widget.widget_type === 'vue-component' && resolvedVueComponent"
     v-bind="(widget.content_json as any)?.props || {}"
+    :config="(widget.config as any) ?? undefined"
     class="cms-widget cms-widget--vue"
   />
   <div
@@ -159,7 +160,9 @@ import { resolveCmsVueComponent } from '../registry/vueComponentRegistry';
 
 const resolvedVueComponent = computed<Component | undefined>(() => {
   if (props.widget.widget_type !== 'vue-component') return undefined;
-  const name = (props.widget.content_json as any)?.component;
+  // Support both storage conventions: content_json.component (canonical) and config.component_name (legacy)
+  const name = (props.widget.content_json as any)?.component
+    ?? (props.widget.config as any)?.component_name;
   return name ? resolveCmsVueComponent(name) : undefined;
 });
 

@@ -115,7 +115,9 @@
               v-if="plan.description"
               class="plan-section"
             >
-              <h3 class="section-label">Description</h3>
+              <h3 class="section-label">
+                Description
+              </h3>
               <p
                 class="plan-description"
                 data-testid="plan-description"
@@ -128,7 +130,9 @@
             <div
               class="plan-section"
             >
-              <h3 class="section-label">Features</h3>
+              <h3 class="section-label">
+                Features
+              </h3>
               <table
                 v-if="planFeatures.length"
                 class="plan-features-table"
@@ -139,7 +143,9 @@
                     v-for="f in planFeatures"
                     :key="f"
                   >
-                    <td class="feature-check">✓</td>
+                    <td class="feature-check">
+                      ✓
+                    </td>
                     <td>{{ f }}</td>
                   </tr>
                 </tbody>
@@ -158,7 +164,9 @@
               v-if="plan.categories && plan.categories.length"
               class="plan-section"
             >
-              <h3 class="section-label">Categories</h3>
+              <h3 class="section-label">
+                Categories
+              </h3>
               <div
                 class="category-tags"
                 data-testid="plan-categories"

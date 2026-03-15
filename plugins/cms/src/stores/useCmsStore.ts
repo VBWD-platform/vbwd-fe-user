@@ -58,6 +58,7 @@ export interface CmsWidgetData {
   widget_type: 'html' | 'menu' | 'slideshow' | 'vue-component';
   content_json: Record<string, unknown> | null;
   source_css: string | null;
+  config: Record<string, unknown> | null;
   menu_items?: CmsMenuItemData[];
 }
 

@@ -14,6 +14,15 @@
     </div>
 
     <template v-else>
+      <!-- Breadcrumb -->
+      <GhrmBreadcrumb
+        v-if="detailBreadcrumbConfig"
+        :config="detailBreadcrumbConfig"
+        :category-label="categoryLabel"
+        :category-to="`/category/${categorySlug}`"
+        :package-name="pkg?.name"
+      />
+
       <!-- Header -->
       <div class="ghrm-detail-header">
         <img
@@ -82,7 +91,9 @@
               v-for="f in pkg.features"
               :key="f"
             >
-              <td class="ghrm-feature-check">✓</td>
+              <td class="ghrm-feature-check">
+                ✓
+              </td>
               <td>{{ f }}</td>
             </tr>
           </tbody>
@@ -219,8 +230,10 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from 'vbwd-view-component';
 import { useGhrmStore } from '../stores/useGhrmStore';
+import { ghrmApi, type GhrmBreadcrumbConfig } from '../api/ghrmApi';
 import GhrmMarkdownRenderer from '../components/GhrmMarkdownRenderer.vue';
 import GhrmVersionsTable from '../components/GhrmVersionsTable.vue';
+import GhrmBreadcrumb from '../components/GhrmBreadcrumb.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -231,6 +244,30 @@ const categorySlug = computed(() => route.params.category_slug as string);
 const packageSlug = computed(() => route.params.package_slug as string);
 const pkg = computed(() => store.currentPackage);
 const accessStatus = computed(() => store.accessStatus);
+
+// Breadcrumb
+const detailBreadcrumbConfig = ref<GhrmBreadcrumbConfig | null>(null);
+const categoryLabel = ref('');
+
+async function loadWidgetConfig() {
+  try {
+    const data = await ghrmApi.getWidgets();
+    const found = data.widgets.find((w) => w.id === 'detail') ?? data.widgets[0] ?? null;
+    if (found) detailBreadcrumbConfig.value = found;
+  } catch {
+    // breadcrumb silently absent on error
+  }
+}
+
+async function loadCategoryLabel() {
+  try {
+    const data = await ghrmApi.getCategories();
+    const cat = data.categories.find((c) => c.slug === categorySlug.value);
+    categoryLabel.value = cat?.label ?? categorySlug.value.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  } catch {
+    categoryLabel.value = categorySlug.value;
+  }
+}
 
 const isSubscribed = computed(() => accessStatus.value?.connected && accessStatus.value?.access_status === 'active');
 
@@ -260,6 +297,8 @@ async function load() {
   const promises: Promise<unknown>[] = [
     store.fetchRelated(packageSlug.value),
     store.fetchVersions(packageSlug.value),
+    loadWidgetConfig(),
+    loadCategoryLabel(),
   ];
   if (authStore.isAuthenticated) {
     promises.push(store.fetchAccessStatus());

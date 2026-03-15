@@ -71,7 +71,10 @@
                 </td>
                 <td>{{ formatDate(sub.expires_at) }}</td>
                 <td>{{ formatPrice(sub.plan?.price) }} / {{ sub.plan?.billing_period || 'month' }}</td>
-                <td class="actions-cell" @click.stop>
+                <td
+                  class="actions-cell"
+                  @click.stop
+                >
                   <button
                     v-if="sub.status === 'ACTIVE'"
                     class="btn danger small"

@@ -93,9 +93,22 @@ export interface GhrmCategory {
   label: string;
 }
 
+export interface GhrmBreadcrumbConfig {
+  id: string;
+  separator: string;
+  root_name: string;
+  root_slug: string;
+  show_category: boolean;
+  max_label_length: number;
+  css: string;
+}
+
 export const ghrmApi = {
   getCategories(): Promise<{ categories: GhrmCategory[] }> {
     return get(`${API}/categories`);
+  },
+  getWidgets(): Promise<{ widgets: GhrmBreadcrumbConfig[] }> {
+    return get(`${API}/widgets`);
   },
   listPackages(params: Record<string, string> = {}): Promise<GhrmPaginated<GhrmPackageListItem>> {
     return get(`${API}/packages`, params);

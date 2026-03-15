@@ -120,7 +120,9 @@
                 >{{ itemTypeLabel(item.type) }}</span>
                 <span class="item-card-total">{{ formatAmount(item.total_price, invoice.currency) }}</span>
               </div>
-              <div class="item-card-desc">{{ item.description }}</div>
+              <div class="item-card-desc">
+                {{ item.description }}
+              </div>
               <div class="item-card-meta">
                 <span>{{ $t('invoices.detail.itemsTableHeaders.qty') }}: {{ item.quantity }}</span>
                 <span>{{ $t('invoices.detail.itemsTableHeaders.unitPrice') }}: {{ formatAmount(item.unit_price, invoice.currency) }}</span>

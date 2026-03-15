@@ -4,7 +4,9 @@ import { isAuthenticated, sessionExpired } from '../api';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/dashboard'
+    name: 'home',
+    component: () => import('../views/Home.vue'),
+    meta: { requiresAuth: false }
   },
   {
     path: '/login',
