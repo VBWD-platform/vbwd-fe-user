@@ -35,6 +35,7 @@ const isCmsLayoutRoute = computed(() => route.meta.cmsLayout === true);
 const showLayout = computed(() => {
   if (isEmbedRoute.value) return false;
   if (isCmsLayoutRoute.value) return false;
+  if (route.meta.noLayout === true) return false;
   return !!(localStorage.getItem('auth_token') || route.meta.publicLayout === true);
 });
 </script>

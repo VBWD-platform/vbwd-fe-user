@@ -351,15 +351,15 @@ onMounted(async () => {
 }
 
 h1 {
-  color: #2c3e50;
+  color: var(--vbwd-text-heading, #2c3e50);
   margin: 0;
 }
 
 .view-toggle {
   display: flex;
   gap: 4px;
-  background: #f8f9fa;
-  border: 1px solid #ddd;
+  background: var(--vbwd-page-bg, #f8f9fa);
+  border: 1px solid var(--vbwd-border-color, #ddd);
   border-radius: 6px;
   padding: 3px;
 }
@@ -374,12 +374,12 @@ h1 {
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  color: #6b7280;
+  color: var(--vbwd-text-muted, #6b7280);
 }
 
 .view-toggle-btn.active {
-  background: #fff;
-  color: #2c3e50;
+  background: var(--vbwd-card-bg, #fff);
+  color: var(--vbwd-text-heading, #2c3e50);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -388,20 +388,20 @@ h1 {
 .no-plans {
   text-align: center;
   padding: 60px 20px;
-  color: #666;
+  color: var(--vbwd-text-muted, #666);
 }
 
 .spinner {
   width: 40px;
   height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  border: 3px solid var(--vbwd-border-light, #f3f3f3);
+  border-top: 3px solid var(--vbwd-color-primary, #3498db);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: plans-spin 1s linear infinite;
   margin: 0 auto 15px;
 }
 
-@keyframes spin {
+@keyframes plans-spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
@@ -409,8 +409,8 @@ h1 {
 .retry-btn {
   margin-top: 15px;
   padding: 10px 20px;
-  background: #3498db;
-  color: white;
+  background: var(--vbwd-color-primary, #3498db);
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -425,10 +425,10 @@ h1 {
 }
 
 .plan-card {
-  background: white;
+  background: var(--vbwd-card-bg, #fff);
   padding: 30px;
   border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--vbwd-card-shadow, 0 2px 5px rgba(0, 0, 0, 0.05));
   position: relative;
   border: 2px solid transparent;
   transition: all 0.2s;
@@ -438,15 +438,15 @@ h1 {
 .plan-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-  border-color: #3498db;
+  border-color: var(--vbwd-color-primary, #3498db);
 }
 
 .plan-card.popular {
-  border-color: #3498db;
+  border-color: var(--vbwd-color-primary, #3498db);
 }
 
 .plan-card.current {
-  border-color: #27ae60;
+  border-color: var(--vbwd-color-success, #27ae60);
 }
 
 .popular-badge {
@@ -454,8 +454,8 @@ h1 {
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: #3498db;
-  color: white;
+  background-color: var(--vbwd-color-primary, #3498db);
+  color: #fff;
   padding: 4px 15px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -465,8 +465,8 @@ h1 {
   position: absolute;
   top: -12px;
   right: 15px;
-  background-color: #27ae60;
-  color: white;
+  background-color: var(--vbwd-color-success, #27ae60);
+  color: #fff;
   padding: 4px 15px;
   border-radius: 20px;
   font-size: 0.8rem;
@@ -474,7 +474,7 @@ h1 {
 
 .plan-card h2 {
   margin-bottom: 15px;
-  color: #2c3e50;
+  color: var(--vbwd-text-heading, #2c3e50);
   text-align: center;
 }
 
@@ -486,16 +486,16 @@ h1 {
 .amount {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--vbwd-text-heading, #2c3e50);
 }
 
 .period {
-  color: #666;
+  color: var(--vbwd-text-muted, #666);
 }
 
 .description {
   text-align: center;
-  color: #666;
+  color: var(--vbwd-text-muted, #666);
   font-size: 0.9rem;
   margin-bottom: 20px;
 }
@@ -507,8 +507,8 @@ h1 {
 
 .features li {
   padding: 8px 0;
-  color: #666;
-  border-bottom: 1px solid #eee;
+  color: var(--vbwd-text-muted, #666);
+  border-bottom: 1px solid var(--vbwd-border-light, #eee);
 }
 
 .features li:last-child {
@@ -517,7 +517,7 @@ h1 {
 
 .features li::before {
   content: "\2713";
-  color: #27ae60;
+  color: var(--vbwd-color-success, #27ae60);
   margin-right: 8px;
 }
 
@@ -528,14 +528,14 @@ h1 {
 
 .tax-rate {
   font-size: 0.8rem;
-  color: #999;
+  color: var(--vbwd-text-muted, #999);
 }
 
 .select-btn {
   width: 100%;
   padding: 12px;
-  background-color: #3498db;
-  color: white;
+  background-color: var(--vbwd-color-primary, #3498db);
+  color: #fff;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -544,13 +544,14 @@ h1 {
 }
 
 .select-btn:hover:not(:disabled) {
-  background-color: #2980b9;
+  background-color: var(--vbwd-color-primary-hover, #2980b9);
 }
 
 .select-btn.disabled,
 .select-btn:disabled {
-  background-color: #95a5a6;
+  background-color: var(--vbwd-text-muted, #95a5a6);
   cursor: default;
+  opacity: 0.6;
 }
 
 /* Table */
@@ -562,26 +563,26 @@ h1 {
 .plans-table {
   width: 100%;
   border-collapse: collapse;
-  background: white;
+  background: var(--vbwd-card-bg, #fff);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--vbwd-card-shadow, 0 2px 5px rgba(0, 0, 0, 0.05));
 }
 
 .plans-table th {
-  background: #f8f9fa;
+  background: var(--vbwd-page-bg, #f8f9fa);
   padding: 12px 16px;
   text-align: left;
   font-size: 0.85rem;
-  color: #666;
+  color: var(--vbwd-text-muted, #666);
   font-weight: 600;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--vbwd-border-light, #eee);
 }
 
 .plans-table td {
   padding: 14px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  color: #2c3e50;
+  border-bottom: 1px solid var(--vbwd-border-light, #f0f0f0);
+  color: var(--vbwd-text-body, #2c3e50);
 }
 
 .plan-row {
@@ -590,7 +591,7 @@ h1 {
 }
 
 .plan-row:hover {
-  background: #f8f9fa;
+  background: var(--vbwd-page-bg, #f8f9fa);
 }
 
 .plan-name-cell {
@@ -612,13 +613,15 @@ h1 {
 }
 
 .popular-tag {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--vbwd-page-bg, #e3f2fd);
+  color: var(--vbwd-color-primary, #1976d2);
+  border: 1px solid var(--vbwd-color-primary, #1976d2);
 }
 
 .current-tag {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: var(--vbwd-page-bg, #e8f5e9);
+  color: var(--vbwd-color-success, #2e7d32);
+  border: 1px solid var(--vbwd-color-success, #2e7d32);
 }
 
 .plan-price-cell {
@@ -635,11 +638,11 @@ h1 {
 }
 
 .status-dot--active {
-  background: #27ae60;
+  background: var(--vbwd-color-success, #27ae60);
 }
 
 .status-dot--inactive {
-  background: #bdc3c7;
+  background: var(--vbwd-border-color, #bdc3c7);
 }
 
 .actions-cell {
@@ -649,9 +652,9 @@ h1 {
 
 .view-btn {
   padding: 6px 12px;
-  background: #e3f2fd;
-  color: #1976d2;
-  border: none;
+  background: var(--vbwd-page-bg, #e3f2fd);
+  color: var(--vbwd-color-primary, #1976d2);
+  border: 1px solid var(--vbwd-color-primary, #1976d2);
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.85rem;
@@ -664,8 +667,8 @@ h1 {
 
 .select-btn-sm {
   padding: 6px 12px;
-  background: #3498db;
-  color: white;
+  background: var(--vbwd-color-primary, #3498db);
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -679,49 +682,21 @@ h1 {
 
 .select-btn-sm.disabled,
 .select-btn-sm:disabled {
-  background: #95a5a6;
+  background: var(--vbwd-text-muted, #95a5a6);
   cursor: default;
+  opacity: 0.6;
 }
 
-/* Responsive: collapse table on small screens */
+/* Responsive */
 @media (max-width: 768px) {
-  .plans {
-    max-width: 100%;
-  }
-
-  .plans-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .plans-table-wrapper {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .plans-table {
-    min-width: 520px;
-  }
-
-  .plans-table th,
-  .plans-table td {
-    padding: 10px 10px;
-    font-size: 0.85rem;
-  }
-
-  .actions-cell {
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .plans-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .currency-selector {
-    flex-wrap: wrap;
-    padding: 12px;
-  }
+  .plans { max-width: 100%; }
+  .plans-header { flex-direction: column; align-items: flex-start; }
+  .plans-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .plans-table { min-width: 520px; }
+  .plans-table th, .plans-table td { padding: 10px; font-size: 0.85rem; }
+  .actions-cell { flex-direction: column; gap: 4px; }
+  .plans-grid { grid-template-columns: 1fr; }
+  .currency-selector { flex-wrap: wrap; padding: 12px; }
 }
 
 .currency-selector {
@@ -730,17 +705,19 @@ h1 {
   justify-content: center;
   gap: 10px;
   padding: 20px;
-  background: #f8f9fa;
+  background: var(--vbwd-page-bg, #f8f9fa);
   border-radius: 8px;
 }
 
 .currency-selector label {
-  color: #666;
+  color: var(--vbwd-text-muted, #666);
 }
 
 .currency-selector select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--vbwd-border-color, #ddd);
+  background: var(--vbwd-card-bg, #fff);
+  color: var(--vbwd-text-body, #333);
   border-radius: 4px;
   font-size: 1rem;
   cursor: pointer;

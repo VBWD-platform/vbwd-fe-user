@@ -246,6 +246,87 @@ describe('User App Plugin Bootstrap', () => {
     expect(sdk.getRoutes()).toHaveLength(0)
   })
 
+  // --- CMS / GHRM plugin dependency chain ---
+
+  it('should install landing1 and checkout before cms, cms before ghrm (correct topo order)', async () => {
+    const installed: string[] = []
+
+    // Mirror the real plugin dependency declarations
+    const landing1: IPlugin = { name: 'landing1', version: '1.0.0', install() { installed.push('landing1') } }
+    const checkout: IPlugin = { name: 'checkout', version: '1.0.0', install() { installed.push('checkout') } }
+    const cms: IPlugin = { name: 'cms', version: '1.0.0', dependencies: ['landing1'], install() { installed.push('cms') } }
+    const ghrm: IPlugin = { name: 'ghrm', version: '1.0.0', dependencies: ['cms', 'checkout'], install() { installed.push('ghrm') } }
+
+    // Register in reverse order to prove topological sort, not insertion order, governs
+    registry.register(ghrm)
+    registry.register(cms)
+    registry.register(checkout)
+    registry.register(landing1)
+    await registry.installAll(sdk)
+
+    expect(installed.indexOf('landing1')).toBeLessThan(installed.indexOf('cms'))
+    expect(installed.indexOf('checkout')).toBeLessThan(installed.indexOf('ghrm'))
+    expect(installed.indexOf('cms')).toBeLessThan(installed.indexOf('ghrm'))
+    expect(installed).toContain('ghrm')
+  })
+
+  it('should throw when deactivating landing1 while cms is active', async () => {
+    const landing1: IPlugin = { name: 'landing1', version: '1.0.0' }
+    const cms: IPlugin = { name: 'cms', version: '1.0.0', dependencies: ['landing1'] }
+
+    registry.register(landing1)
+    registry.register(cms)
+    await registry.installAll(sdk)
+    await registry.activate('landing1')
+    await registry.activate('cms')
+
+    await expect(registry.deactivate('landing1')).rejects.toThrow('active dependents: cms')
+  })
+
+  it('should throw when deactivating cms while ghrm is active', async () => {
+    const landing1: IPlugin = { name: 'landing1', version: '1.0.0' }
+    const checkout: IPlugin = { name: 'checkout', version: '1.0.0' }
+    const cms: IPlugin = { name: 'cms', version: '1.0.0', dependencies: ['landing1'] }
+    const ghrm: IPlugin = { name: 'ghrm', version: '1.0.0', dependencies: ['cms', 'checkout'] }
+
+    registry.register(landing1)
+    registry.register(checkout)
+    registry.register(cms)
+    registry.register(ghrm)
+    await registry.installAll(sdk)
+    await registry.activate('cms')
+    await registry.activate('ghrm')
+
+    await expect(registry.deactivate('cms')).rejects.toThrow('active dependents: ghrm')
+  })
+
+  it('should throw when installing ghrm without cms registered', async () => {
+    // Only checkout registered — cms missing
+    const checkout: IPlugin = { name: 'checkout', version: '1.0.0' }
+    const ghrm: IPlugin = { name: 'ghrm', version: '1.0.0', dependencies: ['cms', 'checkout'] }
+
+    registry.register(checkout)
+    registry.register(ghrm)
+
+    await expect(registry.installAll(sdk)).rejects.toThrow('Dependency "cms" not found')
+  })
+
+  it('should allow deactivating landing1 after cms is deactivated first', async () => {
+    const landing1: IPlugin = { name: 'landing1', version: '1.0.0' }
+    const cms: IPlugin = { name: 'cms', version: '1.0.0', dependencies: ['landing1'] }
+
+    registry.register(landing1)
+    registry.register(cms)
+    await registry.installAll(sdk)
+    await registry.activate('landing1')
+    await registry.activate('cms')
+
+    await registry.deactivate('cms')
+    await registry.deactivate('landing1') // now safe
+
+    expect(registry.get('landing1')!.status).toBe(PluginStatus.INACTIVE)
+  })
+
   // --- Isolation from Admin ---
 
   it('should keep separate registry instances independent', () => {

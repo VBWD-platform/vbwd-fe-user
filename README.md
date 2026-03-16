@@ -108,7 +108,7 @@ Clones, builds, and wires all repos including this one:
 ### Standalone (manual)
 
 ```bash
-git clone --recurse-submodules https://github.com/dantweb/vbwd-fe-user.git
+git clone --recurse-submodules https://github.com/VBWD-platform/vbwd-fe-user.git
 cd vbwd-fe-user
 
 # Build the shared component library (submodule) first
@@ -239,6 +239,23 @@ vue/
 plugins/               # Client-side plugin directory
 vbwd-fe-core/          # git submodule — shared component library
 ```
+
+---
+
+## Plugin Directory
+
+| Plugin | Repository | Description |
+|--------|-----------|-------------|
+| chat | [vbwd-fe-user-plugin-chat](https://github.com/VBWD-platform/vbwd-fe-user-plugin-chat) | Chat UI — view, input, message, session |
+| checkout | [vbwd-fe-user-plugin-checkout](https://github.com/VBWD-platform/vbwd-fe-user-plugin-checkout) | Checkout flow with billing address and payment method routing |
+| cms | [vbwd-fe-user-plugin-cms](https://github.com/VBWD-platform/vbwd-fe-user-plugin-cms) | CMS page rendering with widget slots |
+| ghrm | [vbwd-fe-user-plugin-ghrm](https://github.com/VBWD-platform/vbwd-fe-user-plugin-ghrm) | Package catalogue, detail page, GitHub OAuth |
+| landing1 | [vbwd-fe-user-plugin-landing1](https://github.com/VBWD-platform/vbwd-fe-user-plugin-landing1) | Marketing landing page + embed widget |
+| paypal-payment | [vbwd-fe-user-plugin-paypal-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-paypal-payment) | PayPal redirect/success/cancel views |
+| stripe-payment | [vbwd-fe-user-plugin-stripe-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-stripe-payment) | Stripe redirect/success/cancel views |
+| taro | [vbwd-fe-user-plugin-taro](https://github.com/VBWD-platform/vbwd-fe-user-plugin-taro) | Tarot card reading UI |
+| theme-switcher | [vbwd-fe-user-plugin-theme-switcher](https://github.com/VBWD-platform/vbwd-fe-user-plugin-theme-switcher) | Light/dark/system theme selector |
+| yookassa-payment | [vbwd-fe-user-plugin-yookassa-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-yookassa-payment) | YooKassa redirect/success/cancel views |
 
 ---
 
