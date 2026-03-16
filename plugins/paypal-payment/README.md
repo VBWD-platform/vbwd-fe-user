@@ -10,6 +10,12 @@ PayPal checkout flow for the user-facing app.
 | `/payment/paypal/success` | `PayPalSuccessView.vue` |
 | `/payment/paypal/cancel` | `PayPalCancelView.vue` |
 
-## Backend counterpart
+---
 
-`vbwd-backend/plugins/paypal/` — `/api/v1/paypal/*`
+## Related
+
+| | Repository |
+|-|------------|
+| 🖥 Backend | [vbwd-plugin-paypal](https://github.com/VBWD-platform/vbwd-plugin-paypal) |
+
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

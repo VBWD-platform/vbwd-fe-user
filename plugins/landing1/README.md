@@ -106,3 +106,9 @@ Fired automatically when the iframe content height changes. The widget handles t
 | `locales/de.json` | German translations |
 | `config.json` | Plugin config schema |
 | `admin-config.json` | Admin panel UI config |
+
+---
+
+## Related
+
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

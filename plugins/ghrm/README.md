@@ -13,10 +13,13 @@ GitHub Repo Manager — software catalogue with subscription-gated GitHub access
 
 Registers `GhrmCatalogueContent` and `GhrmPackageDetail` as CMS Vue components, allowing them to be embedded in CMS pages via the `vue-component` widget type.
 
-## Backend counterpart
+---
 
-`vbwd-backend/plugins/ghrm/` — `/api/v1/ghrm/*`
+## Related
 
-## Admin counterpart
+| | Repository |
+|-|------------|
+| 🖥 Backend | [vbwd-plugin-ghrm](https://github.com/VBWD-platform/vbwd-plugin-ghrm) |
+| 🛠 Frontend (admin) | [vbwd-fe-admin-plugin-ghrm](https://github.com/VBWD-platform/vbwd-fe-admin-plugin-ghrm) |
 
-`vbwd-fe-admin/plugins/ghrm-admin/`
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

@@ -10,6 +10,12 @@ YooKassa checkout flow for the user-facing app (Russian payment provider).
 | `/payment/yookassa/success` | `YooKassaSuccessView.vue` |
 | `/payment/yookassa/cancel` | `YooKassaCancelView.vue` |
 
-## Backend counterpart
+---
 
-`vbwd-backend/plugins/yookassa/` — `/api/v1/yookassa/*`
+## Related
+
+| | Repository |
+|-|------------|
+| 🖥 Backend | [vbwd-plugin-yookassa](https://github.com/VBWD-platform/vbwd-plugin-yookassa) |
+
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

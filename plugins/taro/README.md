@@ -10,10 +10,13 @@ Registered via `sdk.addRoute` in `index.ts`. See `src/views/` for the exact path
 
 `src/stores/useTaroStore.ts` — session state and step management.
 
-## Backend counterpart
+---
 
-`vbwd-backend/plugins/taro/` — `/api/v1/taro/*`
+## Related
 
-## Admin counterpart
+| | Repository |
+|-|------------|
+| 🖥 Backend | [vbwd-plugin-taro](https://github.com/VBWD-platform/vbwd-plugin-taro) |
+| 🛠 Frontend (admin) | [vbwd-fe-admin-plugin-taro](https://github.com/VBWD-platform/vbwd-fe-admin-plugin-taro) |
 
-`vbwd-fe-admin/plugins/taro-admin/`
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

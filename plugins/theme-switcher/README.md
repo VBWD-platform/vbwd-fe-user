@@ -16,3 +16,9 @@ Theme selection UI — allows users to pick and persist a visual theme.
 ## No backend counterpart
 
 Theme preference is stored in `localStorage` only.
+
+---
+
+## Related
+
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

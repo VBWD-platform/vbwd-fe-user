@@ -10,10 +10,12 @@ None (renders as a floating widget injected via `sdk.addComponent`).
 
 Uses socket.io-client to connect to the backend chat service. Authentication token is passed from the auth store.
 
-## Backend counterpart
+---
 
-`vbwd-backend/plugins/chat/`
+## Related
 
-## Admin counterpart
+| | Repository |
+|-|------------|
+| 🖥 Backend | [vbwd-plugin-chat](https://github.com/VBWD-platform/vbwd-plugin-chat) |
 
-`vbwd-fe-admin/plugins/chat-admin/`
+**Core:** [vbwd-fe-user](https://github.com/VBWD-platform/vbwd-fe-user) · [vbwd-fe-core](https://github.com/VBWD-platform/vbwd-fe-core)

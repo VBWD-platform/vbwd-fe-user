@@ -224,7 +224,6 @@ import { useGhrmStore } from '../stores/useGhrmStore';
 import { ghrmApi, type GhrmBreadcrumbConfig } from '../api/ghrmApi';
 import GhrmMarkdownRenderer from '../components/GhrmMarkdownRenderer.vue';
 import GhrmVersionsTable from '../components/GhrmVersionsTable.vue';
-import GhrmBreadcrumb from '../components/GhrmBreadcrumb.vue';
 
 const route = useRoute();
 const router = useRouter();
