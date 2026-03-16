@@ -1,7 +1,0 @@
-{
-  "publishableKey": {
-    "type": "string",
-    "default": "",
-    "description": "Stripe publishable key"
-  }
-}

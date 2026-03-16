@@ -12,3 +12,15 @@ coverage
 .git
 playwright-report
 test-results
+
+# Plugin dirs are hosted in individual repos (vbwd-fe-user-plugin-*)
+plugins/chat/
+plugins/checkout/
+plugins/cms/
+plugins/ghrm/
+plugins/landing1/
+plugins/paypal-payment/
+plugins/stripe-payment/
+plugins/taro/
+plugins/theme-switcher/
+plugins/yookassa-payment/
