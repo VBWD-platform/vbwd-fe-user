@@ -96,7 +96,7 @@ describe('Checkout Public Plugin', () => {
     expect(routes).toHaveLength(1)
     expect(routes[0].path).toBe('/checkout')
     expect(routes[0].name).toBe('checkout-public')
-    expect(routes[0].meta).toEqual({ requiresAuth: false })
+    expect(routes[0].meta).toEqual({ requiresAuth: false, noLayout: true })
   })
 
   it('should have activate method', () => {

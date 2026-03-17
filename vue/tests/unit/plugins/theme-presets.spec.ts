@@ -9,13 +9,13 @@ describe('Theme Presets', () => {
   })
 
   it('should include a default preset', () => {
-    const defaultPreset = themePresets.find(p => p.id === 'default')
+    const defaultPreset = themePresets.find(preset => preset.id === 'default')
     expect(defaultPreset).toBeDefined()
     expect(defaultPreset!.id).toBe('default')
   })
 
   it('should have all 5 expected presets', () => {
-    const ids = themePresets.map(p => p.id)
+    const ids = themePresets.map(preset => preset.id)
     expect(ids).toContain('default')
     expect(ids).toContain('dark')
     expect(ids).toContain('forest')
@@ -23,7 +23,7 @@ describe('Theme Presets', () => {
     expect(ids).toContain('sunset')
   })
 
-  it.each(themePresets.map(p => [p.id, p]))('preset "%s" should have required fields', (_id: string, preset: ThemePreset) => {
+  it.each(themePresets.map(preset => [preset.id, preset]))('preset "%s" should have required fields', (_id: string, preset: ThemePreset) => {
     expect(preset.id).toBeTruthy()
     expect(preset.name).toBeTruthy()
     expect(preset.description).toBeTruthy()
@@ -31,7 +31,7 @@ describe('Theme Presets', () => {
     expect(typeof preset.preview).toBe('object')
   })
 
-  it.each(themePresets.map(p => [p.id, p]))('preset "%s" should define all required CSS variables', (_id: string, preset: ThemePreset) => {
+  it.each(themePresets.map(preset => [preset.id, preset]))('preset "%s" should define all required CSS variables', (_id: string, preset: ThemePreset) => {
     const requiredVars = [
       '--vbwd-sidebar-bg',
       '--vbwd-sidebar-text',
@@ -55,7 +55,7 @@ describe('Theme Presets', () => {
     }
   })
 
-  it.each(themePresets.map(p => [p.id, p]))('preset "%s" should have all preview fields', (_id: string, preset: ThemePreset) => {
+  it.each(themePresets.map(preset => [preset.id, preset]))('preset "%s" should have all preview fields', (_id: string, preset: ThemePreset) => {
     expect(preset.preview.sidebar).toBeTruthy()
     expect(preset.preview.primary).toBeTruthy()
     expect(preset.preview.background).toBeTruthy()
@@ -71,14 +71,14 @@ describe('Theme Presets', () => {
   })
 
   it('dark preset should have dark background colors', () => {
-    const dark = themePresets.find(p => p.id === 'dark')!
+    const dark = themePresets.find(preset => preset.id === 'dark')!
     // Dark backgrounds should be notably dark
     expect(dark.colors['--vbwd-page-bg']).toMatch(/^#1/)
     expect(dark.colors['--vbwd-card-bg']).toMatch(/^#1/)
   })
 
   it('each preset should have unique id', () => {
-    const ids = themePresets.map(p => p.id)
+    const ids = themePresets.map(preset => preset.id)
     const uniqueIds = new Set(ids)
     expect(uniqueIds.size).toBe(ids.length)
   })

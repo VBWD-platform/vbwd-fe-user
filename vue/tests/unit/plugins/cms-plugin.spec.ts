@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { PluginRegistry, PlatformSDK } from 'vbwd-view-component'
 import { cmsPlugin } from '../../../../plugins/cms'
+import { landing1Plugin } from '../../../../plugins/landing1'
 
 const NotFoundStub = { template: '<div>404</div>' }
 
@@ -23,6 +24,7 @@ describe('CMS Plugin — route registration', () => {
   beforeEach(() => {
     registry = new PluginRegistry()
     sdk = new PlatformSDK()
+    registry.register(landing1Plugin)
   })
 
   it('registers /:slug(.+) route (not /page/:slug)', async () => {
@@ -30,7 +32,7 @@ describe('CMS Plugin — route registration', () => {
     await registry.installAll(sdk)
 
     const routes = sdk.getRoutes()
-    const slugRoute = routes.find(r => r.name === 'cms-page')
+    const slugRoute = routes.find(route => route.name === 'cms-page')
     expect(slugRoute).toBeDefined()
     expect(slugRoute!.path).toBe('/:slug(.+)')
   })
@@ -40,7 +42,7 @@ describe('CMS Plugin — route registration', () => {
     await registry.installAll(sdk)
 
     const routes = sdk.getRoutes()
-    const indexRoute = routes.find(r => r.name === 'cms-page-index')
+    const indexRoute = routes.find(route => route.name === 'cms-page-index')
     expect(indexRoute).toBeDefined()
     expect(indexRoute!.path).toBe('/pages')
   })
@@ -49,16 +51,16 @@ describe('CMS Plugin — route registration', () => {
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
-    const route = sdk.getRoutes().find(r => r.name === 'cms-page')
-    expect(route!.meta?.requiresAuth).toBe(false)
+    const cmsPageRoute = sdk.getRoutes().find(route => route.name === 'cms-page')
+    expect(cmsPageRoute!.meta?.requiresAuth).toBe(false)
   })
 
   it('cms-page-index route does NOT require auth', async () => {
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
-    const route = sdk.getRoutes().find(r => r.name === 'cms-page-index')
-    expect(route!.meta?.requiresAuth).toBe(false)
+    const cmsPageIndexRoute = sdk.getRoutes().find(route => route.name === 'cms-page-index')
+    expect(cmsPageIndexRoute!.meta?.requiresAuth).toBe(false)
   })
 
   it('adds english translations on install', async () => {
@@ -78,6 +80,7 @@ describe('CMS Plugin — Vue Router integration', () => {
     const registry = new PluginRegistry()
     const sdk = new PlatformSDK()
 
+    registry.register(landing1Plugin)
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
@@ -103,6 +106,7 @@ describe('CMS Plugin — Vue Router integration', () => {
     const registry = new PluginRegistry()
     const sdk = new PlatformSDK()
 
+    registry.register(landing1Plugin)
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
@@ -130,6 +134,7 @@ describe('CMS Plugin — Vue Router integration', () => {
     const registry = new PluginRegistry()
     const sdk = new PlatformSDK()
 
+    registry.register(landing1Plugin)
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
@@ -152,6 +157,7 @@ describe('CMS Plugin — Vue Router integration', () => {
     const registry = new PluginRegistry()
     const sdk = new PlatformSDK()
 
+    registry.register(landing1Plugin)
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 
@@ -176,6 +182,7 @@ describe('CMS Plugin — Vue Router integration', () => {
     const registry = new PluginRegistry()
     const sdk = new PlatformSDK()
 
+    registry.register(landing1Plugin)
     registry.register(cmsPlugin)
     await registry.installAll(sdk)
 

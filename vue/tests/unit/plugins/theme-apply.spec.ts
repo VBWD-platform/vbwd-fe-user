@@ -13,7 +13,7 @@ describe('applyTheme / clearTheme', () => {
   })
 
   it('should set CSS variables on document root', () => {
-    const defaultPreset = themePresets.find(p => p.id === 'default')!
+    const defaultPreset = themePresets.find(preset => preset.id === 'default')!
     applyTheme(defaultPreset)
 
     expect(document.documentElement.style.getPropertyValue('--vbwd-sidebar-bg')).toBe('#2c3e50')
@@ -21,7 +21,7 @@ describe('applyTheme / clearTheme', () => {
   })
 
   it('should apply dark theme variables', () => {
-    const dark = themePresets.find(p => p.id === 'dark')!
+    const dark = themePresets.find(preset => preset.id === 'dark')!
     applyTheme(dark)
 
     expect(document.documentElement.style.getPropertyValue('--vbwd-page-bg')).toBe('#16213e')
@@ -29,8 +29,8 @@ describe('applyTheme / clearTheme', () => {
   })
 
   it('should overwrite previous theme variables', () => {
-    const defaultPreset = themePresets.find(p => p.id === 'default')!
-    const dark = themePresets.find(p => p.id === 'dark')!
+    const defaultPreset = themePresets.find(preset => preset.id === 'default')!
+    const dark = themePresets.find(preset => preset.id === 'dark')!
 
     applyTheme(defaultPreset)
     expect(document.documentElement.style.getPropertyValue('--vbwd-color-primary')).toBe('#3498db')
@@ -40,7 +40,7 @@ describe('applyTheme / clearTheme', () => {
   })
 
   it('should set all CSS variables defined in a preset', () => {
-    const forest = themePresets.find(p => p.id === 'forest')!
+    const forest = themePresets.find(preset => preset.id === 'forest')!
     applyTheme(forest)
 
     for (const [property, value] of Object.entries(forest.colors)) {
@@ -49,7 +49,7 @@ describe('applyTheme / clearTheme', () => {
   })
 
   it('clearTheme should remove all CSS variables for a preset', () => {
-    const ocean = themePresets.find(p => p.id === 'ocean')!
+    const ocean = themePresets.find(preset => preset.id === 'ocean')!
     applyTheme(ocean)
 
     // Verify they're set
@@ -64,7 +64,7 @@ describe('applyTheme / clearTheme', () => {
 
   it('clearTheme should not affect other CSS properties', () => {
     document.documentElement.style.setProperty('--custom-prop', 'red')
-    const sunset = themePresets.find(p => p.id === 'sunset')!
+    const sunset = themePresets.find(preset => preset.id === 'sunset')!
 
     applyTheme(sunset)
     clearTheme(sunset)

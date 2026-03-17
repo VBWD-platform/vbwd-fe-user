@@ -102,6 +102,12 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install plugins
+        run: |
+          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment taro theme-switcher yookassa-payment; do
+            git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${plugin}.git plugins/${plugin}
+          done
+
       - name: Run integration tests
         run: ./bin/pre-commit-check.sh --integration
 
