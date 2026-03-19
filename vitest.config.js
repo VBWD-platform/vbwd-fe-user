@@ -7,7 +7,7 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    include: ['vue/tests/unit/**/*.spec.{js,ts}', 'vue/tests/integration/**/*.spec.{js,ts}', 'plugins/*/tests/*.spec.{js,ts}'],
+    include: ['vue/tests/unit/**/*.spec.{js,ts}', 'vue/tests/integration/**/*.spec.{js,ts}', 'plugins/*/tests/**/*.spec.{js,ts}'],
     exclude: ['vue/tests/e2e/**'],
     coverage: {
       reporter: ['text', 'html'],
