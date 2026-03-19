@@ -126,22 +126,14 @@ run_style() {
         lint_target="plugins/$PLUGIN_NAME/"
     fi
 
-    # ESLint
+    # ESLint (always run full project — scoped eslint can crash on CI)
     echo "Running ESLint..."
-    if [ -n "$lint_target" ]; then
-        if npx eslint "$lint_target" --ext .vue,.ts,.tsx; then
-            print_success "ESLint passed"
-        else
-            print_error "ESLint failed"
-            OVERALL_EXIT=1
-        fi
+    if npm run lint; then
+        print_success "ESLint passed"
     else
-        if npm run lint; then
-            print_success "ESLint passed"
-        else
-            print_error "ESLint failed"
-            OVERALL_EXIT=1
-        fi
+        print_error "ESLint failed"
+        OVERALL_EXIT=1
+    fi
     fi
 
     # TypeScript check (full project — always runs)
