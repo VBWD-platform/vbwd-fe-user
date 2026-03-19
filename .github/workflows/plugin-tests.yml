@@ -14,6 +14,7 @@ jobs:
       fail-fast: false
       matrix:
         plugin:
+          - booking
           - chat
           - checkout
           - cms
@@ -30,84 +31,18 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
       - name: Build vbwd-fe-core submodule
-        run: |
-          cd vbwd-fe-core
-          npm install
-          npm run build
+        run: cd vbwd-fe-core && npm install && npm run build
 
-      - name: Install dependencies
-        run: npm install
+      - run: npm install
 
       - name: Install plugin
-        run: |
-          git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${{ matrix.plugin }}.git plugins/${{ matrix.plugin }}
+        run: git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${{ matrix.plugin }}.git plugins/${{ matrix.plugin }}
 
-      - name: Run unit tests
-        run: |
-          UNIT_DIR="plugins/${{ matrix.plugin }}/tests/unit"
-          if [ -d "$UNIT_DIR" ] && find "$UNIT_DIR" -name "*.spec.ts" -o -name "*.test.ts" | grep -q .; then
-            npx vitest run "$UNIT_DIR" --reporter=verbose
-          elif find plugins/${{ matrix.plugin }}/tests -maxdepth 1 -name "*.spec.ts" -o -name "*.test.ts" 2>/dev/null | grep -q .; then
-            npx vitest run plugins/${{ matrix.plugin }}/tests --reporter=verbose
-          else
-            echo "No unit tests for ${{ matrix.plugin }} — skipping."
-          fi
-
-  integration:
-    name: Integration Tests — ${{ matrix.plugin }}
-    needs: unit
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        plugin:
-          - chat
-          - checkout
-          - cms
-          - ghrm
-          - landing1
-          - paypal-payment
-          - stripe-payment
-          - taro
-          - theme-switcher
-          - yookassa-payment
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Build vbwd-fe-core submodule
-        run: |
-          cd vbwd-fe-core
-          npm install
-          npm run build
-
-      - name: Install dependencies
-        run: npm install
-
-      - name: Install plugin
-        run: |
-          git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${{ matrix.plugin }}.git plugins/${{ matrix.plugin }}
-
-      - name: Run integration tests
-        run: |
-          INTEGRATION_DIR="plugins/${{ matrix.plugin }}/tests/integration"
-          if [ -d "$INTEGRATION_DIR" ] && find "$INTEGRATION_DIR" -name "*.spec.ts" -o -name "*.test.ts" | grep -q .; then
-            npx vitest run "$INTEGRATION_DIR" --reporter=verbose
-          else
-            echo "No integration tests for ${{ matrix.plugin }} — skipping."
-          fi
+      - name: Run pre-commit (style + unit)
+        run: ./bin/pre-commit-check.sh --plugin ${{ matrix.plugin }} --unit
