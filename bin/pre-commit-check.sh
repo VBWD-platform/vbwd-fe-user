@@ -121,11 +121,6 @@ run_style() {
 
     cd "$REPO_DIR"
 
-    local lint_target=""
-    if [ -n "$PLUGIN_NAME" ]; then
-        lint_target="plugins/$PLUGIN_NAME/"
-    fi
-
     # ESLint (always run full project — scoped eslint can crash on CI)
     echo "Running ESLint..."
     if npm run lint; then
@@ -133,7 +128,6 @@ run_style() {
     else
         print_error "ESLint failed"
         OVERALL_EXIT=1
-    fi
     fi
 
     # TypeScript check (full project — always runs)
