@@ -93,7 +93,7 @@
                     <span
                       class="type-badge"
                       :class="item.type?.toLowerCase()"
-                    >{{ itemTypeLabel(item.type) }}</span>
+                    >{{ itemTypeLabel(item.type, item.extra_data) }}</span>
                   </td>
                   <td>{{ item.description }}</td>
                   <td>{{ item.quantity }}</td>
@@ -117,7 +117,7 @@
                 <span
                   class="type-badge"
                   :class="item.type?.toLowerCase()"
-                >{{ itemTypeLabel(item.type) }}</span>
+                >{{ itemTypeLabel(item.type, item.extra_data) }}</span>
                 <span class="item-card-total">{{ formatAmount(item.total_price, invoice.currency) }}</span>
               </div>
               <div class="item-card-desc">
@@ -200,6 +200,7 @@ interface LineItem {
   quantity: number;
   unit_price: string;
   total_price: string;
+  extra_data?: Record<string, unknown>;
 }
 
 interface Invoice {
@@ -269,13 +270,14 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
-function itemTypeLabel(type?: string): string {
+function itemTypeLabel(type?: string, extraData?: Record<string, unknown>): string {
   const labels: Record<string, string> = {
     subscription: 'Plan',
     token_bundle: 'Token Bundle',
     add_on: 'Add-On',
+    custom: extraData?.plugin === 'booking' ? 'Booking' : 'Custom',
   };
-  return labels[type || ''] || type || 'Item';
+  return labels[type?.toLowerCase() || ''] || type || 'Item';
 }
 
 function paymentMethodLabel(method: string): string {
@@ -294,7 +296,7 @@ function formatAmount(value: string | number | null | undefined, currency = 'USD
   return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
 }
 
-function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string }): string | null {
+function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string; extra_data?: Record<string, unknown> }): string | null {
   const catalogId = item.catalog_item_id;
   switch (item.type?.toUpperCase()) {
     case 'SUBSCRIPTION':
@@ -303,6 +305,11 @@ function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: str
       return catalogId ? `/dashboard/tokens/${catalogId}` : null;
     case 'ADD_ON':
       return catalogId ? `/dashboard/add-ons/info/${catalogId}` : null;
+    case 'CUSTOM':
+      if (item.extra_data?.plugin === 'booking' && item.extra_data?.resource_slug) {
+        return `/booking/${item.extra_data.resource_slug}`;
+      }
+      return null;
     default:
       return null;
   }
@@ -537,6 +544,11 @@ h1 {
 .type-badge.add_on {
   background: #fce4ec;
   color: #c62828;
+}
+
+.type-badge.custom {
+  background: #e8f4fd;
+  color: #1a73e8;
 }
 
 .total-section {
