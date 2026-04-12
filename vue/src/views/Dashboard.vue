@@ -68,8 +68,9 @@
         </router-link>
       </div>
 
-      <!-- Token Activity Card -->
+      <!-- Token Activity Card (requires subscription.tokens.view) -->
       <div
+        v-if="hasUserPermission('subscription.tokens.view')"
         class="card token-history-card"
         data-testid="token-history"
       >
@@ -104,8 +105,9 @@
         </div>
       </div>
 
-      <!-- Recent Invoices Card -->
+      <!-- Recent Invoices Card (requires subscription.invoices.view) -->
       <div
+        v-if="hasUserPermission('subscription.invoices.view')"
         class="card invoices-card"
         data-testid="recent-invoices"
       >
@@ -159,7 +161,7 @@ import { ref, computed, onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProfileStore } from '../stores/profile';
 import { useInvoicesStore } from '../stores/invoices';
-import { api } from '@/api';
+import { api, hasUserPermission } from '@/api';
 import type { PlatformSDK } from 'vbwd-view-component';
 
 interface TokenTransaction {

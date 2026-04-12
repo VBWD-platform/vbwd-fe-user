@@ -16,7 +16,9 @@ vi.mock('../../../src/api', () => ({
   },
   initializeApi: vi.fn(),
   clearApiAuth: vi.fn(),
-  isAuthenticated: vi.fn(() => true)
+  isAuthenticated: vi.fn(() => true),
+  hasUserPermission: vi.fn(() => true),
+  getUserPermissions: vi.fn(() => ['*']),
 }));
 
 vi.mock('vue-i18n', () => ({
