@@ -1,12 +1,14 @@
-import type { IPlugin } from 'vbwd-view-component';
-import pluginsManifest from '@plugins/plugins.json';
+import type { IPlugin, PluginManifest } from 'vbwd-view-component';
+import { fetchPluginManifest } from 'vbwd-view-component';
+import buildTimeManifest from '@plugins/plugins.json';
 
 /**
  * Plugin Registry - Controls which plugins are loaded
  *
- * Plugins are discovered dynamically from plugins.json.
- * Only enabled plugins are loaded and registered.
- * Core does NOT import from plugins — plugins depend on core.
+ * Plugins are discovered via Vite's import.meta.glob at build time (all
+ * plugin code is in the bundle). The **manifest** (which plugins to activate)
+ * is fetched at runtime from /plugins.json, falling back to the build-time
+ * import when the fetch fails (e.g., dev server without a mounted file).
  *
  * To add a new plugin:
  * 1. Create the plugin in /plugins/{name}/
@@ -14,29 +16,24 @@ import pluginsManifest from '@plugins/plugins.json';
  * 3. Add entry to plugins.json with enabled: true
  */
 
-interface PluginManifest {
-  plugins: Record<string, {
-    enabled: boolean;
-    version: string;
-    installedAt: string;
-    source: string;
-  }>;
-}
-
 // Vite statically analyses import.meta.glob at build time and includes all
 // matching modules in the bundle — no runtime dynamic import needed.
 const pluginModules = import.meta.glob<any>('../../../plugins/*/index.ts', { eager: false });
 
+/** Cached manifest after first load */
+let cachedManifest: PluginManifest | null = null;
+
 /**
- * Get enabled plugins based on plugins.json configuration.
+ * Get enabled plugins based on runtime manifest.
+ * Fetches /plugins.json at runtime; falls back to build-time manifest.
  * Plugins are dynamically loaded; only enabled ones are instantiated.
  */
 export async function getEnabledPlugins(): Promise<IPlugin[]> {
   try {
-    const manifest: PluginManifest = pluginsManifest as PluginManifest;
+    cachedManifest = await fetchPluginManifest('/plugins.json', buildTimeManifest as PluginManifest);
     const enabledPlugins: IPlugin[] = [];
 
-    for (const [pluginName, pluginConfig] of Object.entries(manifest.plugins)) {
+    for (const [pluginName, pluginConfig] of Object.entries(cachedManifest.plugins)) {
       if (!pluginConfig.enabled) {
         console.warn(`[PluginRegistry] Skipping disabled plugin: ${pluginName}`);
         continue;
@@ -56,8 +53,6 @@ export async function getEnabledPlugins(): Promise<IPlugin[]> {
         const pluginModule = await pluginModules[matchingKey]();
 
         // Prefer default export; fall back to the first named export that satisfies IPlugin
-        // (has an `install` method). This supports both export styles without forcing every
-        // plugin to change its export signature.
         const plugin: IPlugin =
           pluginModule.default ??
           (Object.values(pluginModule) as unknown[]).find(
@@ -86,10 +81,11 @@ export async function getEnabledPlugins(): Promise<IPlugin[]> {
 
 /**
  * Get list of enabled plugin names from manifest.
+ * Uses cached runtime manifest if available, otherwise falls back to build-time.
  */
 export function getEnabledPluginNames(): Set<string> {
   try {
-    const manifest: PluginManifest = pluginsManifest as PluginManifest;
+    const manifest = cachedManifest ?? (buildTimeManifest as PluginManifest);
     return new Set(
       Object.entries(manifest.plugins)
         .filter(([, config]) => config.enabled)
