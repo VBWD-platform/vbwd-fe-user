@@ -1,4 +1,4 @@
-import type { IPlugin, PluginManifest } from 'vbwd-view-component';
+import type { IPlugin, PluginManifest, PluginManifestEntry } from 'vbwd-view-component';
 import { fetchPluginManifest } from 'vbwd-view-component';
 import buildTimeManifest from '@plugins/plugins.json';
 
@@ -30,10 +30,11 @@ let cachedManifest: PluginManifest | null = null;
  */
 export async function getEnabledPlugins(): Promise<IPlugin[]> {
   try {
-    cachedManifest = await fetchPluginManifest('/plugins.json', buildTimeManifest as PluginManifest);
+    const manifest = await fetchPluginManifest('/plugins.json', buildTimeManifest as PluginManifest);
+    cachedManifest = manifest;
     const enabledPlugins: IPlugin[] = [];
 
-    for (const [pluginName, pluginConfig] of Object.entries(cachedManifest.plugins)) {
+    for (const [pluginName, pluginConfig] of Object.entries(manifest.plugins) as [string, PluginManifestEntry][]) {
       if (!pluginConfig.enabled) {
         console.warn(`[PluginRegistry] Skipping disabled plugin: ${pluginName}`);
         continue;

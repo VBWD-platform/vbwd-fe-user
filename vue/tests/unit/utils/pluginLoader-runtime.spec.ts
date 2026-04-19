@@ -11,7 +11,7 @@
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { fetchPluginManifest } from 'vbwd-view-component';
-import type { PluginManifest } from 'vbwd-view-component';
+import type { PluginManifest, PluginManifestEntry } from 'vbwd-view-component';
 
 describe('Runtime plugin manifest loading (fe-user)', () => {
   beforeEach(() => {
@@ -95,7 +95,7 @@ describe('Runtime plugin manifest loading (fe-user)', () => {
 
     const enabledNames = new Set(
       Object.entries(result.plugins)
-        .filter(([, config]) => config.enabled)
+        .filter(([, config]) => (config as PluginManifestEntry).enabled)
         .map(([name]) => name),
     );
 
