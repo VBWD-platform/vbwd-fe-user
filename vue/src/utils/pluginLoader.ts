@@ -30,7 +30,8 @@ let cachedManifest: PluginManifest | null = null;
  */
 export async function getEnabledPlugins(): Promise<IPlugin[]> {
   try {
-    const manifest = await fetchPluginManifest('/plugins.json', buildTimeManifest as PluginManifest);
+    const manifestPath = `${import.meta.env.BASE_URL}plugins.json`;
+    const manifest = await fetchPluginManifest(manifestPath, buildTimeManifest as PluginManifest);
     cachedManifest = manifest;
     const enabledPlugins: IPlugin[] = [];
 
