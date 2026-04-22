@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { api } from '@/api';
+import { downloadAuthenticatedFile } from '@/utils/download';
 
 export interface Invoice {
   id: string;
@@ -76,13 +77,16 @@ export const useInvoicesStore = defineStore('invoices', {
       }
     },
 
-    async downloadInvoice(invoiceId: string) {
+    async downloadInvoice(invoiceId: string, invoiceNumber?: string): Promise<void> {
       this.loading = true;
       this.error = null;
 
       try {
-        const response = await api.get(`/user/invoices/${invoiceId}/download`);
-        return response as { downloadUrl: string };
+        const filename = `invoice-${invoiceNumber || invoiceId}.pdf`;
+        await downloadAuthenticatedFile(
+          `/user/invoices/${invoiceId}/pdf`,
+          filename,
+        );
       } catch (error) {
         this.error = (error as Error).message || 'Failed to download invoice';
         throw error;

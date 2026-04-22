@@ -2,15 +2,22 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useInvoicesStore } from '../../../src/stores/invoices';
 import { api } from '../../../src/api';
+import * as downloadUtil from '../../../src/utils/download';
 
 vi.mock('../../../src/api', () => ({
   api: {
     get: vi.fn(),
     post: vi.fn(),
     put: vi.fn(),
-    delete: vi.fn()
+    delete: vi.fn(),
+    getToken: vi.fn(() => 'fake-token'),
+    baseURL: '/api/v1'
   },
   isAuthenticated: vi.fn(() => true)
+}));
+
+vi.mock('../../../src/utils/download', () => ({
+  downloadAuthenticatedFile: vi.fn()
 }));
 
 describe('InvoicesStore', () => {
@@ -65,17 +72,42 @@ describe('InvoicesStore', () => {
     expect(store.loading).toBe(false);
   });
 
-  it('downloads invoice PDF', async () => {
+  it('downloads invoice PDF via blob fetch', async () => {
     const store = useInvoicesStore();
 
-    vi.mocked(api.get).mockResolvedValue({
-      downloadUrl: 'https://example.com/invoices/inv_1.pdf'
-    });
+    vi.mocked(downloadUtil.downloadAuthenticatedFile).mockResolvedValue(undefined);
 
-    const result = await store.downloadInvoice('inv_1');
+    await store.downloadInvoice('inv_1', 'INV-001');
 
-    expect(api.get).toHaveBeenCalledWith('/user/invoices/inv_1/download');
-    expect(result.downloadUrl).toBeDefined();
+    expect(downloadUtil.downloadAuthenticatedFile).toHaveBeenCalledWith(
+      '/user/invoices/inv_1/pdf',
+      'invoice-INV-001.pdf'
+    );
+  });
+
+  it('uses invoice id as filename fallback when invoice_number missing', async () => {
+    const store = useInvoicesStore();
+
+    vi.mocked(downloadUtil.downloadAuthenticatedFile).mockResolvedValue(undefined);
+
+    await store.downloadInvoice('inv_2');
+
+    expect(downloadUtil.downloadAuthenticatedFile).toHaveBeenCalledWith(
+      '/user/invoices/inv_2/pdf',
+      'invoice-inv_2.pdf'
+    );
+  });
+
+  it('surfaces download errors through store.error', async () => {
+    const store = useInvoicesStore();
+
+    vi.mocked(downloadUtil.downloadAuthenticatedFile).mockRejectedValue(
+      new Error('Network down')
+    );
+
+    await expect(store.downloadInvoice('inv_1')).rejects.toThrow('Network down');
+    expect(store.error).toBe('Network down');
+    expect(store.loading).toBe(false);
   });
 
   it('sets loading state during fetch', async () => {

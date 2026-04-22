@@ -99,22 +99,21 @@ async function setPageStyle(ctx, token, pageId, styleId) {
 
   fs.writeFileSync(path.join(OUT, 'audit.json'), JSON.stringify(rows, null, 2));
   // Detect misalignments: for same page, the "anchor" elements should agree
-  console.log('\n=== misalignments ===');
+  process.stdout.write('\n=== misalignments ===\n');
   for (const r of rows) {
-    if (r.err) { console.log(`${r.style}/${r.page}: ERR ${r.err}`); continue; }
+    if (r.err) { process.stdout.write(`${r.style}/${r.page}: ERR ${r.err}\n`); continue; }
     const fullwidth = r.container_max === '100%';
-    const refs = [r.menu_link, r.breadcrumb, r.hero, r.burger].filter(x => x !== null && x !== undefined);
     // Menu-link and burger shouldn't both be visible (narrow=link, fullwidth=burger)
     // Check alignment within 6px tolerance on fullwidth themes
     if (fullwidth && r.burger !== null && r.breadcrumb !== null) {
       const delta = Math.abs(r.burger - r.breadcrumb);
-      if (delta > 10) console.log(`${r.style}/${r.page}: burger=${r.burger} breadcrumb=${r.breadcrumb} Δ=${delta}`);
+      if (delta > 10) process.stdout.write(`${r.style}/${r.page}: burger=${r.burger} breadcrumb=${r.breadcrumb} Δ=${delta}\n`);
     }
     if (!fullwidth && r.menu_link !== null && r.breadcrumb !== null) {
       const delta = Math.abs(r.menu_link - r.breadcrumb);
-      if (delta > 10) console.log(`${r.style}/${r.page}: menu=${r.menu_link} breadcrumb=${r.breadcrumb} Δ=${delta}`);
+      if (delta > 10) process.stdout.write(`${r.style}/${r.page}: menu=${r.menu_link} breadcrumb=${r.breadcrumb} Δ=${delta}\n`);
     }
   }
-  console.log(`\n[AUDIT] ${rows.length} measurements · Report: ${OUT}/audit.json`);
-  console.log(`[AUDIT] Screenshots: ${OUT}/<slug>/<page>.png`);
+  process.stdout.write(`\n[AUDIT] ${rows.length} measurements · Report: ${OUT}/audit.json\n`);
+  process.stdout.write(`[AUDIT] Screenshots: ${OUT}/<slug>/<page>.png\n`);
 })();

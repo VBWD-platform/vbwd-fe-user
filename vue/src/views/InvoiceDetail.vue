@@ -201,6 +201,9 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
+import { useInvoicesStore } from '@/stores/invoices';
+
+const invoicesStore = useInvoicesStore();
 
 interface LineItem {
   type: string;
@@ -258,10 +261,10 @@ async function downloadInvoice(): Promise<void> {
   if (!invoice.value) return;
 
   try {
-    const response = await api.get(`/user/invoices/${invoice.value.id}/download`) as { downloadUrl?: string };
-    if (response.downloadUrl) {
-      window.open(response.downloadUrl, '_blank');
-    }
+    await invoicesStore.downloadInvoice(
+      invoice.value.id,
+      invoice.value.invoice_number,
+    );
   } catch (err) {
     error.value = (err as Error).message || t('invoices.detail.errors.failedToDownload');
   }
