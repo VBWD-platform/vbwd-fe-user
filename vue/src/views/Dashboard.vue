@@ -157,7 +157,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, inject } from 'vue';
+import { ref, computed, defineAsyncComponent, onMounted, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProfileStore } from '../stores/profile';
 import { useInvoicesStore } from '../stores/invoices';
@@ -219,13 +219,18 @@ const recentInvoices = computed(() => {
   return invoicesStore.invoices.slice(0, 5);
 });
 
-// Plugin dashboard widgets
+// Plugin dashboard widgets. The SDK returns ComponentDefinition values
+// (lazy loaders: () => Promise<{default: Component}>). We must wrap each
+// loader in defineAsyncComponent before using it with <component :is=…/> —
+// handing the raw loader to Vue renders "[object Promise]" as text.
 const dashboardWidgets = computed(() => {
   if (!sdk) return [];
   const components = sdk.getComponents();
   return Object.entries(components)
     .filter(([name]) => name.startsWith('Dashboard'))
-    .map(([, component]) => component);
+    .map(([, loader]) => defineAsyncComponent(
+      loader as () => Promise<{ default: unknown }>,
+    ));
 });
 
 async function loadDashboardData(): Promise<void> {
