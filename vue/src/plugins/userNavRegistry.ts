@@ -32,10 +32,10 @@ export interface UserNavItem {
   /**
    * Collapsible nav group this item belongs to.
    * Items with a group are rendered inside that group's sub-menu and
-   * are excluded from getSidebarItems().
-   * Currently supported value: 'store'
+   * are excluded from getSidebarItems(). Open string so any plugin can
+   * contribute to a group (e.g. 'store') without core knowing the value.
    */
-  group?: 'store';
+  group?: string;
   /**
    * When true, an external-link icon (↗) is shown next to the label
    * to signal that the link opens a public-facing area.
@@ -56,15 +56,22 @@ class UserNavRegistry {
    * Call from a plugin's activate() hook.
    */
   register(item: UserNavItem): void {
-    this._items.set(item.pluginName, item);
+    // Keyed by pluginName + route so a single plugin can register multiple
+    // nav items (e.g. subscription → Plans, Add-Ons, Subscription).
+    this._items.set(`${item.pluginName}::${item.to}`, item);
   }
 
   /**
-   * Remove a plugin nav item.
-   * Call from a plugin's deactivate() hook so the item disappears immediately.
+   * Remove a plugin's nav item(s).
+   * Call from a plugin's deactivate() hook so the items disappear immediately.
+   * Removes every item registered by the plugin (all its routes).
    */
   unregister(pluginName: string): void {
-    this._items.delete(pluginName);
+    for (const key of Array.from(this._items.keys())) {
+      if (key === pluginName || key.startsWith(`${pluginName}::`)) {
+        this._items.delete(key);
+      }
+    }
   }
 
   /** All items that appear as top-level sidebar links (no group). */

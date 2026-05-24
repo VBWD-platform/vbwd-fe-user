@@ -75,7 +75,7 @@
           <!-- Plugin sidebar nav items (registered dynamically by plugins) -->
           <router-link
             v-for="item in sidebarNavItems"
-            :key="item.pluginName"
+            :key="item.to"
             :to="item.to"
             class="nav-item"
             :data-testid="item.testId"
@@ -84,7 +84,17 @@
             {{ $t(item.labelKey) }}
           </router-link>
 
-          <!-- Store (Plans, Tokens, Add-Ons) -->
+          <!-- Invoices (core billing — stays in core per the agnostic split) -->
+          <router-link
+            to="/dashboard/subscription/invoices"
+            class="nav-item"
+            data-testid="nav-invoices"
+            @click="closeMobileMenu"
+          >
+            {{ $t('nav.invoices') }}
+          </router-link>
+
+          <!-- Store (Tokens core; Plans/Add-Ons contributed by plugins) -->
           <div class="nav-group">
             <button
               class="nav-item nav-group-toggle"
@@ -108,30 +118,17 @@
               class="nav-subgroup"
             >
               <router-link
-                to="/dashboard/plans"
-                class="nav-subitem"
-                @click="closeMobileMenu"
-              >
-                {{ $t('nav.plans') }}
-              </router-link>
-              <router-link
                 to="/dashboard/tokens"
                 class="nav-subitem"
                 @click="closeMobileMenu"
               >
                 {{ $t('nav.tokens') }}
               </router-link>
-              <router-link
-                to="/dashboard/add-ons"
-                class="nav-subitem"
-                @click="closeMobileMenu"
-              >
-                {{ $t('nav.addons') }}
-              </router-link>
-              <!-- Plugin store group items (e.g. GHRM Software Catalogue) -->
+              <!-- Plugin store group items (Plans/Add-Ons from the
+                   subscription plugin; GHRM Software Catalogue; etc.) -->
               <router-link
                 v-for="item in storeGroupNavItems"
-                :key="item.pluginName"
+                :key="item.to"
                 :to="item.to"
                 class="nav-subitem nav-subitem--external"
                 :data-testid="item.testId"
@@ -162,45 +159,9 @@
             </div>
           </div>
 
-          <!-- Subscription (with Invoices sub-item) -->
-          <div class="nav-group">
-            <button
-              class="nav-item nav-group-toggle"
-              :class="{ active: expandedGroups.subscription }"
-              @click="toggleGroup('subscription')"
-            >
-              {{ $t('nav.subscription') }}
-              <svg
-                class="chevron"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-            <div
-              v-if="expandedGroups.subscription"
-              class="nav-subgroup"
-            >
-              <router-link
-                to="/dashboard/subscription"
-                class="nav-subitem"
-                @click="closeMobileMenu"
-              >
-                {{ $t('nav.subscription') }}
-              </router-link>
-              <router-link
-                to="/dashboard/subscription/invoices"
-                class="nav-subitem"
-                @click="closeMobileMenu"
-              >
-                {{ $t('nav.invoices') }}
-              </router-link>
-            </div>
-          </div>
+          <!-- Subscription nav (Subscription / Plans / Add-Ons) is
+               contributed by the subscription plugin via userNavRegistry —
+               no hardcoded subscription group in core. -->
         </nav>
       </div>
 
@@ -422,7 +383,6 @@ const showCart = ref(false);
 const showUserMenu = ref(false);
 const expandedGroups = ref({
   store: false,
-  subscription: false,
 });
 
 const userEmail = computed(() => {
@@ -445,7 +405,7 @@ function closeMobileMenu() {
   showMobileMenu.value = false;
 }
 
-function toggleGroup(groupName: 'store' | 'subscription') {
+function toggleGroup(groupName: 'store') {
   expandedGroups.value[groupName] = !expandedGroups.value[groupName];
 }
 

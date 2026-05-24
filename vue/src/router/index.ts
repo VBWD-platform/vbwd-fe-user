@@ -9,6 +9,13 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    // Static entry point served by nginx. Normalise it to `/` so the
+    // homepage routing rules apply, instead of falling into the CMS
+    // catch-all (`/:slug(.+)`) as the literal slug "index.html".
+    path: '/index.html',
+    redirect: { name: 'home' }
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../views/Login.vue'),

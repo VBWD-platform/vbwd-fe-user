@@ -1,5 +1,8 @@
 <template>
-  <div class="dashboard">
+  <div
+    class="dashboard"
+    data-testid="dashboard-root"
+  >
     <h1>{{ $t('dashboard.title') }}</h1>
 
     <!-- Loading State -->

@@ -1,249 +1,143 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
 import { useCheckoutStore } from '../../../src/stores/checkout';
-import { api } from '../../../src/api';
+import {
+  checkoutSourceRegistry,
+  type CheckoutSource,
+  type CheckoutResult,
+  type LineItem,
+} from '../../../src/registries/checkoutSourceRegistry';
 
-vi.mock('../../../src/api', () => ({
-  api: {
-    get: vi.fn(),
-    post: vi.fn(),
-    put: vi.fn(),
-    delete: vi.fn()
-  },
-  isAuthenticated: vi.fn(() => true)
-}));
+/**
+ * The core checkout store is plugin-agnostic: it drives whatever CheckoutSource
+ * the registry matches. These tests register a fake source and assert the store
+ * delegates load / line items / total / submit / reset to it — never naming any
+ * plugin domain.
+ */
+function makeSource(overrides: Partial<CheckoutSource> = {}): CheckoutSource & {
+  loadCalls: number;
+  resetCalls: number;
+} {
+  const items: LineItem[] = [
+    { type: 'fake', id: 'x1', name: 'Item One', price: 10 },
+    { type: 'fake', id: 'x2', name: 'Item Two', price: 5 },
+  ];
+  const result: CheckoutResult = {
+    invoice: {
+      id: 'inv-1',
+      invoice_number: 'INV-001',
+      status: 'PENDING',
+      amount: '15',
+      total_amount: '15',
+      currency: 'USD',
+      line_items: items,
+    },
+    message: 'ok',
+  };
+  const source = {
+    id: 'fake',
+    loadCalls: 0,
+    resetCalls: 0,
+    matches: (ctx) => ctx.source === 'fake',
+    async load() { source.loadCalls += 1; },
+    getLineItems: () => items,
+    getOrderTotal: () => 15,
+    submit: vi.fn(async () => result),
+    reset() { source.resetCalls += 1; },
+    ...overrides,
+  } as CheckoutSource & { loadCalls: number; resetCalls: number };
+  return source;
+}
 
-let mockCartItems: Array<{ type: string; id: string; name: string; price: number; quantity: number; metadata?: Record<string, unknown> }> = [];
-const mockClearCart = vi.fn();
-
-vi.mock('vbwd-view-component', () => ({
-  useCartStore: () => ({
-    get items() { return mockCartItems; },
-    clearCart: mockClearCart,
-  }),
-}));
-
-describe('CheckoutStore', () => {
+describe('core checkout store (agnostic)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
+    checkoutSourceRegistry.clear();
     vi.clearAllMocks();
-    mockCartItems = [];
   });
 
-  describe('initial state', () => {
-    it('initializes with default values', () => {
-      const store = useCheckoutStore();
-
-      expect(store.plan).toBeNull();
-      expect(store.selectedBundles).toEqual([]);
-      expect(store.selectedAddons).toEqual([]);
-      expect(store.loading).toBe(false);
-      expect(store.submitting).toBe(false);
-      expect(store.error).toBeNull();
-      expect(store.checkoutResult).toBeNull();
-      expect(store.isCartCheckout).toBe(false);
-      expect(store.paymentMethodCode).toBeNull();
-    });
+  it('initializes empty with no active source', () => {
+    const store = useCheckoutStore();
+    expect(store.hasActiveSource).toBe(false);
+    expect(store.lineItems).toEqual([]);
+    expect(store.orderTotal).toBe(0);
+    expect(store.checkoutResult).toBeNull();
+    expect(store.error).toBeNull();
   });
 
-  describe('loadFromCart', () => {
-    it('populates bundles and addons from cart', async () => {
-      mockCartItems = [
-        {
-          type: 'TOKEN_BUNDLE',
-          id: 'bundle-1',
-          name: '1000 Tokens',
-          price: 10,
-          quantity: 1,
-          metadata: { token_amount: 1000, currency: 'USD' }
-        },
-        {
-          type: 'ADD_ON',
-          id: 'addon-1',
-          name: 'Priority Support',
-          price: 15,
-          quantity: 1,
-          metadata: { slug: 'priority-support', description: 'Priority support addon', currency: 'USD', billing_period: 'monthly' }
-        },
-      ];
+  it('loads via the matching source and projects its line items + total', async () => {
+    const source = makeSource();
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
 
-      const store = useCheckoutStore();
-      await store.loadFromCart();
+    await store.loadForContext({ source: 'fake' });
 
-      expect(store.isCartCheckout).toBe(true);
-      expect(store.selectedBundles).toHaveLength(1);
-      expect(store.selectedBundles[0].id).toBe('bundle-1');
-      expect(store.selectedBundles[0].name).toBe('1000 Tokens');
-      expect(store.selectedBundles[0].price).toBe(10);
-      expect(store.selectedAddons).toHaveLength(1);
-      expect(store.selectedAddons[0].id).toBe('addon-1');
-      expect(store.selectedAddons[0].name).toBe('Priority Support');
-    });
-
-    it('loads plan from cart when present', async () => {
-      mockCartItems = [
-        {
-          type: 'PLAN',
-          id: 'plan-slug-1',
-          name: 'Pro Plan',
-          price: 29,
-          quantity: 1,
-        },
-      ];
-
-      vi.mocked(api.get).mockResolvedValueOnce({
-        plan: { id: 'plan-uuid-1', name: 'Pro Plan', slug: 'plan-slug-1', price: 29, currency: 'USD', billing_period: 'MONTHLY' }
-      });
-
-      const store = useCheckoutStore();
-      await store.loadFromCart();
-
-      expect(api.get).toHaveBeenCalledWith('/tarif-plans/plan-slug-1');
-      expect(store.plan).not.toBeNull();
-      expect(store.plan?.name).toBe('Pro Plan');
-    });
-
-    it('sets error when cart is empty', async () => {
-      mockCartItems = [];
-
-      const store = useCheckoutStore();
-      await store.loadFromCart();
-
-      expect(store.error).toBe('Cart is empty');
-    });
+    expect(source.loadCalls).toBe(1);
+    expect(store.hasActiveSource).toBe(true);
+    expect(store.lineItems).toHaveLength(2);
+    expect(store.orderTotal).toBe(15);
   });
 
-  describe('submitCheckout', () => {
-    it('works without plan (bundles only)', async () => {
-      const store = useCheckoutStore();
-      store.selectedBundles = [
-        { id: 'b1', name: '1000 Tokens', token_amount: 1000, price: 10, currency: 'USD', is_active: true }
-      ];
-
-      vi.mocked(api.post).mockResolvedValueOnce({
-        invoice: { id: 'inv-1', invoice_number: 'INV-001', status: 'pending', amount: '10.00', total_amount: '10.00', currency: 'USD', line_items: [] },
-        token_bundles: [{ id: 'bp-1', bundle_id: 'b1', status: 'pending' }],
-        add_ons: [],
-        message: 'Checkout created. Awaiting payment.',
-      });
-
-      await store.submitCheckout();
-
-      expect(api.post).toHaveBeenCalledWith('/user/checkout', {
-        token_bundle_ids: ['b1'],
-        add_on_ids: [],
-      });
-      expect(store.checkoutResult).not.toBeNull();
-      expect(store.error).toBeNull();
-    });
-
-    it('sends payment_method_code when set', async () => {
-      const store = useCheckoutStore();
-      store.plan = { id: 'p1', name: 'Pro', slug: 'pro', price: 29, currency: 'USD', billing_period: 'MONTHLY' };
-      store.setPaymentMethod('stripe');
-
-      vi.mocked(api.post).mockResolvedValueOnce({
-        subscription: { id: 's1', status: 'pending', plan: { id: 'p1', name: 'Pro', slug: 'pro' } },
-        invoice: { id: 'inv-1', invoice_number: 'INV-001', status: 'pending', amount: '29.00', total_amount: '29.00', currency: 'USD', line_items: [] },
-        token_bundles: [],
-        add_ons: [],
-        message: 'Checkout created. Awaiting payment.',
-      });
-
-      await store.submitCheckout();
-
-      expect(api.post).toHaveBeenCalledWith('/user/checkout', {
-        plan_id: 'p1',
-        token_bundle_ids: [],
-        add_on_ids: [],
-        payment_method_code: 'stripe',
-      });
-    });
-
-    it('errors when no items selected', async () => {
-      const store = useCheckoutStore();
-
-      await store.submitCheckout();
-
-      expect(store.error).toBe('No items selected');
-      expect(api.post).not.toHaveBeenCalled();
-    });
-
-    it('clears cart after successful cart checkout', async () => {
-      const store = useCheckoutStore();
-      store.isCartCheckout = true;
-      store.selectedBundles = [
-        { id: 'b1', name: '1000 Tokens', token_amount: 1000, price: 10, currency: 'USD', is_active: true }
-      ];
-
-      vi.mocked(api.post).mockResolvedValueOnce({
-        invoice: { id: 'inv-1', invoice_number: 'INV-001', status: 'pending', amount: '10.00', total_amount: '10.00', currency: 'USD', line_items: [] },
-        token_bundles: [],
-        add_ons: [],
-        message: 'Checkout created. Awaiting payment.',
-      });
-
-      await store.submitCheckout();
-
-      expect(mockClearCart).toHaveBeenCalled();
-    });
+  it('leaves no active source when nothing matches (empty state, no error)', async () => {
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'nope' });
+    expect(store.hasActiveSource).toBe(false);
+    expect(store.error).toBeNull();
   });
 
-  describe('orderTotal and lineItems', () => {
-    it('computes correctly without plan', () => {
-      const store = useCheckoutStore();
-      store.selectedBundles = [
-        { id: 'b1', name: '1000 Tokens', token_amount: 1000, price: 10, currency: 'USD', is_active: true },
-        { id: 'b2', name: '5000 Tokens', token_amount: 5000, price: 40, currency: 'USD', is_active: true },
-      ];
-      store.selectedAddons = [
-        { id: 'a1', name: 'Support', slug: 'support', description: '', price: 15, currency: 'USD', billing_period: 'monthly', is_active: true },
-      ];
+  it('surfaces a source load error', async () => {
+    const source = makeSource({ load: async () => { throw new Error('Cart is empty'); } });
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
 
-      expect(store.orderTotal).toBe(65);
-      expect(store.lineItems).toHaveLength(3);
-      expect(store.lineItems[0].type).toBe('token_bundle');
-      expect(store.lineItems[1].type).toBe('token_bundle');
-      expect(store.lineItems[2].type).toBe('add_on');
-    });
-
-    it('includes plan in total when present', () => {
-      const store = useCheckoutStore();
-      store.plan = { id: 'p1', name: 'Pro', slug: 'pro', price: 29, currency: 'USD', billing_period: 'MONTHLY' };
-      store.selectedBundles = [
-        { id: 'b1', name: '1000 Tokens', token_amount: 1000, price: 10, currency: 'USD', is_active: true },
-      ];
-
-      expect(store.orderTotal).toBe(39);
-      expect(store.lineItems).toHaveLength(2);
-      expect(store.lineItems[0].type).toBe('subscription');
-      expect(store.lineItems[1].type).toBe('token_bundle');
-    });
+    await store.loadForContext({ source: 'fake' });
+    expect(store.error).toBe('Cart is empty');
   });
 
-  describe('setPaymentMethod', () => {
-    it('sets the payment method code', () => {
-      const store = useCheckoutStore();
-      store.setPaymentMethod('paypal');
+  it('delegates submit to the active source and stores the result', async () => {
+    const source = makeSource();
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+    store.setPaymentMethod('stripe');
 
-      expect(store.paymentMethodCode).toBe('paypal');
-    });
+    await store.submitCheckout();
+
+    expect(source.submit).toHaveBeenCalledWith('stripe');
+    expect(store.checkoutResult?.invoice.id).toBe('inv-1');
+    expect(store.error).toBeNull();
   });
 
-  describe('reset', () => {
-    it('resets all state including cart checkout fields', () => {
-      const store = useCheckoutStore();
-      store.plan = { id: 'p1', name: 'Pro', slug: 'pro', price: 29, currency: 'USD', billing_period: 'MONTHLY' };
-      store.isCartCheckout = true;
-      store.paymentMethodCode = 'stripe';
-      store.error = 'some error';
+  it('errors on submit when no source is active', async () => {
+    const store = useCheckoutStore();
+    await store.submitCheckout();
+    expect(store.error).toBe('No items selected');
+  });
 
-      store.reset();
+  it('reset clears state and resets the active source', async () => {
+    const source = makeSource();
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
 
-      expect(store.plan).toBeNull();
-      expect(store.isCartCheckout).toBe(false);
-      expect(store.paymentMethodCode).toBeNull();
-      expect(store.error).toBeNull();
-    });
+    store.reset();
+
+    expect(source.resetCalls).toBe(1);
+    expect(store.hasActiveSource).toBe(false);
+    expect(store.paymentMethodCode).toBeNull();
+    expect(store.checkoutResult).toBeNull();
+  });
+
+  it('picks the highest-priority matching source', async () => {
+    const low = makeSource({ id: 'low', priority: 1, matches: () => true });
+    const high = makeSource({ id: 'high', priority: 10, matches: () => true });
+    checkoutSourceRegistry.register(low);
+    checkoutSourceRegistry.register(high);
+    const store = useCheckoutStore();
+
+    await store.loadForContext({});
+
+    expect(high.loadCalls).toBe(1);
+    expect(low.loadCalls).toBe(0);
   });
 });

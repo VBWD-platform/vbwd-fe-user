@@ -6,6 +6,7 @@
  */
 import { ApiClient } from 'vbwd-view-component';
 import { ref } from 'vue';
+import { isTokenExpired } from './token';
 
 // Session expired state - reactive so components can react to it
 export const sessionExpired = ref(false);
@@ -87,13 +88,30 @@ export function clearApiAuth(): void {
   api.clearToken();
   localStorage.removeItem('auth_token');
   localStorage.removeItem('user_id');
+  localStorage.removeItem('user_permissions');
 }
 
 /**
- * Check if user is authenticated
+ * Check if the user has a valid, unexpired session.
+ *
+ * This is the single source of truth for "am I authenticated?" — the router
+ * guard, App.vue's layout switch, and Home.vue all go through it.
+ *
+ * A token string alone is NOT enough: a JWT left in localStorage after a
+ * window close may already be expired. We read the `exp` claim client-side
+ * (zero network cost) and, if the token is provably expired, purge it and
+ * report unauthenticated — so protected views (the dashboard) are never
+ * painted to a dead session. Tokens we cannot decode fall through to
+ * "present ⇒ authenticated"; the server's 401 remains the backstop.
  */
 export function isAuthenticated(): boolean {
-  return !!localStorage.getItem('auth_token');
+  const token = localStorage.getItem('auth_token');
+  if (!token) return false;
+  if (isTokenExpired(token)) {
+    clearApiAuth();
+    return false;
+  }
+  return true;
 }
 
 /**

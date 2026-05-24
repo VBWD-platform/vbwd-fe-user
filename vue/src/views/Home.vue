@@ -7,6 +7,12 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { api, isAuthenticated } from '@/api';
 
+// Where an anonymous visitor lands on `/` (and `/index.html`) when no CMS
+// routing rule is configured, or the rules call fails. The homepage is a
+// PUBLIC page — the root must never bounce a visitor to /login. Login is
+// reserved for protected /dashboard routes, enforced by the router guard.
+const DEFAULT_PUBLIC_SLUG = '/home';
+
 const router = useRouter();
 
 onMounted(async () => {
@@ -30,11 +36,8 @@ onMounted(async () => {
     // fall through to default behaviour
   }
 
-  // No routing rule configured — fall back to app defaults
-  if (isAuthenticated()) {
-    router.replace('/dashboard');
-  } else {
-    router.replace('/login');
-  }
+  // No routing rule configured. Authenticated users go to their dashboard;
+  // anonymous visitors get the public homepage slug — never /login.
+  router.replace(isAuthenticated() ? '/dashboard' : DEFAULT_PUBLIC_SLUG);
 });
 </script>

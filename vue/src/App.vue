@@ -21,6 +21,7 @@ import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 import UserLayout from './layouts/UserLayout.vue';
 import SessionExpiredModal from './components/SessionExpiredModal.vue';
+import { isAuthenticated } from '@/api';
 
 const route = useRoute();
 
@@ -36,7 +37,7 @@ const showLayout = computed(() => {
   if (isEmbedRoute.value) return false;
   if (isCmsLayoutRoute.value) return false;
   if (route.meta.noLayout === true) return false;
-  return !!(localStorage.getItem('auth_token') || route.meta.publicLayout === true);
+  return isAuthenticated() || route.meta.publicLayout === true;
 });
 </script>
 
