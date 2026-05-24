@@ -6,11 +6,12 @@
  * plugin-registered CheckoutSources; subscription/shop state + endpoints live in
  * their plugins.
  *
- * Allowed residuals (decision-locked — NOT violations):
- *  - D4: invoices and tokens stay core, so invoice DTOs may carry
- *    `subscription_*` metadata, InvoiceDetail may display it, and the core
- *    router may host `/dashboard/tokens` + `/dashboard/subscription/invoices`
- *    with `subscription.*` permission names (a backend permission namespace).
+ * Sprint 11 closed the invoice-DTO part of the former D4 residual: core invoice
+ * DTOs carry NO `subscription_*` / `tarif_plan_id` fields (the backend invoice
+ * no longer FKs subscription/plan). Remaining D4 residuals (decision-locked —
+ * NOT violations): tokens stay core, so the core router may host
+ * `/dashboard/tokens` + `/dashboard/subscription/invoices` with `subscription.*`
+ * permission names (a backend permission namespace, optional S8).
  *
  * If this test fails, core re-acquired a subscription/shop coupling — move it to
  * the owning plugin (register a CheckoutSource) instead of relaxing assertions.
@@ -59,6 +60,12 @@ describe('core fe-user checkout is plugin-agnostic (Sprint 10 oracle)', () => {
     const store = read('stores/checkout.ts');
     expect(store).toContain('checkoutSourceRegistry');
     expect(store).toContain('loadForContext');
+  });
+
+  it('core invoice store carries no subscription/plan metadata (Sprint 11)', () => {
+    const store = read('stores/invoices.ts');
+    expect(store).not.toContain('subscription_id');
+    expect(store).not.toContain('tarif_plan_id');
   });
 
   it('no core file imports a subscription / shop / checkout plugin store', () => {

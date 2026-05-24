@@ -2,11 +2,11 @@ import { defineStore } from 'pinia';
 import { api } from '@/api';
 import { downloadAuthenticatedFile } from '@/utils/download';
 
+// Core invoices are subscription-agnostic — no plan/subscription columns. Any
+// subscription metadata is plugin-contributed (backend) and never typed here.
 export interface Invoice {
   id: string;
   user_id: string;
-  tarif_plan_id: string;
-  subscription_id: string | null;
   invoice_number: string;
   amount: string;
   currency: string;
