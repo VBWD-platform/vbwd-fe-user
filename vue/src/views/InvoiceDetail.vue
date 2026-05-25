@@ -193,6 +193,16 @@
           >
             {{ $t('invoices.detail.payByInvoice') }}
           </button>
+
+          <!-- Agnostic: plugin-contributed payment methods (e.g. token balance).
+               Each self-gates on availability; core knows nothing about them. -->
+          <component
+            :is="method"
+            v-for="(method, index) in paymentMethods"
+            :key="index"
+            :invoice="invoice"
+            @paid="loadInvoice"
+          />
         </div>
       </div>
     </div>
@@ -205,8 +215,10 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
 import { useInvoicesStore } from '@/stores/invoices';
+import { getInvoicePaymentMethods } from '@/extensions/invoicePaymentMethods';
 
 const invoicesStore = useInvoicesStore();
+const paymentMethods = getInvoicePaymentMethods();
 
 interface LineItem {
   type: string;

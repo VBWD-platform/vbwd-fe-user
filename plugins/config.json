@@ -9,5 +9,6 @@
   },
   "booking": {},
   "subscription": {},
-  "shop": {}
+  "shop": {},
+  "token-payment": {}
 }
