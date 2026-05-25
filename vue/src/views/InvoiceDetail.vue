@@ -1,5 +1,14 @@
 <template>
   <div class="invoice-detail">
+    <a
+      href="#"
+      class="back-link"
+      data-testid="back-link"
+      @click.prevent="$router.back()"
+    >
+      &larr; {{ $t('common.back') }}
+    </a>
+
     <h1>{{ $t('invoices.detail.title') }}</h1>
 
     <!-- Loading State -->
@@ -150,12 +159,6 @@
 
         <!-- Actions -->
         <div class="actions">
-          <router-link
-            to="/dashboard/subscription"
-            class="btn secondary"
-          >
-            {{ $t('common.back') }}
-          </router-link>
           <button
             class="btn secondary"
             @click="downloadInvoice"
@@ -332,6 +335,18 @@ function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: str
 <style scoped>
 .invoice-detail {
   max-width: 800px;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 20px;
+  color: #3498db;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.back-link:hover {
+  text-decoration: underline;
 }
 
 h1 {
