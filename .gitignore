@@ -15,15 +15,22 @@ test-results
 
 # Plugin dirs are hosted in individual repos (vbwd-fe-user-plugin-*)
 plugins/booking/
+plugins/c2p2-payment/
 plugins/chat/
 plugins/checkout/
 plugins/cms/
+plugins/conekta-payment/
 plugins/ecommerce/
 plugins/ghrm/
 plugins/landing1/
+plugins/meinchat/
+plugins/mercado-pago-payment/
 plugins/paypal-payment/
+plugins/promptpay-payment/
 plugins/stripe-payment/
 plugins/subscription/
 plugins/taro/
 plugins/theme-switcher/
+plugins/toss-payments-payment/
+plugins/truemoney-payment/
 plugins/yookassa-payment/
