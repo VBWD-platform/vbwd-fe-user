@@ -110,7 +110,7 @@
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
-import { useCartStore } from 'vbwd-view-component';
+import { useCartStore, eventBus, AppEvents } from 'vbwd-view-component';
 
 interface TokenBundle {
   id: string;
@@ -145,12 +145,18 @@ async function loadBundles() {
 
 function addToCart(bundle: TokenBundle) {
   const numPrice = typeof bundle.price === 'string' ? parseFloat(bundle.price) : bundle.price;
+  const name = `${formatTokenAmount(bundle.token_amount)} Tokens`;
   cartStore.addItem({
     type: 'TOKEN_BUNDLE',
     id: bundle.id,
-    name: `${formatTokenAmount(bundle.token_amount)} Tokens`,
+    name,
     price: numPrice,
     metadata: { token_amount: bundle.token_amount },
+  });
+  eventBus.emit(AppEvents.NOTIFICATION_SHOW, {
+    type: 'success',
+    message: t('cart.addedToCart', { name }),
+    duration: 3000,
   });
 }
 

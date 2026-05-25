@@ -1,5 +1,8 @@
 <template>
   <div class="user-layout">
+    <!-- Global toast notifications (e.g. "added to cart") -->
+    <ToastHost />
+
     <!-- Mobile Header with Burger Menu (Tablet & Mobile only) -->
     <header class="mobile-header">
       <button
@@ -347,6 +350,7 @@ import { useCartStore } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
 import { hasUserPermission } from '@/api';
+import ToastHost from '@/components/ToastHost.vue';
 
 const router = useRouter();
 

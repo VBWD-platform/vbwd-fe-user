@@ -369,5 +369,8 @@
   "notFound": {
     "message": "The page you are looking for does not exist.",
     "backHome": "Back to Dashboard"
+  },
+  "cart": {
+    "addedToCart": "{name} added to cart"
   }
 }
