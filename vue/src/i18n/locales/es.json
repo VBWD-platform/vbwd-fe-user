@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "Error al cargar el panel"
-    }
+    },
+    "tokenBalance": "Saldo de tokens"
   },
   "profile": {
     "title": "Perfil",

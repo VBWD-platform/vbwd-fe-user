@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "加载仪表板失败"
-    }
+    },
+    "tokenBalance": "代币余额"
   },
   "profile": {
     "title": "个人资料",

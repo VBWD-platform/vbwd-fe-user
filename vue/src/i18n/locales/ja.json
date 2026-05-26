@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "ダッシュボードの読み込みに失敗しました"
-    }
+    },
+    "tokenBalance": "トークン残高"
   },
   "profile": {
     "title": "プロフィール",

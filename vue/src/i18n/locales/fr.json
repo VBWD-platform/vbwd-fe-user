@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "Erreur de chargement du tableau de bord"
-    }
+    },
+    "tokenBalance": "Solde de jetons"
   },
   "profile": {
     "title": "Profil",

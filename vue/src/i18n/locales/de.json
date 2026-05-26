@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "Dashboard-Daten konnten nicht geladen werden"
-    }
+    },
+    "tokenBalance": "Token-Guthaben"
   },
   "profile": {
     "title": "Profil",

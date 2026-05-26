@@ -35,6 +35,26 @@
       v-else
       class="dashboard-grid"
     >
+      <!-- Token balance hero — XXL, always visible for users with token access -->
+      <div
+        v-if="hasUserPermission('subscription.tokens.view')"
+        class="token-balance-hero"
+        data-testid="dashboard-token-balance-hero"
+      >
+        <div class="token-balance-hero__label">
+          {{ $t('dashboard.tokenBalance') }}
+        </div>
+        <div
+          class="token-balance-hero__value"
+          data-testid="dashboard-token-balance-value"
+        >
+          {{ formatNumber(tokenBalance) }}
+        </div>
+        <div class="token-balance-hero__unit">
+          tokens
+        </div>
+      </div>
+
       <!-- Profile Summary Card -->
       <div
         class="card profile-card"
@@ -348,6 +368,34 @@ h1 {
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.token-balance-hero {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #1d4ed8 0%, #5b21b6 100%);
+  color: #ffffff;
+}
+.token-balance-hero__label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  opacity: 0.85;
+  margin-bottom: 0.4rem;
+}
+.token-balance-hero__value {
+  font-size: clamp(3rem, 7vw, 4.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.token-balance-hero__unit {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-top: 0.4rem;
 }
 
 .card {

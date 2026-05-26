@@ -111,7 +111,8 @@
     },
     "errors": {
       "failedToLoad": "Failed to load dashboard data"
-    }
+    },
+    "tokenBalance": "Token Balance"
   },
   "profile": {
     "title": "Profile",

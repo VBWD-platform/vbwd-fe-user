@@ -110,7 +110,8 @@
     },
     "errors": {
       "failedToLoad": "Ошибка загрузки главной"
-    }
+    },
+    "tokenBalance": "Баланс токенов"
   },
   "profile": {
     "title": "Профиль",
