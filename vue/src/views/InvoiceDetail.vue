@@ -70,6 +70,17 @@
             <span class="label">{{ $t('invoices.detail.paymentMethod') }}</span>
             <span class="value payment-method-badge">{{ paymentMethodLabel(invoice.payment_method) }}</span>
           </div>
+
+          <!-- Plugin-contributed payment-method rows (token-payment, stripe,
+               paypal, …) — visual peers of the rows above, no heading or
+               chrome of their own. Block + registry live in vbwd-fe-core.
+               ``payment-method`` is passed so contributors can fall back to
+               their summary row when the invoice metadata is empty (zero-
+               price flow / legacy invoices). -->
+          <PaymentDataBlock
+            :metadata="invoice.metadata"
+            :payment-method="invoice.payment_method"
+          />
         </div>
 
         <!-- Line Items -->
@@ -214,6 +225,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
+import { PaymentDataBlock } from 'vbwd-view-component';
 import { useInvoicesStore } from '@/stores/invoices';
 import { getInvoicePaymentMethods } from '@/extensions/invoicePaymentMethods';
 
@@ -243,6 +255,9 @@ interface Invoice {
   created_at?: string;
   due_date?: string;
   line_items?: LineItem[];
+  // Free-form JSON written by payment plugins under their namespace
+  // (e.g. ``{ tokens_paid: { amount: 600 } }``). Rendered via PaymentDataBlock.
+  metadata?: Record<string, unknown> | null;
 }
 
 const route = useRoute();

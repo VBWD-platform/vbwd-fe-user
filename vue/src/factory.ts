@@ -14,6 +14,10 @@ import i18n, { initLocale } from '@/i18n';
 import { PluginRegistry, PlatformSDK } from 'vbwd-view-component';
 import type { IPlugin } from 'vbwd-view-component';
 import type { Router } from 'vue-router';
+// fe-core ships its scoped component styles as a separate stylesheet
+// (default for vite library builds) — import once at the entry so e.g.
+// PaymentDataBlock's flex layout actually applies in the host.
+import 'vbwd-view-component/styles';
 
 export interface VbwdUserAppOptions {
   plugins?: IPlugin[];

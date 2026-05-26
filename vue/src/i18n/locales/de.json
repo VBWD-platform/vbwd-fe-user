@@ -243,7 +243,8 @@
       "errors": {
         "failedToLoad": "Rechnung konnte nicht geladen werden",
         "failedToDownload": "Rechnung konnte nicht heruntergeladen werden"
-      }
+      },
+      "paymentData": "Zahlungsdaten"
     },
     "pay": {
       "title": "Rechnung bezahlen",

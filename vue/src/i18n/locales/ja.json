@@ -243,7 +243,8 @@
       "errors": {
         "failedToLoad": "請求書の読み込みに失敗しました",
         "failedToDownload": "請求書のダウンロードに失敗しました"
-      }
+      },
+      "paymentData": "支払いデータ"
     },
     "pay": {
       "title": "請求書を支払う",

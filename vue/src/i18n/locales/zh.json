@@ -243,7 +243,8 @@
       "errors": {
         "failedToLoad": "加载发票失败",
         "failedToDownload": "下载发票失败"
-      }
+      },
+      "paymentData": "付款数据"
     },
     "pay": {
       "title": "支付发票",

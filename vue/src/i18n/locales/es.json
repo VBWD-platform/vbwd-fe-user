@@ -243,7 +243,8 @@
       "errors": {
         "failedToLoad": "Error al cargar factura",
         "failedToDownload": "Error al descargar factura"
-      }
+      },
+      "paymentData": "Datos del pago"
     },
     "pay": {
       "title": "Pagar Factura",

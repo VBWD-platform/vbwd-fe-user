@@ -243,7 +243,8 @@
       "errors": {
         "failedToLoad": "Ошибка загрузки счета",
         "failedToDownload": "Ошибка загрузки счета"
-      }
+      },
+      "paymentData": "Данные платежа"
     },
     "pay": {
       "title": "Оплатить Счет",
