@@ -1,19 +1,25 @@
 /**
- * Agnostic checkout payment-method extension point (s12).
+ * Agnostic checkout payment-method extension point.
  *
  * A plugin registers, keyed by the payment-method code from the backend's
- * ``vbwd_payment_method`` table, an optional **detail component** rendered
- * under the selected method (e.g. the "Pay with tokens" quote block) and an
- * optional **instantPay** hook called after invoice creation for methods that
- * complete in-band (no gateway redirect, no PENDING state).
+ * ``vbwd_payment_method`` table, any of:
+ *   - ``detailComponent`` — rendered under the selected method on the checkout
+ *     page (e.g. the "Pay with tokens" live quote).
+ *   - ``redirectPath(invoiceId)`` — for gateway methods (stripe / paypal /
+ *     yookassa / …) that hop to a per-plugin ``/pay/<name>`` view after the
+ *     invoice is created.
+ *   - ``instantPay(invoiceId)`` — for in-band methods (e.g. token balance)
+ *     that finish in one HTTP call and then land on ``/checkout/confirmation``.
  *
- * Mirrors the s10 `invoicePaymentMethods` registry + the existing checkout
- * `checkout*Registry` pattern — core stays agnostic.
+ * Core's checkout never names a concrete method: the registry is the single
+ * dispatch table. Mirrors fe-admin's extensionRegistry + the existing
+ * ``checkout*Registry`` pattern.
  */
 import { markRaw, type Component } from 'vue';
 
 export interface CheckoutPaymentMethodEntry {
   detailComponent?: Component;
+  redirectPath?: (invoiceId: string) => string;
   instantPay?: (invoiceId: string) => Promise<unknown>;
 }
 

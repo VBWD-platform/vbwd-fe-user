@@ -38,4 +38,12 @@ describe('checkoutPaymentMethods registry', () => {
     expect(entry?.detailComponent).toBe(detail);
     expect(entry?.instantPay).toBe(pay);
   });
+
+  it('stores redirectPath — for gateway methods that hop to a /pay page', () => {
+    registerCheckoutPaymentMethod('stripe', {
+      redirectPath: (invoiceId) => `/pay/stripe?invoice=${invoiceId}`,
+    });
+    const entry = getCheckoutPaymentMethod('stripe');
+    expect(entry?.redirectPath?.('inv-1')).toBe('/pay/stripe?invoice=inv-1');
+  });
 });
