@@ -37,6 +37,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const hasActiveSource = computed(() => activeSource.value !== null);
   const lineItems = computed<LineItem[]>(() => activeSource.value?.getLineItems() ?? []);
   const orderTotal = computed<number>(() => activeSource.value?.getOrderTotal() ?? 0);
+  // Currency of the order — taken from the first line item (single source of
+  // truth used by checkout payment methods, e.g. the token-balance quote).
+  const currency = computed<string>(() => lineItems.value[0]?.currency || 'USD');
   const summaryComponent = computed(() => activeSource.value?.summaryComponent ?? null);
 
   // Actions
@@ -105,6 +108,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     hasActiveSource,
     lineItems,
     orderTotal,
+    currency,
     summaryComponent,
     // Actions
     loadForContext,

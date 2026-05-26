@@ -72,17 +72,31 @@
     >
       <p>{{ selectedMethod.instructions }}</p>
     </div>
+
+    <!-- Agnostic plugin-contributed detail for the selected method (e.g. the
+         token-balance quote block from the token-payment plugin). Core knows
+         nothing about which methods register a detail. -->
+    <component
+      :is="selectedMethodDetail"
+      v-if="selectedMethodDetail && selectedMethodCode"
+      :method-code="selectedMethodCode"
+      :amount="amount"
+      :currency="currency"
+      data-testid="payment-method-detail"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, watch } from 'vue';
+import { computed, onMounted, watch } from 'vue';
 import { usePaymentMethods } from '@/composables/usePaymentMethods';
+import { getCheckoutPaymentMethod } from '@/registries/checkoutPaymentMethods';
 
 const props = defineProps<{
   locale?: string;
   currency?: string;
   country?: string;
+  amount?: number | string | null;
 }>();
 
 const emit = defineEmits<{
@@ -98,6 +112,12 @@ const {
   loadMethods,
   selectMethod,
 } = usePaymentMethods();
+
+// Agnostic detail component for the selected method (e.g. token-balance quote).
+const selectedMethodDetail = computed(() => {
+  const code = selectedMethodCode.value;
+  return code ? getCheckoutPaymentMethod(code)?.detailComponent ?? null : null;
+});
 
 const handleSelect = (methodCode: string) => {
   selectMethod(methodCode);
