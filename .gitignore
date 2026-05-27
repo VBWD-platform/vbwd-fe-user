@@ -31,6 +31,7 @@ plugins/stripe-payment/
 plugins/subscription/
 plugins/taro/
 plugins/theme-switcher/
+plugins/token-payment/
 plugins/toss-payments-payment/
 plugins/truemoney-payment/
 plugins/yookassa-payment/
