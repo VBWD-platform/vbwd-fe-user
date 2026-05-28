@@ -15,13 +15,25 @@
  */
 import type { Component } from 'vue';
 
+export type ProfileSectionPlacement = 'top' | 'bottom';
+
 export interface ProfileSection {
   /** Stable id used as Vue key + ``data-testid`` suffix. */
   id: string;
   /** Vue component to render. Receives no props. */
   component: Component;
-  /** Display ordering (ascending). Default 100. */
+  /** Display ordering within the same placement (ascending). Default 100. */
   order?: number;
+  /**
+   * Where to render relative to the core Profile cards.
+   *
+   *   - ``'top'``    — above the Account Information card (use for blocks
+   *                     the user should see *first*, e.g. picking a
+   *                     nickname before browsing the rest of Profile).
+   *   - ``'bottom'`` — below the Change Password card (default; for
+   *                     supplementary cards like plugin settings).
+   */
+  placement?: ProfileSectionPlacement;
 }
 
 const registry: ProfileSection[] = [];
@@ -34,8 +46,24 @@ export function registerProfileSection(section: ProfileSection): void {
   registry.push(section);
 }
 
-export function getProfileSections(): ProfileSection[] {
-  return [...registry].sort(
+/**
+ * Return registered sections, optionally filtered by placement.
+ *
+ * Sort is stable within a placement: ascending ``order`` (default 100),
+ * then insertion order. The host renders the ``'top'`` slot above the
+ * Account Information card and the ``'bottom'`` slot below the
+ * Change Password card.
+ */
+export function getProfileSections(
+  placement?: ProfileSectionPlacement,
+): ProfileSection[] {
+  const filtered =
+    placement === undefined
+      ? [...registry]
+      : registry.filter(
+          (section) => (section.placement ?? 'bottom') === placement,
+        );
+  return filtered.sort(
     (left, right) => (left.order ?? 100) - (right.order ?? 100),
   );
 }

@@ -29,6 +29,17 @@
       v-else
       class="profile-content"
     >
+      <!-- Plugin-contributed sections placed ABOVE the core cards
+           (e.g. meinchat nickname picker — shown first so the user
+           can claim their handle before browsing the rest). -->
+      <component
+        :is="section.component"
+        v-for="section in profileSectionsTop"
+        :key="section.id"
+        :data-testid="`profile-section-${section.id}`"
+        class="card"
+      />
+
       <!-- Account Info Card -->
       <div class="card">
         <h2>{{ $t('profile.accountInfo.title') }}</h2>
@@ -275,12 +286,11 @@
         </form>
       </div>
 
-      <!-- Plugin-contributed profile sections (meinchat nickname, …).
-           Agnostic seam — core knows nothing about which plugins render
-           here. Mirrors the iOS app's ProfileNicknameSection injection. -->
+      <!-- Plugin-contributed sections placed BELOW the core cards
+           (supplementary plugin settings; default placement). -->
       <component
         :is="section.component"
-        v-for="section in profileSections"
+        v-for="section in profileSectionsBottom"
         :key="section.id"
         :data-testid="`profile-section-${section.id}`"
         class="card"
@@ -309,9 +319,11 @@ import { getProfileSections } from '@/registries/profileSectionsRegistry';
 const { t, locale } = useI18n();
 const profileStore = useProfileStore();
 
-// Plugin-contributed cards (e.g. meinchat's nickname picker). Read once
-// on setup — plugins register synchronously during app bootstrap.
-const profileSections = getProfileSections();
+// Plugin-contributed cards. Two slots: ``top`` renders above the core
+// cards (use for things the user should see first, e.g. picking a
+// nickname); ``bottom`` is the default for supplementary settings.
+const profileSectionsTop = getProfileSections('top');
+const profileSectionsBottom = getProfileSections('bottom');
 
 const loading = ref(true);
 const error = ref<string | null>(null);
