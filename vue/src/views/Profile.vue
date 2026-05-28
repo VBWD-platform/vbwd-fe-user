@@ -274,6 +274,17 @@
           </div>
         </form>
       </div>
+
+      <!-- Plugin-contributed profile sections (meinchat nickname, …).
+           Agnostic seam — core knows nothing about which plugins render
+           here. Mirrors the iOS app's ProfileNicknameSection injection. -->
+      <component
+        :is="section.component"
+        v-for="section in profileSections"
+        :key="section.id"
+        :data-testid="`profile-section-${section.id}`"
+        class="card"
+      />
     </div>
 
     <!-- Success Toast -->
@@ -293,9 +304,14 @@ import { useI18n } from 'vue-i18n';
 import { useProfileStore } from '../stores/profile';
 import { api } from '../api';
 import { setLocale, type LocaleCode } from '../i18n';
+import { getProfileSections } from '@/registries/profileSectionsRegistry';
 
 const { t, locale } = useI18n();
 const profileStore = useProfileStore();
+
+// Plugin-contributed cards (e.g. meinchat's nickname picker). Read once
+// on setup — plugins register synchronously during app bootstrap.
+const profileSections = getProfileSections();
 
 const loading = ref(true);
 const error = ref<string | null>(null);
