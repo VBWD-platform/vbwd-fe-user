@@ -171,7 +171,9 @@
       "failedToLoad": "Error al cargar perfil",
       "failedToUpdate": "Error al actualizar perfil",
       "failedToChangePassword": "Error al cambiar contraseña"
-    }
+    },
+    "preferences": "Preferencias",
+    "language": "Idioma"
   },
   "tokens": {
     "breadcrumbPlans": "Planes",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "La página que busca no existe.",
     "backHome": "Volver al Panel"
+  },
+  "cart": {
+    "addedToCart": "{name} añadido al carrito"
   }
 }

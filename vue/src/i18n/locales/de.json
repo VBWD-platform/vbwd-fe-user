@@ -171,7 +171,9 @@
       "failedToLoad": "Profil konnte nicht geladen werden",
       "failedToUpdate": "Profil konnte nicht aktualisiert werden",
       "failedToChangePassword": "Passwort konnte nicht geändert werden"
-    }
+    },
+    "preferences": "Einstellungen",
+    "language": "Sprache"
   },
   "tokens": {
     "breadcrumbPlans": "Tarife",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "Die angeforderte Seite existiert nicht.",
     "backHome": "Zurück zum Dashboard"
+  },
+  "cart": {
+    "addedToCart": "{name} zum Warenkorb hinzugefügt"
   }
 }

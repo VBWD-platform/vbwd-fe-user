@@ -172,7 +172,9 @@
       "failedToLoad": "Failed to load profile",
       "failedToUpdate": "Failed to update profile",
       "failedToChangePassword": "Failed to change password"
-    }
+    },
+    "preferences": "Preferences",
+    "language": "Language"
   },
   "tokens": {
     "breadcrumbPlans": "Plans",

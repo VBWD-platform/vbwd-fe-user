@@ -171,7 +171,9 @@
       "failedToLoad": "プロフィールの読み込みに失敗しました",
       "failedToUpdate": "プロフィールの更新に失敗しました",
       "failedToChangePassword": "パスワード変更に失敗しました"
-    }
+    },
+    "preferences": "設定",
+    "language": "言語"
   },
   "tokens": {
     "breadcrumbPlans": "プラン",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "探しているページは存在しません。",
     "backHome": "ダッシュボードに戻る"
+  },
+  "cart": {
+    "addedToCart": "{name} をカートに追加しました"
   }
 }

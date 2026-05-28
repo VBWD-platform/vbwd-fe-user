@@ -171,7 +171,9 @@
       "failedToLoad": "Ошибка загрузки профиля",
       "failedToUpdate": "Ошибка обновления профиля",
       "failedToChangePassword": "Ошибка изменения пароля"
-    }
+    },
+    "preferences": "Настройки",
+    "language": "Язык"
   },
   "tokens": {
     "breadcrumbPlans": "Тарифы",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "Страница, которую вы ищете, не существует.",
     "backHome": "Вернуться на Главную"
+  },
+  "cart": {
+    "addedToCart": "{name} добавлен в корзину"
   }
 }

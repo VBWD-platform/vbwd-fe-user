@@ -171,7 +171,9 @@
       "failedToLoad": "ไม่สามารถโหลดโปรไฟล์",
       "failedToUpdate": "ไม่สามารถอัปเดตโปรไฟล์",
       "failedToChangePassword": "ไม่สามารถเปลี่ยนรหัสผ่าน"
-    }
+    },
+    "preferences": "การตั้งค่า",
+    "language": "ภาษา"
   },
   "tokens": {
     "breadcrumbPlans": "แผน",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "ไม่พบหน้าที่คุณค้นหา",
     "backHome": "กลับไปยังแดชบอร์ด"
+  },
+  "cart": {
+    "addedToCart": "เพิ่ม {name} ในตะกร้าแล้ว"
   }
 }

@@ -171,7 +171,9 @@
       "failedToLoad": "Erreur de chargement du profil",
       "failedToUpdate": "Erreur de mise à jour du profil",
       "failedToChangePassword": "Erreur lors du changement du mot de passe"
-    }
+    },
+    "preferences": "Préférences",
+    "language": "Langue"
   },
   "tokens": {
     "breadcrumbPlans": "Plans",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "La page que vous recherchez n'existe pas.",
     "backHome": "Retour au Tableau de Bord"
+  },
+  "cart": {
+    "addedToCart": "{name} ajouté au panier"
   }
 }

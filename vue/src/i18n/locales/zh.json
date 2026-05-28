@@ -171,7 +171,9 @@
       "failedToLoad": "加载个人资料失败",
       "failedToUpdate": "更新个人资料失败",
       "failedToChangePassword": "更改密码失败"
-    }
+    },
+    "preferences": "偏好设置",
+    "language": "语言"
   },
   "tokens": {
     "breadcrumbPlans": "计划",
@@ -370,5 +372,8 @@
   "notFound": {
     "message": "您查找的页面不存在。",
     "backHome": "返回仪表板"
+  },
+  "cart": {
+    "addedToCart": "{name} 已加入购物车"
   }
 }
