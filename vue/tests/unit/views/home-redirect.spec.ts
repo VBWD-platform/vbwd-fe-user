@@ -1,17 +1,25 @@
 /**
- * Homepage (`/` and, via a router redirect, `/index.html`) resolution.
+ * Homepage (`/` and, via a router redirect, `/index.html`) fallback resolution.
  *
- * Rules (sprint 2026-05-23/02):
- *   - A CMS "default" routing rule wins → redirect to its target slug.
- *   - No rule + authenticated → /dashboard.
- *   - No rule + anonymous → the public default slug, NOT /login.
+ * After the 2026-05-29 refactor, CMS middleware-layer routing rules (incl.
+ * the `default` rule) are evaluated by the CMS plugin's router guard,
+ * NOT by Home.vue. The guard runs as `router.beforeEach`, so when a rule
+ * matches `/`, this view never mounts — its onMounted is the fallback
+ * for when NO rule applies.
+ *
+ * Rules tested here (unchanged user-visible behaviour):
+ *   - Authenticated visitor + no rule → /dashboard.
+ *   - Anonymous visitor + no rule → DEFAULT_PUBLIC_SLUG.
  *   - The root must NEVER redirect to /login. Login is reserved for
- *     protected routes (router guard on `requiresAuth`).
+ *     protected routes (router auth guard on `requiresAuth`).
+ *
+ * Rule-driven redirect cases are covered in
+ * `vue/tests/unit/plugins/cms-routing-guard.spec.ts`.
  */
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount, flushPromises } from '@vue/test-utils';
 import Home from '../../../src/views/Home.vue';
-import { api, isAuthenticated } from '@/api';
+import { isAuthenticated } from '@/api';
 
 const replace = vi.fn();
 
@@ -20,7 +28,6 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/api', () => ({
-  api: { get: vi.fn() },
   isAuthenticated: vi.fn(() => false),
 }));
 
@@ -33,18 +40,8 @@ async function mountHome() {
   await flushPromises();
 }
 
-describe('Home redirect', () => {
-  it('redirects to the CMS default routing-rule target when one exists', async () => {
-    vi.mocked(api.get).mockResolvedValue([
-      { match_type: 'default', target_slug: 'welcome', is_active: true, layer: 'middleware' },
-    ]);
-    await mountHome();
-    expect(replace).toHaveBeenCalledWith('/welcome');
-    expect(replace).not.toHaveBeenCalledWith('/login');
-  });
-
-  it('falls back to /dashboard for an authenticated user when no rule exists', async () => {
-    vi.mocked(api.get).mockResolvedValue([]);
+describe('Home — fallback when no CMS routing rule fires', () => {
+  it('falls back to /dashboard for an authenticated user', async () => {
     vi.mocked(isAuthenticated).mockReturnValue(true);
     await mountHome();
     expect(replace).toHaveBeenCalledWith('/dashboard');
@@ -52,15 +49,6 @@ describe('Home redirect', () => {
   });
 
   it('falls back to the public default slug (not /login) for an anonymous visitor', async () => {
-    vi.mocked(api.get).mockResolvedValue([]);
-    vi.mocked(isAuthenticated).mockReturnValue(false);
-    await mountHome();
-    expect(replace).toHaveBeenCalledWith('/home');
-    expect(replace).not.toHaveBeenCalledWith('/login');
-  });
-
-  it('never redirects to /login even when the routing-rules call fails', async () => {
-    vi.mocked(api.get).mockRejectedValue(new Error('network'));
     vi.mocked(isAuthenticated).mockReturnValue(false);
     await mountHome();
     expect(replace).toHaveBeenCalledWith('/home');

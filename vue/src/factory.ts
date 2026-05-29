@@ -14,6 +14,7 @@ import i18n, { initLocale } from '@/i18n';
 import { PluginRegistry, PlatformSDK } from 'vbwd-view-component';
 import type { IPlugin } from 'vbwd-view-component';
 import type { Router } from 'vue-router';
+import { wireRouterGuards } from './router/wireGuards';
 // fe-core ships its scoped component styles as a separate stylesheet
 // (default for vite library builds) — import once at the entry so e.g.
 // PaymentDataBlock's flex layout actually applies in the host.
@@ -79,6 +80,11 @@ export async function createVbwdUserApp(
     component: () => import('./views/NotFound.vue'),
     meta: { requiresAuth: false }
   });
+
+  // Wire plugin-registered router guards into beforeEach (installation
+  // order). Host stays agnostic — guards encapsulate cross-cutting nav
+  // concerns owned by plugins (CMS routing rules, feature flags, etc.).
+  wireRouterGuards(router, sdk);
 
   // Activate all registered plugins
   for (const name of enabledPluginNames) {
