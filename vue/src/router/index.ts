@@ -3,10 +3,15 @@ import { isAuthenticated, sessionExpired, hasUserPermission } from '../api';
 
 const routes: RouteRecordRaw[] = [
   {
+    // `/` is a redirect bouncer (Home.vue renders an empty <div/>), so it
+    // must never wear UserLayout chrome — otherwise an authenticated visitor
+    // sees a flash of dashboard chrome around nothing while the synchronous
+    // redirect resolves. App.vue:39 short-circuits on noLayout.
+    // See docs/dev_log/20260528/sprints/s29-fe-user-home-no-chrome-flash.md.
     path: '/',
     name: 'home',
     component: () => import('../views/Home.vue'),
-    meta: { requiresAuth: false }
+    meta: { requiresAuth: false, noLayout: true }
   },
   {
     // Static entry point served by nginx. Normalise it to `/` so the
