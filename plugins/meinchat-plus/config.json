@@ -1,0 +1,5 @@
+{
+  "debug_mode": false,
+  "one_time_prekey_count": 100,
+  "one_time_prekey_low_water": 20
+}

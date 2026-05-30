@@ -1,6 +1,10 @@
 server {
     listen 80;
 
+    # Allow large image uploads (raw photo / base64-inflated e2e ciphertext).
+    # Must exceed meinchat `attachment_max_bytes` (25 MB) + ~33% base64 overhead.
+    client_max_body_size 40m;
+
     # Use docker's internal resolver and runtime variables so missing upstreams
     # (e.g. plugin-api not yet up, or absent in older instance composes) cause
     # a 502 at request time instead of preventing nginx from starting.

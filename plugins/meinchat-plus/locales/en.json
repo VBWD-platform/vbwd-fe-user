@@ -1,0 +1,18 @@
+{
+  "meinchatPlus": {
+    "ready": "Secure chat ready",
+    "downgradeBlocked": "Secure chat is unavailable for this conversation — message not sent.",
+    "peerNoDevice": "Ask @{nickname} to enable secure chat on a device.",
+    "encryptedAttachment": "🔒 Encrypted attachment",
+    "pairing": {
+      "setTitle": "Set a passphrase to enable secure chat",
+      "unlockTitle": "Unlock secure chat",
+      "setHint": "Your messages are end-to-end encrypted. This passphrase protects your keys on this device — it is never sent to the server.",
+      "unlockHint": "Enter your secure-chat passphrase to unlock messages on this device.",
+      "placeholder": "Passphrase",
+      "enable": "Enable secure chat",
+      "unlock": "Unlock",
+      "working": "Working…"
+    }
+  }
+}
