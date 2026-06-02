@@ -140,4 +140,68 @@ describe('core checkout store (agnostic)', () => {
     expect(high.loadCalls).toBe(1);
     expect(low.loadCalls).toBe(0);
   });
+
+  it('delegates applyCoupon to the active source and exposes the discount', async () => {
+    const source = makeSource({
+      applyCoupon: vi.fn(async () => ({ valid: true, discountAmount: 3 })),
+      getDiscountAmount: () => 3,
+    });
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+
+    await store.applyCoupon('SUB30');
+
+    expect(source.applyCoupon).toHaveBeenCalledWith('SUB30');
+    expect(store.couponCode).toBe('SUB30');
+    expect(store.couponError).toBeNull();
+    expect(store.discountAmount).toBe(3);
+  });
+
+  it('records couponError and no code when the source rejects the coupon', async () => {
+    const source = makeSource({
+      applyCoupon: vi.fn(async () => ({ valid: false, discountAmount: 0, error: 'Coupon not found' })),
+      getDiscountAmount: () => 0,
+    });
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+
+    await store.applyCoupon('NOPE');
+
+    expect(store.couponCode).toBeNull();
+    expect(store.couponError).toBe('Coupon not found');
+    expect(store.discountAmount).toBe(0);
+  });
+
+  it('clearCoupon delegates to the source and resets coupon state', async () => {
+    const clearCoupon = vi.fn();
+    const source = makeSource({
+      applyCoupon: vi.fn(async () => ({ valid: true, discountAmount: 3 })),
+      getDiscountAmount: () => 3,
+      clearCoupon,
+    });
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+    await store.applyCoupon('SUB30');
+
+    store.clearCoupon();
+
+    expect(clearCoupon).toHaveBeenCalled();
+    expect(store.couponCode).toBeNull();
+    expect(store.couponError).toBeNull();
+  });
+
+  it('is agnostic: applyCoupon is a no-op when the source has no coupon support', async () => {
+    const source = makeSource(); // no applyCoupon
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+
+    await store.applyCoupon('SUB30');
+
+    expect(store.couponCode).toBeNull();
+    expect(store.discountAmount).toBe(0);
+  });
 });

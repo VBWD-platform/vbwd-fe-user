@@ -82,6 +82,16 @@ export interface CheckoutSource {
   reset(): void;
   /** Optional component rendering this source's order summary (items + total). */
   summaryComponent?: Component;
+
+  // ── Optional coupon support (additive — sources that omit these behave as
+  //    today, no coupon). `getOrderTotal()` returns the NET total: a source
+  //    that applies a coupon subtracts its own discount. ──────────────────────
+  /** Validate + apply a coupon code; resolves with the discount it grants. */
+  applyCoupon?(code: string): Promise<{ valid: boolean; discountAmount: number; error?: string }>;
+  /** Current discount amount (0 when none applied). */
+  getDiscountAmount?(): number;
+  /** Clear any applied coupon. */
+  clearCoupon?(): void;
 }
 
 class CheckoutSourceRegistry {
