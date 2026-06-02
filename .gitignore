@@ -35,3 +35,5 @@ plugins/token-payment/
 plugins/toss-payments-payment/
 plugins/truemoney-payment/
 plugins/yookassa-payment/
+plugins/meinchat-plus/
+plugins/shop/
