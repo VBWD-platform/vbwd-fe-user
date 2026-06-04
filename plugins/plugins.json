@@ -131,6 +131,12 @@
       "version": "1.0.0",
       "installedAt": "2026-05-30T13:27:14.987Z",
       "source": "local"
+    },
+    "cms-youtube": {
+      "enabled": true,
+      "version": "1.0.0",
+      "installedAt": "2026-06-03T00:00:00.000Z",
+      "source": "local"
     }
   }
 }

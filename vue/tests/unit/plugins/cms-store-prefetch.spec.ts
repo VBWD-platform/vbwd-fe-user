@@ -7,7 +7,9 @@ vi.mock('@/api', () => ({ api: { get: vi.fn() } }));
 
 function mockApi() {
   vi.mocked(api.get).mockImplementation(async (url: string) => {
-    if (url.startsWith('/cms/pages/')) {
+    // Unified engine cutover: the public renderer reads cms_post via
+    // /cms/posts/<slug>, not the legacy /cms/pages/<slug>.
+    if (url.startsWith('/cms/posts/')) {
       return { id: '1', slug: 'about', layout_id: 'L1', style_id: 'S1' } as never;
     }
     if (url.startsWith('/cms/layouts/')) return { id: 'L1', areas: [] } as never;

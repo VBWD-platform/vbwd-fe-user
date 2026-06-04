@@ -1,0 +1,7 @@
+{
+  "debug_mode": {
+    "type": "boolean",
+    "default": false,
+    "description": "Enable verbose console logging for the YouTube content-block renderer"
+  }
+}

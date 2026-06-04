@@ -1,3 +1,15 @@
+# S47.2 cache-bypass: a logged-in session (vbwd_session cookie) must always get
+# the live CSR SPA so it sees unpublished edits; anonymous visitors + bots get
+# the prerendered static file from `${VAR_DIR}/seo/`. This `map` reads the cookie
+# once per request. Adding/removing a post is a file in `/usr/share/nginx/seo/`;
+# toggling `seo.mode` is a backend flag — NEITHER needs an nginx reload.
+# `${VAR_DIR}/seo` is bind-mounted read-only at /usr/share/nginx/html/seo so the
+# `try_files /seo$uri.html` lookup (rooted at /usr/share/nginx/html) resolves it.
+map $http_cookie $vbwd_is_authed {
+    default 0;
+    "~*vbwd_session=" 1;
+}
+
 server {
     listen 80;
 
@@ -58,10 +70,17 @@ server {
         proxy_read_timeout 60s;
     }
 
-    # SPA — serve index.html for all non-asset routes
+    # SPA + prerender serving.
+    #   - logged-in (vbwd_session) → live CSR SPA (cache-bypass);
+    #   - anonymous/bot → the prerendered `/seo/<slug>.html` if present, else the
+    #     real path (assets), else the SPA shell.
+    # `${VAR_DIR}/seo` is bind-mounted read-only at /usr/share/nginx/html/seo
+    # (shared with the backend prerender writer). Content changes never touch
+    # this conf.
     location / {
         root /usr/share/nginx/html;
         index index.html;
-        try_files $uri $uri/ /index.html;
+        if ($vbwd_is_authed) { rewrite ^ /index.html last; }
+        try_files /seo$uri.html /seo$uri/index.html $uri /index.html;
     }
 }

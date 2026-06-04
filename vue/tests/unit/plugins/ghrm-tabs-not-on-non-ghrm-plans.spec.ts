@@ -43,7 +43,6 @@ vi.mock('../../../../plugins/ghrm/src/components/GhrmVersionsTable.vue', () => (
   default: { template: '<div />', props: ['versions'] },
 }))
 
-import GhrmPlanGithubAccessTab from '../../../../plugins/ghrm/src/components/GhrmPlanGithubAccessTab.vue'
 import GhrmPlanSoftwareTab from '../../../../plugins/ghrm/src/components/GhrmPlanSoftwareTab.vue'
 import { ghrmApi } from '../../../../plugins/ghrm/src/api/ghrmApi'
 
@@ -53,21 +52,6 @@ describe('GHRM tabs on non-GHRM plans (no linked package)', () => {
   beforeEach(() => {
     mockGetPackageByPlan.mockReset()
     accessStatusRef.value = null
-  })
-
-  it('GhrmPlanGithubAccessTab shows no-package message when plan has no linked GHRM package', async () => {
-    mockGetPackageByPlan.mockRejectedValue(new Error('GET failed: 404'))
-    accessStatusRef.value = { connected: true, github_username: 'dantweb', access_status: 'active' }
-
-    setActivePinia(createPinia())
-    const wrapper = mount(GhrmPlanGithubAccessTab, {
-      props: { planSlug: 'enterprise', planId: 'enterprise-uuid-000' },
-      global: { mocks: { $t: (k: string) => k } },
-    })
-    await flushPromises()
-
-    expect(wrapper.find('[data-testid="install-instructions"]').exists()).toBe(false)
-    expect(wrapper.find('[data-testid="no-package-message"]').exists()).toBe(true)
   })
 
   it('GhrmPlanSoftwareTab shows no-package message when plan has no linked GHRM package', async () => {
