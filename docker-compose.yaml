@@ -6,6 +6,9 @@ services:
       - "8080:80"
     volumes:
       - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+      # Serve the backend-written SEO prerender files to anon/bots/curl in dev
+      # (read-only; backend is the only writer). Logged-in users still get Vite.
+      - ${VBWD_VAR_DIR:-../var}/seo:/usr/share/nginx/seo:ro
     depends_on:
       dev:
         condition: service_healthy
