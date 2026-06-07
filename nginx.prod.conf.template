@@ -33,6 +33,30 @@ server {
         proxy_read_timeout 60s;
     }
 
+    # SEO — sitemap + robots are DYNAMIC backend routes (cms plugin) served at
+    # root; proxy them to the backend so they don't fall through to the SPA.
+    location = /sitemap.xml {
+        proxy_pass http://$api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;
+    }
+    location ~ ^/sitemap-\d+\.xml$ {
+        proxy_pass http://$api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;
+    }
+    location = /robots.txt {
+        proxy_pass http://$api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;
+    }
+
     # Server-Sent Events stream — MUST NOT be buffered, or the browser only
     # sees new messages on refresh (iOS uses polling and is unaffected). Disable
     # buffering at this hop AND re-assert `X-Accel-Buffering: no` downstream so
