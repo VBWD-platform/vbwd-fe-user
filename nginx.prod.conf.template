@@ -1,13 +1,22 @@
-# S47.2 cache-bypass: a logged-in session (vbwd_session cookie) must always get
-# the live CSR SPA so it sees unpublished edits; anonymous visitors + bots get
-# the prerendered static file from `${VAR_DIR}/seo/`. This `map` reads the cookie
-# once per request. Adding/removing a post is a file in `/usr/share/nginx/seo/`;
+# Serving model: real crawlers (matched by user-agent below) get the prerendered
+# static file from `${VAR_DIR}/seo/` for SEO; every human — anonymous OR logged-in
+# — gets the live CSR SPA, which renders the full layout client-side. (A prior
+# cookie-based rule served anonymous humans the content-only prerender → a
+# layout-less page, and its `rewrite ^ /index.html last` looped → 500 on every
+# authed request. Both are fixed here.)
+# Adding/removing a post is a file in `/usr/share/nginx/seo/`;
 # toggling `seo.mode` is a backend flag — NEITHER needs an nginx reload.
 # `${VAR_DIR}/seo` is bind-mounted read-only at /usr/share/nginx/html/seo so the
 # `try_files /seo$uri.html` lookup (rooted at /usr/share/nginx/html) resolves it.
-map $http_cookie $vbwd_is_authed {
-    default 0;
-    "~*vbwd_session=" 1;
+# Crawlers (no JS) get the prerendered SEO snapshot under /seo; every human —
+# anonymous OR logged-in — gets the live SPA, which renders the full layout
+# client-side. Serving the content-only prerender to humans left them on an
+# unstyled, layout-less page: the SPA can't cleanly take over a #app that the
+# prerender already filled with bare content. $seo_prefix is "/seo" only for
+# crawler user-agents; empty for everyone else.
+map $http_user_agent $seo_prefix {
+    default "";
+    "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" "/seo";
 }
 
 server {
@@ -104,7 +113,10 @@ server {
     location / {
         root /usr/share/nginx/html;
         index index.html;
-        if ($vbwd_is_authed) { rewrite ^ /index.html last; }
-        try_files /seo$uri.html /seo$uri/index.html $uri /index.html;
+        # Crawlers ($seo_prefix="/seo") resolve the prerendered /seo/<slug>.html
+        # for SEO; humans ($seo_prefix="") fall straight through to /index.html —
+        # the SPA shell — which renders the complete layout. Real asset paths
+        # ($uri) still resolve before the /index.html fallback.
+        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri /index.html;
     }
 }
