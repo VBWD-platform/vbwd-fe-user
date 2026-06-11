@@ -300,6 +300,15 @@
             class="user-dropdown"
           >
             <router-link
+              v-if="hasUserPermission('manage_api')"
+              to="/dashboard/api-keys"
+              class="user-dropdown-item"
+              data-testid="nav-manage-api"
+              @click="closeUserMenu"
+            >
+              {{ $t('nav.manage_api') }}
+            </router-link>
+            <router-link
               to="/dashboard/profile"
               class="user-dropdown-item"
               @click="closeUserMenu"

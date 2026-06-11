@@ -56,7 +56,8 @@
     "profile": "Profile",
     "invoices": "Invoices",
     "tokens": "Tokens",
-    "store": "Store"
+    "store": "Store",
+    "manage_api": "Manage API"
   },
   "layout": {
     "logo": "VBWD",
@@ -376,5 +377,9 @@
   },
   "cart": {
     "addedToCart": "{name} added to cart"
+  },
+  "manageApi": {
+    "title": "Manage API",
+    "intro": "Create and manage scoped API keys for programmatic access. Each key is shown once at creation — copy it then."
   }
 }

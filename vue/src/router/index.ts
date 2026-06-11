@@ -39,6 +39,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, requiredUserPermission: 'user.profile.view' }
   },
   {
+    path: '/dashboard/api-keys',
+    name: 'manage-api',
+    component: () => import('../views/ManageApi.vue'),
+    meta: { requiresAuth: true, requiredUserPermission: 'manage_api' }
+  },
+  {
     path: '/dashboard/tokens',
     name: 'tokens',
     component: () => import('../views/Tokens.vue'),
