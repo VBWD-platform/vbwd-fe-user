@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "Retirar",
+    "balance": "Saldo disponible",
+    "moneyPreview": "≈ {amount}",
+    "provider": "Método de pago",
+    "destination": "Cuenta de destino",
+    "amount": "Importe",
+    "amountHint": "Mínimo {min} · Máximo {max}",
+    "payoutPreview": "Recibirás {amount}",
+    "submit": "Solicitar retiro",
+    "submitting": "Enviando…",
+    "submitted": "Solicitud de retiro creada",
+    "history": "Tus solicitudes de retiro",
+    "noRequests": "Aún no hay solicitudes de retiro.",
+    "noProviders": "No hay métodos de pago disponibles en este momento.",
+    "back": "Volver a Retirar",
+    "requestDetail": "Solicitud de retiro",
+    "notFound": "Solicitud de retiro no encontrada.",
+    "errors": {
+      "belowMin": "El retiro mínimo es {min}.",
+      "aboveBalance": "El importe supera tu saldo disponible."
+    },
+    "status": {
+      "pending": "Pendiente",
+      "approved": "Aprobada",
+      "processing": "Procesando",
+      "completed": "Completada",
+      "failed": "Fallida",
+      "rejected": "Rechazada"
+    },
+    "fields": {
+      "paypal_email": "Correo de PayPal",
+      "stripe_account": "ID de cuenta de Stripe",
+      "truemoney_msisdn": "Número de teléfono de TrueMoney",
+      "promptpay_id": "ID de PromptPay",
+      "account_name": "Nombre del titular"
+    },
+    "detail": {
+      "id": "ID de solicitud",
+      "provider": "Proveedor",
+      "amount": "Importe",
+      "payout": "Pago",
+      "balanceSource": "Origen del saldo",
+      "status": "Estado",
+      "destination": "Cuenta de destino",
+      "payoutId": "ID de pago del proveedor",
+      "error": "Error",
+      "created": "Creada",
+      "updated": "Actualizada"
+    }
+  }
+}

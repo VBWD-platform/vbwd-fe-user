@@ -125,6 +125,17 @@
                       {{ item.description }}
                     </router-link>
                     <span v-else>{{ item.description }}</span>
+                    <!-- S77: frozen tags + custom-fields snapshot (read-only). -->
+                    <TagChips
+                      v-if="item.tags?.length"
+                      :tags="item.tags"
+                      class="line-item-tags"
+                    />
+                    <CustomFieldsDisplay
+                      v-if="item.custom_fields && Object.keys(item.custom_fields).length"
+                      :custom-fields="item.custom_fields"
+                      class="line-item-custom-fields"
+                    />
                   </td>
                   <td>{{ item.quantity }}</td>
                   <td>{{ formatAmount(item.unit_price, invoice.currency) }}</td>
@@ -152,6 +163,17 @@
               </div>
               <div class="item-card-desc">
                 {{ item.description }}
+                <!-- S77: frozen tags + custom-fields snapshot (read-only). -->
+                <TagChips
+                  v-if="item.tags?.length"
+                  :tags="item.tags"
+                  class="line-item-tags"
+                />
+                <CustomFieldsDisplay
+                  v-if="item.custom_fields && Object.keys(item.custom_fields).length"
+                  :custom-fields="item.custom_fields"
+                  class="line-item-custom-fields"
+                />
               </div>
               <div class="item-card-meta">
                 <span>{{ $t('invoices.detail.itemsTableHeaders.qty') }}: {{ item.quantity }}</span>
@@ -162,10 +184,15 @@
         </div>
 
         <div class="total-section">
-          <div class="total-row">
-            <span class="total-label">{{ $t('invoices.detail.totalAmount') }}</span>
-            <span class="total-value">${{ invoice.total_amount || invoice.amount }}</span>
-          </div>
+          <!-- S85.4 tax disclosure: per-rate tax lines aggregated from the
+               persisted line-item tax_breakdown plus the net / Σtax / gross
+               totals. Falls back to a single aggregate line for legacy invoices
+               that have no per-line breakdown. The FE does no tax math. -->
+          <PriceBreakdown
+            class="invoice-breakdown"
+            data-testid="invoice-breakdown"
+            :price="invoiceBreakdownPrice"
+          />
         </div>
 
         <!-- Actions -->
@@ -221,16 +248,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
-import { PaymentDataBlock } from 'vbwd-view-component';
+import { PaymentDataBlock, TagChips, CustomFieldsDisplay } from 'vbwd-view-component';
 import { useInvoicesStore } from '@/stores/invoices';
 import { getInvoicePaymentMethods } from '@/extensions/invoicePaymentMethods';
+import PriceBreakdown from '@/components/PriceBreakdown.vue';
+import type { PriceVO } from '@/utils/priceDisplay';
 
 const invoicesStore = useInvoicesStore();
 const paymentMethods = getInvoicePaymentMethods();
+
+interface LineItemTax {
+  code: string;
+  name?: string;
+  rate: number;
+  amount: number;
+}
 
 interface LineItem {
   type: string;
@@ -240,7 +276,14 @@ interface LineItem {
   quantity: number;
   unit_price: string;
   total_price: string;
+  // S85.4: persisted per-line tax disclosure (net / tax / per-rate breakdown).
+  net_amount?: string;
+  tax_amount?: string;
+  tax_breakdown?: LineItemTax[];
   extra_data?: Record<string, unknown>;
+  // S77: frozen snapshot of the source item's tags + custom-fields (read-only).
+  tags?: string[];
+  custom_fields?: Record<string, unknown>;
 }
 
 interface Invoice {
@@ -248,6 +291,9 @@ interface Invoice {
   invoice_number: string;
   status: string;
   amount: string;
+  // S85 invoice-level net / tax / gross totals (persisted).
+  subtotal?: string;
+  tax_amount?: string;
   total_amount?: string;
   currency: string;
   payment_method?: string | null;
@@ -267,6 +313,53 @@ const { t } = useI18n();
 const loading = ref(true);
 const error = ref<string | null>(null);
 const invoice = ref<Invoice | null>(null);
+
+// Totals-level Price VO built ONLY from persisted fields — no fe-side tax math.
+// ``brutto`` is the gross total; ``netto`` the subtotal (falls back to gross).
+// Per-rate tax lines are AGGREGATED from the persisted line-item tax_breakdown
+// (sum of already-computed amounts per code+rate — a display sum, never a tax
+// recompute). When no line carries a breakdown (legacy invoices), it falls back
+// to a single aggregate tax line from the persisted invoice ``tax_amount``.
+const invoiceBreakdownPrice = computed<PriceVO>(() => {
+  const current = invoice.value;
+  const gross = Number(current?.total_amount ?? current?.amount ?? 0);
+  const net = current?.subtotal !== undefined ? Number(current.subtotal) : gross;
+  const aggregateTax = current?.tax_amount !== undefined ? Number(current.tax_amount) : 0;
+
+  const perRate = aggregateTaxBreakdown(current?.line_items);
+  const taxes = perRate.length > 0
+    ? perRate
+    : aggregateTax > 0
+      ? [{ code: 'TAX', rate: 0, amount: aggregateTax }]
+      : [];
+
+  return {
+    netto: net,
+    taxes,
+    brutto: gross,
+    currency: current?.currency || 'USD',
+  };
+});
+
+// Sum the persisted per-rate amounts across all line items, grouped by
+// code+rate, into one tax line per rate. This is purely a display aggregation
+// of values the backend already computed — the FE performs no tax arithmetic.
+function aggregateTaxBreakdown(lineItems?: LineItem[]): LineItemTax[] {
+  if (!lineItems?.length) return [];
+  const byRate = new Map<string, LineItemTax>();
+  for (const item of lineItems) {
+    for (const tax of item.tax_breakdown ?? []) {
+      const key = `${tax.code}-${tax.rate}`;
+      const existing = byRate.get(key);
+      if (existing) {
+        existing.amount += tax.amount;
+      } else {
+        byRate.set(key, { code: tax.code, name: tax.name, rate: tax.rate, amount: tax.amount });
+      }
+    }
+  }
+  return Array.from(byRate.values());
+}
 
 onMounted(async () => {
   await loadInvoice();

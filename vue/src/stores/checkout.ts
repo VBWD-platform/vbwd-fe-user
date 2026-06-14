@@ -19,6 +19,8 @@ import {
   type LineItem,
   type CheckoutRouteContext,
 } from '@/registries/checkoutSourceRegistry';
+import { useAppConfigStore } from '@/stores/appConfig';
+import type { PriceVO } from '@/utils/priceDisplay';
 
 // Re-export the generic types so existing `@/stores/checkout` type imports keep working.
 export type { LineItem, CheckoutResult, CheckoutRouteContext } from '@/registries/checkoutSourceRegistry';
@@ -44,10 +46,19 @@ export const useCheckoutStore = defineStore('checkout', () => {
   // Net total (the source subtracts its own discount).
   const orderTotal = computed<number>(() => activeSource.value?.getOrderTotal() ?? 0);
   const discountAmount = computed<number>(() => activeSource.value?.getDiscountAmount?.() ?? 0);
-  // Currency of the order — taken from the first line item (single source of
-  // truth used by checkout payment methods, e.g. the token-balance quote).
-  const currency = computed<string>(() => lineItems.value[0]?.currency || 'USD');
+  // Currency of the order — an explicit per-item currency wins, otherwise the
+  // global operating currency (the `default_currency` core setting, S93). Never
+  // a hardcoded 'USD'. This is the single source of truth used by checkout
+  // payment methods, e.g. the token-balance quote.
+  const appConfig = useAppConfigStore();
+  const currency = computed<string>(() => lineItems.value[0]?.currency || appConfig.defaultCurrency);
   const summaryComponent = computed(() => activeSource.value?.summaryComponent ?? null);
+  // Order-level tax breakdown across all line items, projected from the active
+  // source (null when the source carries no tax data). Generic Price VO — core
+  // names no plugin domain.
+  const taxBreakdown = computed<PriceVO | null>(
+    () => activeSource.value?.getTaxBreakdown?.() ?? null,
+  );
 
   // Actions
   /** Pick the source matching the route context and load its items. */
@@ -154,6 +165,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     discountAmount,
     currency,
     summaryComponent,
+    taxBreakdown,
     // Actions
     loadForContext,
     setPaymentMethod,

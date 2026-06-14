@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "ถอนเงิน",
+    "balance": "ยอดคงเหลือที่ใช้ได้",
+    "moneyPreview": "≈ {amount}",
+    "provider": "ช่องทางการจ่ายเงิน",
+    "destination": "บัญชีปลายทาง",
+    "amount": "จำนวน",
+    "amountHint": "ขั้นต่ำ {min} · สูงสุด {max}",
+    "payoutPreview": "คุณจะได้รับ {amount}",
+    "submit": "ขอถอนเงิน",
+    "submitting": "กำลังส่ง…",
+    "submitted": "สร้างคำขอถอนเงินแล้ว",
+    "history": "คำขอถอนเงินของคุณ",
+    "noRequests": "ยังไม่มีคำขอถอนเงิน",
+    "noProviders": "ขณะนี้ไม่มีช่องทางการจ่ายเงินที่ใช้ได้",
+    "back": "กลับไปหน้าถอนเงิน",
+    "requestDetail": "คำขอถอนเงิน",
+    "notFound": "ไม่พบคำขอถอนเงิน",
+    "errors": {
+      "belowMin": "ยอดถอนขั้นต่ำคือ {min}",
+      "aboveBalance": "จำนวนเงินเกินยอดคงเหลือที่ใช้ได้"
+    },
+    "status": {
+      "pending": "รอดำเนินการ",
+      "approved": "อนุมัติแล้ว",
+      "processing": "กำลังดำเนินการ",
+      "completed": "สำเร็จ",
+      "failed": "ล้มเหลว",
+      "rejected": "ถูกปฏิเสธ"
+    },
+    "fields": {
+      "paypal_email": "อีเมล PayPal",
+      "stripe_account": "รหัสบัญชี Stripe",
+      "truemoney_msisdn": "เบอร์โทรศัพท์กระเป๋า TrueMoney",
+      "promptpay_id": "หมายเลขพร้อมเพย์",
+      "account_name": "ชื่อเจ้าของบัญชี"
+    },
+    "detail": {
+      "id": "รหัสคำขอ",
+      "provider": "ผู้ให้บริการ",
+      "amount": "จำนวน",
+      "payout": "ยอดจ่าย",
+      "balanceSource": "แหล่งที่มาของยอดเงิน",
+      "status": "สถานะ",
+      "destination": "บัญชีปลายทาง",
+      "payoutId": "รหัสการจ่ายเงินของผู้ให้บริการ",
+      "error": "ข้อผิดพลาด",
+      "created": "สร้างเมื่อ",
+      "updated": "อัปเดตเมื่อ"
+    }
+  }
+}

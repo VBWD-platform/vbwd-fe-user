@@ -142,7 +142,12 @@
               {{ invoice.invoice_number }}
             </td>
             <td class="invoice-amount">
-              {{ formatPrice(invoice.amount) }}
+              <PriceDisplay
+                :net-amount="invoiceNetAmount(invoice)"
+                :gross-amount="invoiceGrossAmount(invoice)"
+                :currency="invoice.currency || 'USD'"
+                :account-type="authStore.user?.account_type"
+              />
             </td>
             <td>
               <span
@@ -228,10 +233,13 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from 'vbwd-view-component';
 import { useInvoicesStore, type Invoice } from '../stores/invoices';
+import PriceDisplay from '@/components/PriceDisplay.vue';
 
 const router = useRouter();
 const { t } = useI18n();
+const authStore = useAuthStore();
 const invoicesStore = useInvoicesStore();
 
 const loading = ref(true);
@@ -364,13 +372,15 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
-function formatPrice(amount: string | number | null | undefined): string {
-  if (amount === null || amount === undefined) return '-';
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(num);
+// Net side for the invoice row: persisted ``subtotal`` (net) when present, else
+// the bare gross ``amount`` (no fe-side tax math — net == gross when no split).
+function invoiceNetAmount(invoice: Invoice): number {
+  return Number(invoice.subtotal ?? invoice.total_amount ?? invoice.amount ?? 0);
+}
+
+// Gross side: persisted ``total_amount`` when present, else the bare ``amount``.
+function invoiceGrossAmount(invoice: Invoice): number {
+  return Number(invoice.total_amount ?? invoice.amount ?? 0);
 }
 
 onMounted(() => {

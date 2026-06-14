@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "Auszahlung",
+    "balance": "Verfügbares Guthaben",
+    "moneyPreview": "≈ {amount}",
+    "provider": "Auszahlungsmethode",
+    "destination": "Empfängerkonto",
+    "amount": "Betrag",
+    "amountHint": "Minimum {min} · Maximum {max}",
+    "payoutPreview": "Sie erhalten {amount}",
+    "submit": "Auszahlung anfordern",
+    "submitting": "Wird gesendet…",
+    "submitted": "Auszahlungsanfrage erstellt",
+    "history": "Ihre Auszahlungsanfragen",
+    "noRequests": "Noch keine Auszahlungsanfragen.",
+    "noProviders": "Derzeit sind keine Auszahlungsmethoden verfügbar.",
+    "back": "Zurück zur Auszahlung",
+    "requestDetail": "Auszahlungsanfrage",
+    "notFound": "Auszahlungsanfrage nicht gefunden.",
+    "errors": {
+      "belowMin": "Die Mindestauszahlung beträgt {min}.",
+      "aboveBalance": "Der Betrag übersteigt Ihr verfügbares Guthaben."
+    },
+    "status": {
+      "pending": "Ausstehend",
+      "approved": "Genehmigt",
+      "processing": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "failed": "Fehlgeschlagen",
+      "rejected": "Abgelehnt"
+    },
+    "fields": {
+      "paypal_email": "PayPal-E-Mail",
+      "stripe_account": "Stripe-Konto-ID",
+      "truemoney_msisdn": "TrueMoney-Wallet-Telefonnummer",
+      "promptpay_id": "PromptPay-ID",
+      "account_name": "Name des Kontoinhabers"
+    },
+    "detail": {
+      "id": "Anfrage-ID",
+      "provider": "Anbieter",
+      "amount": "Betrag",
+      "payout": "Auszahlung",
+      "balanceSource": "Guthabenquelle",
+      "status": "Status",
+      "destination": "Empfängerkonto",
+      "payoutId": "Auszahlungs-ID des Anbieters",
+      "error": "Fehler",
+      "created": "Erstellt",
+      "updated": "Aktualisiert"
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "Вывод средств",
+    "balance": "Доступный баланс",
+    "moneyPreview": "≈ {amount}",
+    "provider": "Способ выплаты",
+    "destination": "Счёт получателя",
+    "amount": "Сумма",
+    "amountHint": "Минимум {min} · Максимум {max}",
+    "payoutPreview": "Вы получите {amount}",
+    "submit": "Запросить вывод",
+    "submitting": "Отправка…",
+    "submitted": "Заявка на вывод создана",
+    "history": "Ваши заявки на вывод",
+    "noRequests": "Заявок на вывод пока нет.",
+    "noProviders": "Сейчас нет доступных способов выплаты.",
+    "back": "Назад к выводу средств",
+    "requestDetail": "Заявка на вывод",
+    "notFound": "Заявка на вывод не найдена.",
+    "errors": {
+      "belowMin": "Минимальная сумма вывода — {min}.",
+      "aboveBalance": "Сумма превышает доступный баланс."
+    },
+    "status": {
+      "pending": "В ожидании",
+      "approved": "Одобрена",
+      "processing": "В обработке",
+      "completed": "Завершена",
+      "failed": "Ошибка",
+      "rejected": "Отклонена"
+    },
+    "fields": {
+      "paypal_email": "Email PayPal",
+      "stripe_account": "ID аккаунта Stripe",
+      "truemoney_msisdn": "Номер телефона кошелька TrueMoney",
+      "promptpay_id": "ID PromptPay",
+      "account_name": "Имя владельца счёта"
+    },
+    "detail": {
+      "id": "ID заявки",
+      "provider": "Провайдер",
+      "amount": "Сумма",
+      "payout": "Выплата",
+      "balanceSource": "Источник баланса",
+      "status": "Статус",
+      "destination": "Счёт получателя",
+      "payoutId": "ID выплаты провайдера",
+      "error": "Ошибка",
+      "created": "Создана",
+      "updated": "Обновлена"
+    }
+  }
+}

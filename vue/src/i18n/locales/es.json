@@ -134,7 +134,11 @@
       "taxNumber": "Número de Impuesto / NIF",
       "taxNumberPlaceholder": "ES12345678A",
       "phone": "Teléfono",
-      "phonePlaceholder": "+34 912 345 678"
+      "phonePlaceholder": "+34 912 345 678",
+      "accountType": "Tipo de cuenta",
+      "accountTypePrivate": "Persona física",
+      "accountTypeBusiness": "Empresa",
+      "companyRequiredForBusiness": "El nombre de la empresa es obligatorio para una cuenta de empresa"
     },
     "address": {
       "title": "Dirección",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} añadido al carrito"
+  },
+  "price": {
+    "nettoTag": "precio neto",
+    "totalNet": "Total neto",
+    "totalTax": "Impuestos totales",
+    "totalTaxWithRate": "Impuestos totales ({rate}%)",
+    "totalGross": "Total bruto a pagar"
   }
 }

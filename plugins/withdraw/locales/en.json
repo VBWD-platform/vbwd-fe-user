@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "Withdraw",
+    "balance": "Available balance",
+    "moneyPreview": "≈ {amount}",
+    "provider": "Payout method",
+    "destination": "Destination",
+    "amount": "Amount",
+    "amountHint": "Minimum {min} · Maximum {max}",
+    "payoutPreview": "You will receive {amount}",
+    "submit": "Request withdrawal",
+    "submitting": "Submitting…",
+    "submitted": "Withdrawal request created",
+    "history": "Your withdrawal requests",
+    "noRequests": "No withdrawal requests yet.",
+    "noProviders": "No payout methods are available right now.",
+    "back": "Back to Withdraw",
+    "requestDetail": "Withdrawal request",
+    "notFound": "Withdrawal request not found.",
+    "errors": {
+      "belowMin": "Minimum withdrawal is {min}.",
+      "aboveBalance": "Amount exceeds your available balance."
+    },
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "rejected": "Rejected"
+    },
+    "fields": {
+      "paypal_email": "PayPal email",
+      "stripe_account": "Stripe account ID",
+      "truemoney_msisdn": "TrueMoney wallet phone number",
+      "promptpay_id": "PromptPay ID",
+      "account_name": "Account holder name"
+    },
+    "detail": {
+      "id": "Request ID",
+      "provider": "Provider",
+      "amount": "Amount",
+      "payout": "Payout",
+      "balanceSource": "Balance source",
+      "status": "Status",
+      "destination": "Destination",
+      "payoutId": "Provider payout ID",
+      "error": "Error",
+      "created": "Created",
+      "updated": "Updated"
+    }
+  }
+}

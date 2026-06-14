@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "Retrait",
+    "balance": "Solde disponible",
+    "moneyPreview": "≈ {amount}",
+    "provider": "Méthode de paiement",
+    "destination": "Compte de destination",
+    "amount": "Montant",
+    "amountHint": "Minimum {min} · Maximum {max}",
+    "payoutPreview": "Vous recevrez {amount}",
+    "submit": "Demander un retrait",
+    "submitting": "Envoi…",
+    "submitted": "Demande de retrait créée",
+    "history": "Vos demandes de retrait",
+    "noRequests": "Aucune demande de retrait pour le moment.",
+    "noProviders": "Aucune méthode de paiement disponible pour le moment.",
+    "back": "Retour au retrait",
+    "requestDetail": "Demande de retrait",
+    "notFound": "Demande de retrait introuvable.",
+    "errors": {
+      "belowMin": "Le retrait minimum est de {min}.",
+      "aboveBalance": "Le montant dépasse votre solde disponible."
+    },
+    "status": {
+      "pending": "En attente",
+      "approved": "Approuvée",
+      "processing": "En cours",
+      "completed": "Terminée",
+      "failed": "Échouée",
+      "rejected": "Rejetée"
+    },
+    "fields": {
+      "paypal_email": "E-mail PayPal",
+      "stripe_account": "ID de compte Stripe",
+      "truemoney_msisdn": "Numéro de téléphone TrueMoney",
+      "promptpay_id": "ID PromptPay",
+      "account_name": "Nom du titulaire"
+    },
+    "detail": {
+      "id": "ID de la demande",
+      "provider": "Fournisseur",
+      "amount": "Montant",
+      "payout": "Versement",
+      "balanceSource": "Source du solde",
+      "status": "Statut",
+      "destination": "Compte de destination",
+      "payoutId": "ID de versement du fournisseur",
+      "error": "Erreur",
+      "created": "Créée",
+      "updated": "Mise à jour"
+    }
+  }
+}

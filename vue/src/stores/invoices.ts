@@ -9,6 +9,11 @@ export interface Invoice {
   user_id: string;
   invoice_number: string;
   amount: string;
+  // S85 invoice-level net / tax / gross totals (persisted). The bare ``amount``
+  // stays for backward compatibility; ``total_amount`` is the gross total.
+  subtotal?: string;
+  tax_amount?: string;
+  total_amount?: string;
   currency: string;
   status: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELLED' | 'REFUNDED';
   payment_method: string | null;

@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "提现",
+    "balance": "可用余额",
+    "moneyPreview": "≈ {amount}",
+    "provider": "提现方式",
+    "destination": "收款账户",
+    "amount": "金额",
+    "amountHint": "最低 {min} · 最高 {max}",
+    "payoutPreview": "您将收到 {amount}",
+    "submit": "申请提现",
+    "submitting": "提交中…",
+    "submitted": "提现申请已创建",
+    "history": "您的提现申请",
+    "noRequests": "暂无提现申请。",
+    "noProviders": "当前没有可用的提现方式。",
+    "back": "返回提现",
+    "requestDetail": "提现申请",
+    "notFound": "未找到提现申请。",
+    "errors": {
+      "belowMin": "最低提现金额为 {min}。",
+      "aboveBalance": "金额超过您的可用余额。"
+    },
+    "status": {
+      "pending": "待处理",
+      "approved": "已批准",
+      "processing": "处理中",
+      "completed": "已完成",
+      "failed": "失败",
+      "rejected": "已拒绝"
+    },
+    "fields": {
+      "paypal_email": "PayPal 邮箱",
+      "stripe_account": "Stripe 账户 ID",
+      "truemoney_msisdn": "TrueMoney 钱包手机号",
+      "promptpay_id": "PromptPay ID",
+      "account_name": "账户持有人姓名"
+    },
+    "detail": {
+      "id": "申请 ID",
+      "provider": "服务商",
+      "amount": "金额",
+      "payout": "付款",
+      "balanceSource": "余额来源",
+      "status": "状态",
+      "destination": "收款账户",
+      "payoutId": "服务商付款 ID",
+      "error": "错误",
+      "created": "创建时间",
+      "updated": "更新时间"
+    }
+  }
+}

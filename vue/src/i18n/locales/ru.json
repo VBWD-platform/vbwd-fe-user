@@ -134,7 +134,11 @@
       "taxNumber": "ИНН / НДС",
       "taxNumberPlaceholder": "7712345678",
       "phone": "Телефон",
-      "phonePlaceholder": "+7 495 123-45-67"
+      "phonePlaceholder": "+7 495 123-45-67",
+      "accountType": "Тип аккаунта",
+      "accountTypePrivate": "Частное лицо",
+      "accountTypeBusiness": "Компания",
+      "companyRequiredForBusiness": "Для бизнес-аккаунта требуется название компании"
     },
     "address": {
       "title": "Адрес",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} добавлен в корзину"
+  },
+  "price": {
+    "nettoTag": "цена нетто",
+    "totalNet": "Итого нетто",
+    "totalTax": "Налоги всего",
+    "totalTaxWithRate": "Налоги всего ({rate}%)",
+    "totalGross": "Итого брутто к оплате"
   }
 }

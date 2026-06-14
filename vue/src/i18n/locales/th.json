@@ -134,7 +134,11 @@
       "taxNumber": "หมายเลขประเมิน / หมายเลขภาษี",
       "taxNumberPlaceholder": "1234567890",
       "phone": "โทรศัพท์",
-      "phonePlaceholder": "+66 8 1234 5678"
+      "phonePlaceholder": "+66 8 1234 5678",
+      "accountType": "ประเภทบัญชี",
+      "accountTypePrivate": "บุคคลธรรมดา",
+      "accountTypeBusiness": "ธุรกิจ",
+      "companyRequiredForBusiness": "บัญชีธุรกิจต้องระบุชื่อบริษัท"
     },
     "address": {
       "title": "ที่อยู่",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "เพิ่ม {name} ในตะกร้าแล้ว"
+  },
+  "price": {
+    "nettoTag": "ราคาสุทธิ",
+    "totalNet": "ยอดรวมก่อนภาษี",
+    "totalTax": "ภาษีรวม",
+    "totalTaxWithRate": "ภาษีรวม ({rate}%)",
+    "totalGross": "ยอดรวมที่ต้องชำระ"
   }
 }

@@ -136,7 +136,11 @@
       "taxNumber": "Tax Number / VAT ID",
       "taxNumberPlaceholder": "DE123456789",
       "phone": "Phone",
-      "phonePlaceholder": "+49 123 456 7890"
+      "phonePlaceholder": "+49 123 456 7890",
+      "accountType": "Account Type",
+      "accountTypePrivate": "Private person",
+      "accountTypeBusiness": "Business",
+      "companyRequiredForBusiness": "Company is required for a business account"
     },
     "address": {
       "title": "Address",
@@ -381,5 +385,15 @@
   "manageApi": {
     "title": "Manage API",
     "intro": "Create and manage scoped API keys for programmatic access. Each key is shown once at creation — copy it then."
+  },
+  "price": {
+    "nettoTag": "netto price",
+    "net": "Net",
+    "gross": "Gross",
+    "taxLine": "{name} {rate}%",
+    "totalNet": "Total netto",
+    "totalTax": "Total taxes",
+    "totalTaxWithRate": "Total taxes ({rate}%)",
+    "totalGross": "Total brutto to pay"
   }
 }

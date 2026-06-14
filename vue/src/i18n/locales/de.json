@@ -134,7 +134,11 @@
       "taxNumber": "Steuernummer / USt-IdNr.",
       "taxNumberPlaceholder": "DE123456789",
       "phone": "Telefon",
-      "phonePlaceholder": "+49 123 456 7890"
+      "phonePlaceholder": "+49 123 456 7890",
+      "accountType": "Kontotyp",
+      "accountTypePrivate": "Privatperson",
+      "accountTypeBusiness": "Unternehmen",
+      "companyRequiredForBusiness": "Für ein Geschäftskonto ist ein Firmenname erforderlich"
     },
     "address": {
       "title": "Adresse",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} zum Warenkorb hinzugefügt"
+  },
+  "price": {
+    "nettoTag": "Nettopreis",
+    "totalNet": "Summe netto",
+    "totalTax": "Steuern gesamt",
+    "totalTaxWithRate": "Steuern gesamt ({rate}%)",
+    "totalGross": "Summe brutto zu zahlen"
   }
 }

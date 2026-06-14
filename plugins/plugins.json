@@ -137,6 +137,12 @@
       "version": "1.0.0",
       "installedAt": "2026-06-03T00:00:00.000Z",
       "source": "local"
+    },
+    "withdraw": {
+      "enabled": true,
+      "version": "1.0.0",
+      "installedAt": "2026-06-12T00:00:00.000Z",
+      "source": "local"
     }
   }
 }

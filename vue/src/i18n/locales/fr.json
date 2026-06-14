@@ -134,7 +134,11 @@
       "taxNumber": "Numéro de TVA",
       "taxNumberPlaceholder": "FR12345678901",
       "phone": "Téléphone",
-      "phonePlaceholder": "+33 1 23 45 67 89"
+      "phonePlaceholder": "+33 1 23 45 67 89",
+      "accountType": "Type de compte",
+      "accountTypePrivate": "Particulier",
+      "accountTypeBusiness": "Entreprise",
+      "companyRequiredForBusiness": "Le nom de l'entreprise est requis pour un compte professionnel"
     },
     "address": {
       "title": "Adresse",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} ajouté au panier"
+  },
+  "price": {
+    "nettoTag": "prix net",
+    "totalNet": "Total net",
+    "totalTax": "Taxes totales",
+    "totalTaxWithRate": "Taxes totales ({rate}%)",
+    "totalGross": "Total brut à payer"
   }
 }

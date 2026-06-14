@@ -1,0 +1,53 @@
+{
+  "withdraw": {
+    "title": "出金",
+    "balance": "利用可能残高",
+    "moneyPreview": "≈ {amount}",
+    "provider": "出金方法",
+    "destination": "送金先",
+    "amount": "金額",
+    "amountHint": "最小 {min} · 最大 {max}",
+    "payoutPreview": "受取額: {amount}",
+    "submit": "出金をリクエスト",
+    "submitting": "送信中…",
+    "submitted": "出金リクエストを作成しました",
+    "history": "出金リクエスト履歴",
+    "noRequests": "出金リクエストはまだありません。",
+    "noProviders": "現在利用可能な出金方法はありません。",
+    "back": "出金ページに戻る",
+    "requestDetail": "出金リクエスト",
+    "notFound": "出金リクエストが見つかりません。",
+    "errors": {
+      "belowMin": "最小出金額は {min} です。",
+      "aboveBalance": "金額が利用可能残高を超えています。"
+    },
+    "status": {
+      "pending": "保留中",
+      "approved": "承認済み",
+      "processing": "処理中",
+      "completed": "完了",
+      "failed": "失敗",
+      "rejected": "却下"
+    },
+    "fields": {
+      "paypal_email": "PayPalメールアドレス",
+      "stripe_account": "StripeアカウントID",
+      "truemoney_msisdn": "TrueMoneyウォレット電話番号",
+      "promptpay_id": "PromptPay ID",
+      "account_name": "口座名義"
+    },
+    "detail": {
+      "id": "リクエストID",
+      "provider": "プロバイダー",
+      "amount": "金額",
+      "payout": "支払い",
+      "balanceSource": "残高ソース",
+      "status": "ステータス",
+      "destination": "送金先",
+      "payoutId": "プロバイダー支払いID",
+      "error": "エラー",
+      "created": "作成日時",
+      "updated": "更新日時"
+    }
+  }
+}

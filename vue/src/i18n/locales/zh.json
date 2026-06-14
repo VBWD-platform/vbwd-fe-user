@@ -134,7 +134,11 @@
       "taxNumber": "税号 / 增值税号",
       "taxNumberPlaceholder": "123456789",
       "phone": "电话",
-      "phonePlaceholder": "+86 10 1234 5678"
+      "phonePlaceholder": "+86 10 1234 5678",
+      "accountType": "账户类型",
+      "accountTypePrivate": "个人",
+      "accountTypeBusiness": "企业",
+      "companyRequiredForBusiness": "企业账户必须填写公司名称"
     },
     "address": {
       "title": "地址",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} 已加入购物车"
+  },
+  "price": {
+    "nettoTag": "净价",
+    "totalNet": "净额合计",
+    "totalTax": "税费合计",
+    "totalTaxWithRate": "税费合计（{rate}%）",
+    "totalGross": "应付总额（含税）"
   }
 }

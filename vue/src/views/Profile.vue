@@ -98,12 +98,37 @@
 
           <div class="form-row">
             <div class="form-group">
-              <label for="company">{{ $t('profile.personalInfo.company') }}</label>
+              <label for="accountType">{{ $t('profile.personalInfo.accountType') }}</label>
+              <select
+                id="accountType"
+                v-model="formData.account_type"
+                data-testid="account-type-select"
+              >
+                <option value="private">
+                  {{ $t('profile.personalInfo.accountTypePrivate') }}
+                </option>
+                <option value="business">
+                  {{ $t('profile.personalInfo.accountTypeBusiness') }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div
+            v-show="isBusinessAccount"
+            class="form-row"
+            data-testid="business-fields"
+          >
+            <div class="form-group">
+              <label for="company">
+                {{ $t('profile.personalInfo.company') }} <span class="required-mark">*</span>
+              </label>
               <input
                 id="company"
                 v-model="formData.company"
                 type="text"
                 data-testid="company-input"
+                :required="isBusinessAccount"
                 :placeholder="$t('profile.personalInfo.companyPlaceholder')"
               >
             </div>
@@ -346,6 +371,7 @@ const passwordError = ref('');
 interface FormData {
   first_name: string;
   last_name: string;
+  account_type: string;
   company: string;
   tax_number: string;
   phone: string;
@@ -360,6 +386,7 @@ interface FormData {
 const formData = reactive<FormData>({
   first_name: '',
   last_name: '',
+  account_type: 'private',
   company: '',
   tax_number: '',
   phone: '',
@@ -370,6 +397,9 @@ const formData = reactive<FormData>({
   country: '',
   language: 'en',
 });
+
+// S74 — company/tax fields only apply (and company is required) for businesses.
+const isBusinessAccount = computed(() => formData.account_type === 'business');
 
 const passwordData = reactive({
   currentPassword: '',
@@ -443,6 +473,7 @@ async function loadProfile(): Promise<void> {
       details: {
         first_name?: string;
         last_name?: string;
+        account_type?: string;
         company?: string;
         tax_number?: string;
         phone?: string;
@@ -462,6 +493,7 @@ async function loadProfile(): Promise<void> {
     if (response.details) {
       formData.first_name = response.details.first_name || '';
       formData.last_name = response.details.last_name || '';
+      formData.account_type = response.details.account_type || 'private';
       formData.company = response.details.company || '';
       formData.tax_number = response.details.tax_number || '';
       formData.phone = response.details.phone || '';
@@ -488,6 +520,12 @@ function onLanguageChange(): void {
 }
 
 async function handleUpdateProfile(): Promise<void> {
+  // S74 — a business account must declare a company name.
+  if (isBusinessAccount.value && !formData.company.trim()) {
+    error.value = t('profile.personalInfo.companyRequiredForBusiness');
+    return;
+  }
+
   saving.value = true;
   error.value = null;
 
@@ -495,6 +533,7 @@ async function handleUpdateProfile(): Promise<void> {
     await api.put('/user/details', {
       first_name: formData.first_name,
       last_name: formData.last_name,
+      account_type: formData.account_type,
       company: formData.company,
       tax_number: formData.tax_number,
       phone: formData.phone,

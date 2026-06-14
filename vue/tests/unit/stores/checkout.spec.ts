@@ -204,4 +204,50 @@ describe('core checkout store (agnostic)', () => {
     expect(store.couponCode).toBeNull();
     expect(store.discountAmount).toBe(0);
   });
+
+  it('currency falls back to the global default currency (never USD) when line items carry no currency', async () => {
+    // Line items without a `currency` field — the store must use the global
+    // operating currency, not a hardcoded 'USD' (S93).
+    const source = makeSource();
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+
+    expect(store.currency).not.toBe('USD');
+    expect(store.currency).toBe('EUR'); // appConfig baseline default
+  });
+
+  it('currency prefers an explicit line-item currency when present', async () => {
+    const items: LineItem[] = [
+      { type: 'fake', id: 'x1', name: 'Item One', price: 10, currency: 'GBP' },
+    ];
+    const source = makeSource({ getLineItems: () => items });
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+
+    expect(store.currency).toBe('GBP');
+  });
+
+  it('projects the active source order tax breakdown (or null when unsupported)', async () => {
+    const taxBreakdown = {
+      netto: 100,
+      taxes: [{ code: 'VAT', rate: 19, amount: 19 }],
+      brutto: 119,
+      currency: 'EUR',
+    };
+    const withTax = makeSource({ getTaxBreakdown: () => taxBreakdown });
+    checkoutSourceRegistry.register(withTax);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+    expect(store.taxBreakdown).toEqual(taxBreakdown);
+  });
+
+  it('taxBreakdown is null when the source omits getTaxBreakdown', async () => {
+    const source = makeSource();
+    checkoutSourceRegistry.register(source);
+    const store = useCheckoutStore();
+    await store.loadForContext({ source: 'fake' });
+    expect(store.taxBreakdown).toBeNull();
+  });
 });

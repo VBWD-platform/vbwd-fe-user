@@ -23,6 +23,7 @@
  *   });
  */
 import type { Component } from 'vue';
+import type { PriceVO } from '@/utils/priceDisplay';
 
 /** A single purchasable line in a checkout. `type` is an opaque plugin string. */
 export interface LineItem {
@@ -82,6 +83,17 @@ export interface CheckoutSource {
   reset(): void;
   /** Optional component rendering this source's order summary (items + total). */
   summaryComponent?: Component;
+
+  /**
+   * Optional order-level tax breakdown across ALL of this source's line items
+   * (an aggregated Price VO: net + per-(code,rate) tax groups + gross). The
+   * core checkout view renders it just before the Total. Sources that omit it
+   * (no tax data) simply show no breakdown — the field is purely additive and
+   * carries no plugin vocabulary, so core stays agnostic. The amounts are
+   * display-summed from the per-line taxes the backend already computed; the FE
+   * never recomputes tax.
+   */
+  getTaxBreakdown?(): PriceVO | null;
 
   // ── Optional coupon support (additive — sources that omit these behave as
   //    today, no coupon). `getOrderTotal()` returns the NET total: a source

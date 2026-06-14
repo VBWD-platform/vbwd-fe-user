@@ -134,7 +134,11 @@
       "taxNumber": "税務番号 / 法人番号",
       "taxNumberPlaceholder": "1234567890123",
       "phone": "電話番号",
-      "phonePlaceholder": "+81 90 1234 5678"
+      "phonePlaceholder": "+81 90 1234 5678",
+      "accountType": "アカウントタイプ",
+      "accountTypePrivate": "個人",
+      "accountTypeBusiness": "法人",
+      "companyRequiredForBusiness": "法人アカウントには会社名が必要です"
     },
     "address": {
       "title": "住所",
@@ -375,5 +379,12 @@
   },
   "cart": {
     "addedToCart": "{name} をカートに追加しました"
+  },
+  "price": {
+    "nettoTag": "正味価格",
+    "totalNet": "正味合計",
+    "totalTax": "税合計",
+    "totalTaxWithRate": "税合計（{rate}%）",
+    "totalGross": "支払総額（税込）"
   }
 }
