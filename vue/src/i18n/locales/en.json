@@ -49,7 +49,8 @@
       "year": "year",
       "week": "week",
       "oneTime": "one-time"
-    }
+    },
+    "search": "Search"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -193,6 +194,12 @@
     "backToPlans": "Back to Plans",
     "errors": {
       "failedToLoad": "Failed to load token bundles"
+    },
+    "sortByPrice": "Sort by price",
+    "tableHeaders": {
+      "tokens": "Tokens",
+      "price": "Price",
+      "actions": "Actions"
     }
   },
   "invoices": {
