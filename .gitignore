@@ -38,3 +38,5 @@ plugins/truemoney-payment/
 plugins/yookassa-payment/
 plugins/meinchat-plus/
 plugins/shop/
+plugins/cms-youtube/
+plugins/withdraw/
