@@ -131,6 +131,54 @@ describe('InvoiceDetail — per-rate tax breakdown (S85.4 gap #1)', () => {
     expect(taxLines[0].text()).toContain('38');
   });
 
+  it('reconciles a discounted booking invoice (resource + negative-tax discount line)', async () => {
+    // S96.5: booking applies D-DiscountTax — the discount line carries a
+    // NEGATIVE per-rate tax_breakdown so the aggregated per-rate tax matches the
+    // post-discount invoice.tax_amount and the displayed net + tax == gross.
+    mockGet.mockResolvedValue({
+      id: 'inv-1',
+      invoice_number: 'INV-BK-1',
+      status: 'PAID',
+      amount: '107.10',
+      subtotal: '90.00',
+      tax_amount: '17.10',
+      total_amount: '107.10',
+      currency: 'EUR',
+      line_items: [
+        {
+          type: 'booking',
+          description: 'Room — 1 night',
+          quantity: 1,
+          unit_price: '119.00',
+          total_price: '119.00',
+          net_amount: '100.00',
+          tax_amount: '19.00',
+          tax_breakdown: [{ code: 'VAT', name: 'VAT Germany', rate: 19, amount: 19.0 }],
+        },
+        {
+          type: 'custom',
+          description: 'Discount',
+          quantity: 1,
+          unit_price: '-11.90',
+          total_price: '-11.90',
+          net_amount: '-10.00',
+          tax_amount: '-1.90',
+          tax_breakdown: [{ code: 'VAT', name: 'VAT Germany', rate: 19, amount: -1.9 }],
+        },
+      ],
+    });
+
+    const wrapper = mountView();
+    await flushPromises();
+
+    const taxLines = wrapper.findAll('[data-testid="price-breakdown-tax-line"]');
+    expect(taxLines).toHaveLength(1);
+    // 19.00 + (-1.90) = 17.10 — the post-discount tax, reconciling 90 + 17.10 = 107.10.
+    expect(taxLines[0].text()).toContain('17.1');
+    expect(wrapper.get('[data-testid="price-breakdown-net"]').text()).toContain('90');
+    expect(wrapper.get('[data-testid="price-breakdown-gross"]').text()).toContain('107.1');
+  });
+
   it('falls back to the aggregate tax line when no per-line breakdown exists', async () => {
     mockGet.mockResolvedValue({
       id: 'inv-1',
