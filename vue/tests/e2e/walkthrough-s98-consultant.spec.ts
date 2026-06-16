@@ -9,7 +9,9 @@ import { test, expect } from '@playwright/test';
 // LlmConnection pointing at the stub server, and a CMS page hosting the meinchat
 // bot-widget at WIDGET_PATH.
 
-const WIDGET_PATH = process.env.WIDGET_PATH || '/contact-with-chat';
+// The CI seed (vbwd-platform/ci/seed-walkthroughs.py) creates a published
+// `/consultant` page hosting the meinchat bot-widget. Override with WIDGET_PATH.
+const WIDGET_PATH = process.env.WIDGET_PATH || '/consultant';
 
 test('S98 — guest consults the bot-meinchat-llm consultant in the widget', async ({ page }) => {
   await page.goto(WIDGET_PATH, { waitUntil: 'networkidle' });
