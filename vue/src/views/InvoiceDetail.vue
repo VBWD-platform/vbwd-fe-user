@@ -61,7 +61,7 @@
           </div>
           <div class="detail-row">
             <span class="label">{{ $t('invoices.detail.currency') }}</span>
-            <span class="value">{{ invoice.currency || 'USD' }}</span>
+            <span class="value">{{ invoiceCurrency }}</span>
           </div>
           <div
             v-if="invoice.payment_method"
@@ -252,14 +252,16 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
-import { PaymentDataBlock, TagChips, CustomFieldsDisplay } from 'vbwd-view-component';
+import { PaymentDataBlock, TagChips, CustomFieldsDisplay, formatMoney } from 'vbwd-view-component';
 import { useInvoicesStore } from '@/stores/invoices';
+import { useAppConfigStore } from '@/stores/appConfig';
 import { getInvoicePaymentMethods } from '@/extensions/invoicePaymentMethods';
 import PriceBreakdown from '@/components/PriceBreakdown.vue';
 import type { PriceVO } from '@/utils/priceDisplay';
 
 const invoicesStore = useInvoicesStore();
 const paymentMethods = getInvoicePaymentMethods();
+const appConfig = useAppConfigStore();
 
 interface LineItemTax {
   code: string;
@@ -314,6 +316,10 @@ const loading = ref(true);
 const error = ref<string | null>(null);
 const invoice = ref<Invoice | null>(null);
 
+// An invoice renders in its OWN stored currency (a legal document); if it is
+// somehow absent, fall back to the billing default — never a literal (S99).
+const invoiceCurrency = computed(() => invoice.value?.currency || appConfig.defaultCurrency);
+
 // Totals-level Price VO built ONLY from persisted fields — no fe-side tax math.
 // ``brutto`` is the gross total; ``netto`` the subtotal (falls back to gross).
 // Per-rate tax lines are AGGREGATED from the persisted line-item tax_breakdown
@@ -337,7 +343,7 @@ const invoiceBreakdownPrice = computed<PriceVO>(() => {
     netto: net,
     taxes,
     brutto: gross,
-    currency: current?.currency || 'USD',
+    currency: current?.currency || appConfig.defaultCurrency,
   };
 });
 
@@ -425,11 +431,13 @@ function paymentMethodLabel(method: string): string {
   return labels[method] || method;
 }
 
-function formatAmount(value: string | number | null | undefined, currency = 'USD'): string {
+function formatAmount(value: string | number | null | undefined, currency?: string): string {
   if (value === null || value === undefined || value === '') return '—';
   const num = typeof value === 'string' ? parseFloat(value) : value;
   if (isNaN(num)) return '—';
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(num);
+  // The invoice's own currency, else the billing default (an invoice is a legal
+  // document — never a literal); formatted via fe-core formatMoney (S99).
+  return formatMoney(num, { currency: currency || invoiceCurrency.value });
 }
 
 function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string; extra_data?: Record<string, unknown> }): string | null {

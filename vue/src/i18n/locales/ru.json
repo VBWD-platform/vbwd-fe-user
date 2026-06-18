@@ -386,5 +386,9 @@
     "totalTax": "Налоги всего",
     "totalTaxWithRate": "Налоги всего ({rate}%)",
     "totalGross": "Итого брутто к оплате"
+  },
+  "currency": {
+    "displayIn": "Показать в",
+    "billedIn": "Оплата в {currency}"
   }
 }

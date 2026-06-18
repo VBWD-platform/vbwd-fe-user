@@ -168,7 +168,8 @@
         </nav>
       </div>
 
-      <!-- Sidebar Footer: Cart + User Menu -->
+      <!-- Sidebar Footer: Cart + User Menu. The view-only display-currency
+           switcher lives in Profile → Preferences (S99). -->
       <div class="sidebar-footer">
         <!-- Cart Icon -->
         <div class="cart-wrapper">
@@ -240,7 +241,7 @@
                     <span class="cart-item-qty">x{{ item.quantity }}</span>
                   </div>
                   <div class="cart-item-actions">
-                    <span class="cart-item-price">{{ formatPrice(item.price * item.quantity) }}</span>
+                    <span class="cart-item-price">{{ formatPrice(item.price * item.quantity, item.metadata?.currency as string | undefined) }}</span>
                     <button
                       class="remove-btn"
                       :data-testid="`remove-cart-item-${item.id}`"
@@ -360,6 +361,7 @@ import { storeToRefs } from 'pinia';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
 import { hasUserPermission } from '@/api';
 import ToastHost from '@/components/ToastHost.vue';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
 
 const router = useRouter();
 
@@ -448,11 +450,12 @@ function goToCheckout() {
   }
 }
 
-function formatPrice(price: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(price);
+const displayPrice = useDisplayPrice();
+
+function formatPrice(price: number, currency?: string): string {
+  // The cart is a storefront price surface, so it follows the view-only
+  // display-currency switch (S99.4); identity when display == billing.
+  return displayPrice.formatInDisplay(price, currency);
 }
 
 function logout() {

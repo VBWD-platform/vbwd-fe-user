@@ -75,7 +75,7 @@
           class="bundle-price"
           data-testid="token-price"
         >
-          {{ formatPrice(bundle.price) }}
+          {{ formatPrice(bundle.price, bundle.price_info?.price?.currency || bundle.currency) }}
         </div>
         <p
           v-if="bundle.description"
@@ -111,6 +111,14 @@ import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
 import { useCartStore, eventBus, AppEvents } from 'vbwd-view-component';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
+
+interface TokenPriceVO {
+  netto: number;
+  brutto: number;
+  currency: string;
+  taxes: { code: string; rate: number; amount: number }[];
+}
 
 interface TokenBundle {
   id: string;
@@ -120,10 +128,14 @@ interface TokenBundle {
   currency: string;
   description?: string;
   is_active: boolean;
+  // Computed net/gross/taxes split from /token-bundles, preserved into the cart
+  // so the bundle discloses its tax on checkout.
+  price_info?: { price?: TokenPriceVO };
 }
 
 const { t } = useI18n();
 const cartStore = useCartStore();
+const displayPrice = useDisplayPrice();
 
 const bundles = ref<TokenBundle[]>([]);
 const loading = ref(false);
@@ -146,12 +158,19 @@ async function loadBundles() {
 function addToCart(bundle: TokenBundle) {
   const numPrice = typeof bundle.price === 'string' ? parseFloat(bundle.price) : bundle.price;
   const name = `${formatTokenAmount(bundle.token_amount)} Tokens`;
+  // Preserve the computed Price VO + currency so the bundle contributes its tax
+  // to the checkout's order-level breakdown (the bare bundle.currency is null).
+  const priceVO = bundle.price_info?.price;
   cartStore.addItem({
     type: 'TOKEN_BUNDLE',
     id: bundle.id,
     name,
     price: numPrice,
-    metadata: { token_amount: bundle.token_amount },
+    metadata: {
+      token_amount: bundle.token_amount,
+      currency: priceVO?.currency ?? bundle.currency,
+      price_obj: priceVO,
+    },
   });
   eventBus.emit(AppEvents.NOTIFICATION_SHOW, {
     type: 'success',
@@ -164,12 +183,11 @@ function formatTokenAmount(amount: number): string {
   return new Intl.NumberFormat('en-US').format(amount);
 }
 
-function formatPrice(price: number | string): string {
+function formatPrice(price: number | string, currency?: string): string {
   const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(numPrice);
+  // Storefront catalog price — follows the view-only display-currency switch
+  // (S99.4); identity (billing currency) when display == billing.
+  return displayPrice.formatInDisplay(numPrice, currency);
 }
 
 onMounted(() => {

@@ -17,13 +17,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import UserLayout from './layouts/UserLayout.vue';
 import SessionExpiredModal from './components/SessionExpiredModal.vue';
 import { isAuthenticated } from '@/api';
+import { useAppConfigStore } from '@/stores/appConfig';
 
 const route = useRoute();
+
+// Load the public app config (operating currency + active currencies + rates,
+// price-display modes) once at app start. It is the single source for fe-core's
+// operating currency and for the display-currency switcher in UserLayout (S99) —
+// the checkout views also call it, but it's idempotent, and the switcher lives
+// on dashboard pages that never enter a checkout flow, so it must load here too.
+onMounted(() => {
+  void useAppConfigStore().load();
+});
 
 const isEmbedRoute = computed(() => route.meta.embed === true);
 

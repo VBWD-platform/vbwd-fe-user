@@ -386,5 +386,9 @@
     "totalTax": "ภาษีรวม",
     "totalTaxWithRate": "ภาษีรวม ({rate}%)",
     "totalGross": "ยอดรวมที่ต้องชำระ"
+  },
+  "currency": {
+    "displayIn": "แสดงเป็น",
+    "billedIn": "เรียกเก็บเป็น {currency}"
   }
 }

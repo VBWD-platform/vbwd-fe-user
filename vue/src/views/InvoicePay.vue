@@ -51,7 +51,7 @@
           </div>
           <div class="detail-row">
             <span class="label">{{ $t('invoices.pay.currency') }}</span>
-            <span class="value">{{ invoice.currency || 'USD' }}</span>
+            <span class="value">{{ invoiceCurrency }}</span>
           </div>
         </div>
 
@@ -144,10 +144,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
+import { useAppConfigStore } from '@/stores/appConfig';
 
 interface LineItem {
   type: string;
@@ -173,10 +174,15 @@ interface Invoice {
 const route = useRoute();
 const router = useRouter();
 const { t } = useI18n();
+const appConfig = useAppConfigStore();
 
 const loading = ref(true);
 const error = ref<string | null>(null);
 const invoice = ref<Invoice | null>(null);
+
+// An invoice renders in its OWN stored currency (a legal document); if it is
+// somehow absent, fall back to the billing default — never a literal (S99).
+const invoiceCurrency = computed(() => invoice.value?.currency || appConfig.defaultCurrency);
 const processing = ref(false);
 const paymentSuccess = ref(false);
 

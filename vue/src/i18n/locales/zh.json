@@ -386,5 +386,9 @@
     "totalTax": "税费合计",
     "totalTaxWithRate": "税费合计（{rate}%）",
     "totalGross": "应付总额（含税）"
+  },
+  "currency": {
+    "displayIn": "显示货币",
+    "billedIn": "以 {currency} 计费"
   }
 }

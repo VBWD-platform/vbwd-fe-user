@@ -72,6 +72,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { api } from '@/api';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
 
 interface TokenBundle {
   id: string;
@@ -84,6 +85,7 @@ interface TokenBundle {
 
 const route = useRoute();
 const { t } = useI18n();
+const displayPrice = useDisplayPrice();
 
 const loading = ref(true);
 const error = ref<string | null>(null);
@@ -111,10 +113,9 @@ function formatTokenAmount(amount: number): string {
 function formatPrice(price: string | number | null | undefined): string {
   if (price === null || price === undefined) return '-';
   const num = typeof price === 'string' ? parseFloat(price) : price;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(num);
+  // Storefront catalog price — follows the view-only display-currency switch
+  // (S99.4); identity (operating currency) when display == billing.
+  return displayPrice.formatInDisplay(num);
 }
 </script>
 

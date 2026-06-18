@@ -44,16 +44,29 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatMoney } from 'vbwd-view-component';
 import type { PriceVO } from '@/utils/priceDisplay';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
 
 const props = defineProps<{
   /** The aggregated order Price VO (net + per-group taxes + gross). */
   price: PriceVO;
+  /**
+   * Opt in to the storefront display-currency switch (S99.4). Each VO component
+   * (net, every tax amount, gross) is scaled by the SAME cross-rate and shown
+   * in the display currency. Invoice surfaces leave this off (D5).
+   */
+  convertToDisplay?: boolean;
 }>();
 
 const { t } = useI18n();
+const displayPrice = useDisplayPrice();
 
 function formatAmount(amount: number): string {
-  return formatMoney(amount, { currency: props.price.currency || 'USD' });
+  // Storefront surfaces opt in to the display-currency switch (S99.4); every
+  // other usage formats in the VO's own currency (else the operating currency,
+  // formatMoney's default) — never a hardcoded literal (S99).
+  return props.convertToDisplay
+    ? displayPrice.formatInDisplay(amount, props.price.currency)
+    : formatMoney(amount, { currency: props.price.currency });
 }
 
 // Display sum of the already-computed per-group tax amounts — never recomputed.

@@ -15,6 +15,18 @@ const mockAccountType = vi.fn<[], 'private' | 'business' | undefined>();
 vi.mock('vbwd-view-component', () => ({
   useAuthStore: () => ({ user: { account_type: mockAccountType() } }),
   formatMoney: (amount: number) => String(amount),
+  // PriceDisplay now wires the display-currency switch (S99.4), which pulls in
+  // @/stores/appConfig → @/api → ApiClient + setOperatingCurrency. Stub them so
+  // this partial mock keeps the module graph loadable (pitfall a).
+  setOperatingCurrency: vi.fn(),
+  ApiClient: class {
+    get = vi.fn();
+    post = vi.fn();
+    put = vi.fn();
+    delete = vi.fn();
+    on = vi.fn();
+    off = vi.fn();
+  },
 }));
 
 vi.mock('vue-i18n', () => ({

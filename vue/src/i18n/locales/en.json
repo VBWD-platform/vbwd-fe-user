@@ -402,5 +402,9 @@
     "totalTax": "Total taxes",
     "totalTaxWithRate": "Total taxes ({rate}%)",
     "totalGross": "Total brutto to pay"
+  },
+  "currency": {
+    "displayIn": "Display in",
+    "billedIn": "Billed in {currency}"
   }
 }

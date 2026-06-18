@@ -30,6 +30,7 @@ import {
   type PriceDisplayMode,
   type ViewerAccountType,
 } from '@/utils/priceDisplay';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
 
 const props = defineProps<{
   /** Effective display mode from the pricing payload (override ?? global). */
@@ -47,9 +48,17 @@ const props = defineProps<{
    * netto side via the D9 overlay; anonymous viewers omit it.
    */
   accountType?: ViewerAccountType | null;
+  /**
+   * Opt in to the storefront display-currency switch (S99.4). When true and the
+   * user picked a non-billing display currency, the amount is converted at the
+   * render boundary and shown in that currency. Invoice surfaces leave this off
+   * (D5) so they always render their stored currency.
+   */
+  convertToDisplay?: boolean;
 }>();
 
 const { t } = useI18n();
+const displayPrice = useDisplayPrice();
 
 const resolved = computed(() =>
   resolvePriceDisplay({
@@ -62,7 +71,12 @@ const resolved = computed(() =>
 );
 
 const formattedAmount = computed(() =>
-  formatMoney(resolved.value.amount, { currency: props.currency || 'USD' })
+  // Storefront surfaces opt in to the display-currency switch (S99.4); every
+  // other usage formats in the prop currency (else the operating currency,
+  // formatMoney's default) — never a hardcoded literal (S99).
+  props.convertToDisplay
+    ? displayPrice.formatInDisplay(resolved.value.amount, props.currency)
+    : formatMoney(resolved.value.amount, { currency: props.currency })
 );
 </script>
 

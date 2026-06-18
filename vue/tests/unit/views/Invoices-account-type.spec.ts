@@ -12,6 +12,18 @@ const mockAccountType = vi.fn<[], 'private' | 'business' | undefined>();
 vi.mock('vbwd-view-component', () => ({
   useAuthStore: () => ({ user: { account_type: mockAccountType() } }),
   formatMoney: (amount: number) => String(amount),
+  // The view now pulls the app-config store (S99 billing currency), which
+  // transitively imports the @/api ApiClient + fe-core's operating-currency
+  // accessor — stub both so the module graph loads under the mock.
+  setOperatingCurrency: vi.fn(),
+  ApiClient: class {
+    get = vi.fn().mockResolvedValue({});
+    post = vi.fn().mockResolvedValue({});
+    put = vi.fn().mockResolvedValue({});
+    delete = vi.fn().mockResolvedValue({});
+    on = vi.fn();
+    off = vi.fn();
+  },
 }));
 
 vi.mock('vue-i18n', () => ({

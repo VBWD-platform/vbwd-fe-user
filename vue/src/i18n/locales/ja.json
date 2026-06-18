@@ -386,5 +386,9 @@
     "totalTax": "税合計",
     "totalTaxWithRate": "税合計（{rate}%）",
     "totalGross": "支払総額（税込）"
+  },
+  "currency": {
+    "displayIn": "表示通貨",
+    "billedIn": "{currency} で請求"
   }
 }

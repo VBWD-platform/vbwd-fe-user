@@ -256,6 +256,31 @@
             </option>
           </select>
         </div>
+
+        <!-- View-only display currency (S99): pick the currency to SEE prices
+             in. Shown only when the operator offers >= 2 active currencies; it
+             never changes the billing currency, the checkout, or any invoice. -->
+        <div
+          v-if="displayCurrency.hasSwitcher"
+          class="form-group"
+        >
+          <label for="display-currency">{{ $t('currency.displayIn') }}</label>
+          <select
+            id="display-currency"
+            :value="displayCurrency.code"
+            data-testid="display-currency-select"
+            class="form-select"
+            @change="onDisplayCurrencyChange"
+          >
+            <option
+              v-for="code in displayCurrency.availableCurrencies"
+              :key="code"
+              :value="code"
+            >
+              {{ code }}
+            </option>
+          </select>
+        </div>
       </div>
 
       <!-- Change Password Card -->
@@ -337,12 +362,18 @@
 import { ref, reactive, computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProfileStore } from '../stores/profile';
+import { useDisplayCurrencyStore } from '../stores/displayCurrency';
 import { api } from '../api';
 import { setLocale, type LocaleCode } from '../i18n';
 import { getProfileSections } from '@/registries/profileSectionsRegistry';
 
 const { t, locale } = useI18n();
 const profileStore = useProfileStore();
+const displayCurrency = useDisplayCurrencyStore();
+
+function onDisplayCurrencyChange(event: Event): void {
+  displayCurrency.setCurrency((event.target as HTMLSelectElement).value);
+}
 
 // Plugin-contributed cards. Two slots: ``top`` renders above the core
 // cards (use for things the user should see first, e.g. picking a

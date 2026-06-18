@@ -145,7 +145,7 @@
               <PriceDisplay
                 :net-amount="invoiceNetAmount(invoice)"
                 :gross-amount="invoiceGrossAmount(invoice)"
-                :currency="invoice.currency || 'USD'"
+                :currency="invoiceCurrency(invoice)"
                 :account-type="authStore.user?.account_type"
               />
             </td>
@@ -235,12 +235,20 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from 'vbwd-view-component';
 import { useInvoicesStore, type Invoice } from '../stores/invoices';
+import { useAppConfigStore } from '@/stores/appConfig';
 import PriceDisplay from '@/components/PriceDisplay.vue';
 
 const router = useRouter();
 const { t } = useI18n();
 const authStore = useAuthStore();
 const invoicesStore = useInvoicesStore();
+const appConfig = useAppConfigStore();
+
+// An invoice renders in its OWN stored currency (a legal document); if it is
+// somehow absent, fall back to the billing default — never a literal (S99).
+function invoiceCurrency(invoice: Invoice): string {
+  return invoice.currency || appConfig.defaultCurrency;
+}
 
 const loading = ref(true);
 const error = ref<string | null>(null);

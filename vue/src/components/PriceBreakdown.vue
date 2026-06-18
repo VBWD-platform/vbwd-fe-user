@@ -43,16 +43,29 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatMoney } from 'vbwd-view-component';
 import type { PriceVO, PriceTaxVO } from '@/utils/priceDisplay';
+import { useDisplayPrice } from '@/composables/useDisplayPrice';
 
 const props = defineProps<{
   /** The computed Price VO (or a persisted invoice line's breakdown). */
   price: PriceVO;
+  /**
+   * Opt in to the storefront display-currency switch (S99.4). Off by default so
+   * invoice surfaces (a legal document) always render their stored currency
+   * (D5); storefront catalog/checkout usages set it true to convert.
+   */
+  convertToDisplay?: boolean;
 }>();
 
 const { t } = useI18n();
+const displayPrice = useDisplayPrice();
 
 function formatAmount(amount: number): string {
-  return formatMoney(amount, { currency: props.price.currency || 'USD' });
+  // Storefront surfaces opt in to the display-currency switch (S99.4); every
+  // other usage formats in the VO's own currency (else the operating currency,
+  // formatMoney's default) — never a hardcoded literal (S99).
+  return props.convertToDisplay
+    ? displayPrice.formatInDisplay(amount, props.price.currency)
+    : formatMoney(amount, { currency: props.price.currency });
 }
 
 const formattedNet = computed(() => formatAmount(props.price.netto));

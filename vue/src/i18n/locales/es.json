@@ -386,5 +386,9 @@
     "totalTax": "Impuestos totales",
     "totalTaxWithRate": "Impuestos totales ({rate}%)",
     "totalGross": "Total bruto a pagar"
+  },
+  "currency": {
+    "displayIn": "Mostrar en",
+    "billedIn": "Facturado en {currency}"
   }
 }

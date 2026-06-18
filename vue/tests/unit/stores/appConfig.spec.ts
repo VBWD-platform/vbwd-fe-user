@@ -8,7 +8,14 @@ vi.mock('@/api', () => ({
   },
 }));
 
+// Spy on the fe-core operating-currency accessor so we can assert appConfig
+// feeds it the configured default_currency (S99.2 wiring).
+vi.mock('vbwd-view-component', () => ({
+  setOperatingCurrency: vi.fn(),
+}));
+
 import { api } from '@/api';
+import { setOperatingCurrency } from 'vbwd-view-component';
 
 /**
  * S93 — the app-config store is the fe's single source of truth for the global
@@ -63,5 +70,64 @@ describe('useAppConfigStore', () => {
     await store.load();
 
     expect(store.defaultCurrency).toBe('EUR');
+  });
+
+  // S99.2 — appConfig is the fe-user feed for fe-core's process-global operating
+  // currency accessor: once /config loads, the shared accessor must match it so
+  // every fe-core formatter (formatMoney default) renders the billing currency.
+  it('load() feeds default_currency to fe-core setOperatingCurrency', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'USD',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(setOperatingCurrency).toHaveBeenCalledWith('USD');
+  });
+
+  // S99.4 — appConfig is also the fe-user feed for the view-only display-currency
+  // switcher: /config now publishes the base currency, the active set, and the
+  // per-currency cross-rates (S99.0b). appConfig exposes them so the
+  // displayCurrency store can convert at the render boundary.
+  it('exposes empty currency catalog defaults before the config is loaded', () => {
+    const store = useAppConfigStore();
+    expect(store.baseCurrency).toBe('EUR');
+    expect(store.activeCurrencies).toEqual([]);
+    expect(store.currencyRates).toEqual({});
+  });
+
+  it('load() exposes base_currency, active_currencies and currency_rates', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+      base_currency: 'EUR',
+      active_currencies: ['EUR', 'USD'],
+      currency_rates: { EUR: '1', USD: '1.1' },
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.baseCurrency).toBe('EUR');
+    expect(store.activeCurrencies).toEqual(['EUR', 'USD']);
+    expect(store.currencyRates).toEqual({ EUR: '1', USD: '1.1' });
+  });
+
+  it('keeps catalog defaults when the new keys are absent (back-compat)', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.activeCurrencies).toEqual([]);
+    expect(store.currencyRates).toEqual({});
   });
 });

@@ -151,7 +151,7 @@
               <span class="invoice-date">{{ formatDate(invoice.invoiced_at) }}</span>
             </div>
             <div class="invoice-right">
-              <span class="invoice-amount">{{ formatPrice(invoice.amount) }}</span>
+              <span class="invoice-amount">{{ formatPrice(invoice.amount, invoice.currency) }}</span>
               <span
                 class="invoice-status"
                 :class="invoice.status.toLowerCase()"
@@ -185,7 +185,7 @@ import { useI18n } from 'vue-i18n';
 import { useProfileStore } from '../stores/profile';
 import { useInvoicesStore } from '../stores/invoices';
 import { api, hasUserPermission } from '@/api';
-import type { PlatformSDK } from 'vbwd-view-component';
+import { formatMoney, type PlatformSDK } from 'vbwd-view-component';
 
 interface TokenTransaction {
   id: string;
@@ -287,13 +287,12 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
-function formatPrice(amount: string | number | null | undefined): string {
+function formatPrice(amount: string | number | null | undefined, currency?: string): string {
   if (amount === null || amount === undefined) return '-';
   const num = typeof amount === 'string' ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(num);
+  // Resolve: the value's own currency, else fe-core's operating currency
+  // (formatMoney's default) — never a hardcoded literal (S99).
+  return formatMoney(num, { currency });
 }
 
 function formatNumber(num: number): string {

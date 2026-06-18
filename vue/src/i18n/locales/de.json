@@ -386,5 +386,9 @@
     "totalTax": "Steuern gesamt",
     "totalTaxWithRate": "Steuern gesamt ({rate}%)",
     "totalGross": "Summe brutto zu zahlen"
+  },
+  "currency": {
+    "displayIn": "Anzeigen in",
+    "billedIn": "Abgerechnet in {currency}"
   }
 }
