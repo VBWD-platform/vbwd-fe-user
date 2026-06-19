@@ -169,9 +169,15 @@ run_unit() {
             echo "No test files for plugin $PLUGIN_NAME — skipping"
         fi
     else
+        # NOTE: ``set -e`` is active. A bare ``VAR=$(failing-cmd)`` aborts the
+        # whole script on a non-zero exit BEFORE the captured output is printed,
+        # so a failing unit run showed no reason in CI ("Running unit tests..."
+        # then exit 1). Guard the capture so the vitest output is always shown.
+        set +e
         VITEST_OUT=$(npx vitest run vue/tests/unit/ 2>&1)
         VITEST_EXIT=$?
-        echo "$VITEST_OUT" | tail -20
+        set -e
+        echo "$VITEST_OUT" | tail -60
         if [[ "$VITEST_EXIT" == "0" ]]; then
             print_success "Unit tests passed"
         else
