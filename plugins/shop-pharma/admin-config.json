@@ -1,0 +1,10 @@
+{
+  "debug_mode": false,
+  "settings": {
+    "show_class_badges": {
+      "type": "bool",
+      "label": "Show product-class badges on the catalogue",
+      "default": true
+    }
+  }
+}

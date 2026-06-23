@@ -83,6 +83,12 @@
       "version": "1.0.0",
       "installedAt": "2026-05-25T18:44:41.899Z",
       "source": "local"
+    },
+    "shop-pharma": {
+      "enabled": true,
+      "version": "0.1.0",
+      "installedAt": "2026-06-22T00:00:00.000Z",
+      "source": "local"
     }
   }
 }
