@@ -71,7 +71,7 @@ describe('core fe-user checkout is plugin-agnostic (Sprint 10 oracle)', () => {
   it('no core file imports a subscription / shop / checkout plugin store', () => {
     // Scoped to Sprint 10 domains. The generic plugin loader
     // (`import.meta.glob('plugins/*/index.ts')`) and core registries under
-    // `@/plugins/*` are not couplings; an unrelated taro re-export is out of
+    // `@/plugins/*` are not couplings; an unrelated tarot re-export is out of
     // scope. We forbid only importing a subscription/shop/checkout plugin's
     // internals into core.
     const offenders: string[] = [];

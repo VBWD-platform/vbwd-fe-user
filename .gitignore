@@ -30,7 +30,7 @@ plugins/paypal-payment/
 plugins/promptpay-payment/
 plugins/stripe-payment/
 plugins/subscription/
-plugins/taro/
+plugins/tarot/
 plugins/theme-switcher/
 plugins/token-payment/
 plugins/toss-payments-payment/

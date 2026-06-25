@@ -36,7 +36,7 @@ jobs:
 
       - name: Install plugins
         run: |
-          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription taro theme-switcher yookassa-payment; do
+          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription tarot theme-switcher yookassa-payment; do
             git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${plugin}.git plugins/${plugin}
           done
 
@@ -70,7 +70,7 @@ jobs:
 
       - name: Install plugins
         run: |
-          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription taro theme-switcher yookassa-payment; do
+          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription tarot theme-switcher yookassa-payment; do
             git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${plugin}.git plugins/${plugin}
           done
 
@@ -104,7 +104,7 @@ jobs:
 
       - name: Install plugins
         run: |
-          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription taro theme-switcher yookassa-payment; do
+          for plugin in chat checkout cms ghrm landing1 paypal-payment stripe-payment subscription tarot theme-switcher yookassa-payment; do
             git clone --depth=1 https://github.com/VBWD-platform/vbwd-fe-user-plugin-${plugin}.git plugins/${plugin}
           done
 

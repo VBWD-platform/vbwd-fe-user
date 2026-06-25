@@ -24,47 +24,47 @@ async function loginAsTestUser(page: Page): Promise<void> {
   }
 }
 
-test.describe('Taro Plugin - Navigation and Access', () => {
+test.describe('Tarot Plugin - Navigation and Access', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
 
-  test('should display Taro in navigation menu', async ({ page }) => {
+  test('should display Tarot in navigation menu', async ({ page }) => {
     // Navigate to dashboard
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
 
-    // Check for Taro nav item
-    const taroNavLink = page.locator('a[href="/dashboard/taro"]');
-    await expect(taroNavLink).toBeVisible();
+    // Check for Tarot nav item
+    const tarotNavLink = page.locator('a[href="/dashboard/tarot"]');
+    await expect(tarotNavLink).toBeVisible();
   });
 
-  test('should navigate to Taro page via menu link', async ({ page }) => {
+  test('should navigate to Tarot page via menu link', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');
 
-    // Click Taro nav link
-    await page.locator('a[href="/dashboard/taro"]').click();
-    await page.waitForURL('/dashboard/taro', { timeout: 10000 });
+    // Click Tarot nav link
+    await page.locator('a[href="/dashboard/tarot"]').click();
+    await page.waitForURL('/dashboard/tarot', { timeout: 10000 });
 
-    // Verify we're on Taro page
-    await expect(page.locator('[data-testid="taro-dashboard"]')).toBeVisible();
+    // Verify we're on Tarot page
+    await expect(page.locator('[data-testid="tarot-dashboard"]')).toBeVisible();
   });
 
-  test('should navigate directly to /dashboard/taro', async ({ page }) => {
-    await page.goto('/dashboard/taro');
+  test('should navigate directly to /dashboard/tarot', async ({ page }) => {
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Verify page title and main content
-    await expect(page.locator('[data-testid="taro-dashboard"]')).toBeVisible();
+    await expect(page.locator('[data-testid="tarot-dashboard"]')).toBeVisible();
     await expect(page.locator('[data-testid="daily-limits-card"]')).toBeVisible();
   });
 });
 
-test.describe('Taro Plugin - Daily Limits Display', () => {
+test.describe('Tarot Plugin - Daily Limits Display', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
   });
 
@@ -103,10 +103,10 @@ test.describe('Taro Plugin - Daily Limits Display', () => {
   });
 });
 
-test.describe('Taro Plugin - Create Session Flow', () => {
+test.describe('Tarot Plugin - Create Session Flow', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
   });
 
@@ -140,7 +140,7 @@ test.describe('Taro Plugin - Create Session Flow', () => {
 
       // Wait for either success or error
       const activeSessionCard = page.locator('[data-testid="active-session-card"]');
-      const errorMsg = page.locator('[data-testid="taro-error"]');
+      const errorMsg = page.locator('[data-testid="tarot-error"]');
 
       // Either should appear (error if token issues, session if success)
       const hasSessionOrError = await Promise.race([
@@ -156,7 +156,7 @@ test.describe('Taro Plugin - Create Session Flow', () => {
   });
 });
 
-test.describe('Taro Plugin - Active Session Display', () => {
+test.describe('Tarot Plugin - Active Session Display', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
     // This test assumes an active session exists
@@ -164,7 +164,7 @@ test.describe('Taro Plugin - Active Session Display', () => {
   });
 
   test('should display active session card if session exists', async ({ page }) => {
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const activeSessionCard = page.locator('[data-testid="active-session-card"]');
@@ -178,7 +178,7 @@ test.describe('Taro Plugin - Active Session Display', () => {
   });
 
   test('should display 3 cards in active session', async ({ page }) => {
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const activeSessionCard = page.locator('[data-testid="active-session-card"]');
@@ -191,7 +191,7 @@ test.describe('Taro Plugin - Active Session Display', () => {
   });
 
   test('should display session info (follow-ups, tokens, time)', async ({ page }) => {
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const activeSessionCard = page.locator('[data-testid="active-session-card"]');
@@ -205,10 +205,10 @@ test.describe('Taro Plugin - Active Session Display', () => {
   });
 });
 
-test.describe('Taro Plugin - Follow-up Functionality', () => {
+test.describe('Tarot Plugin - Follow-up Functionality', () => {
   test('should display follow-up section when session is active', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const followUpSection = page.locator('[data-testid="follow-up-section"]');
@@ -239,7 +239,7 @@ test.describe('Taro Plugin - Follow-up Functionality', () => {
 
   test('should allow selecting follow-up types', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const followUpSection = page.locator('[data-testid="follow-up-section"]');
@@ -256,7 +256,7 @@ test.describe('Taro Plugin - Follow-up Functionality', () => {
 
   test('submit follow-up button should be disabled when question is empty', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const followUpSection = page.locator('[data-testid="follow-up-section"]');
@@ -269,7 +269,7 @@ test.describe('Taro Plugin - Follow-up Functionality', () => {
 
   test('submit follow-up button should be enabled when question is provided', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const followUpSection = page.locator('[data-testid="follow-up-section"]');
@@ -287,10 +287,10 @@ test.describe('Taro Plugin - Follow-up Functionality', () => {
   });
 });
 
-test.describe('Taro Plugin - Session History', () => {
+test.describe('Tarot Plugin - Session History', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
   });
 
@@ -319,10 +319,10 @@ test.describe('Taro Plugin - Session History', () => {
   });
 });
 
-test.describe('Taro Plugin - Card Display and Interactions', () => {
+test.describe('Tarot Plugin - Card Display and Interactions', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
   });
 
@@ -348,7 +348,7 @@ test.describe('Taro Plugin - Card Display and Interactions', () => {
       const cards = activeSession.locator('[data-testid="card-display"]');
       const cardCount = await cards.count();
 
-      // TaroSession should contain exactly 3 cards (PAST, PRESENT, FUTURE)
+      // TarotSession should contain exactly 3 cards (PAST, PRESENT, FUTURE)
       if (cardCount > 0) {
         expect(cardCount).toBe(3);
       }
@@ -490,18 +490,18 @@ test.describe('Taro Plugin - Card Display and Interactions', () => {
   });
 });
 
-test.describe('Taro Plugin - Cards Grid Rendering (TDD)', () => {
+test.describe('Tarot Plugin - Cards Grid Rendering (TDD)', () => {
   /**
    * This test suite validates that the cards-grid div properly renders
-   * when a TaroSession is loaded with cards from the backend.
+   * when a TarotSession is loaded with cards from the backend.
    *
-   * This was previously failing when the backend TaroSession model
-   * was missing the relationship definition to TaroCardDraw.
+   * This was previously failing when the backend TarotSession model
+   * was missing the relationship definition to TarotCardDraw.
    */
 
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
   });
 
@@ -585,16 +585,16 @@ test.describe('Taro Plugin - Cards Grid Rendering (TDD)', () => {
   });
 });
 
-test.describe('Taro Plugin - Error Handling', () => {
+test.describe('Tarot Plugin - Error Handling', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
 
   test('should display retry button on error', async ({ page }) => {
     // Navigate with invalid state to trigger error (this is a smoke test)
-    await page.goto('/dashboard/taro?error=true', { waitUntil: 'networkidle' }).catch(() => {});
+    await page.goto('/dashboard/tarot?error=true', { waitUntil: 'networkidle' }).catch(() => {});
 
-    const errorState = page.locator('[data-testid="taro-error"]');
+    const errorState = page.locator('[data-testid="tarot-error"]');
 
     if (await errorState.isVisible().catch(() => false)) {
       const retryBtn = errorState.locator('button');
@@ -603,7 +603,7 @@ test.describe('Taro Plugin - Error Handling', () => {
   });
 
   test('should display expiry warning if session about to expire', async ({ page }) => {
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Check if expiry warning appears (only if session exists and is expiring soon)
@@ -615,10 +615,10 @@ test.describe('Taro Plugin - Error Handling', () => {
   });
 });
 
-test.describe('Taro Plugin - Close Session', () => {
+test.describe('Tarot Plugin - Close Session', () => {
   test('should display close session button on active session', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     const activeSession = page.locator('[data-testid="active-session-card"]');
@@ -639,10 +639,10 @@ test.describe('Taro Plugin - Close Session', () => {
   });
 });
 
-test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
+test.describe('Tarot Plugin - Oracle Conversation Flow (Card Reveal)', () => {
   test('should show cards in closed state initially', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed
@@ -671,7 +671,7 @@ test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
 
   test('should reveal card when clicked', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed
@@ -701,7 +701,7 @@ test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
 
   test('should show Oracle dialog after all 3 cards are opened', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed
@@ -734,7 +734,7 @@ test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
 
   test('should transition through Oracle phases correctly', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed
@@ -770,7 +770,7 @@ test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
 
   test('should show situation input when entering asking_situation phase', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed
@@ -815,7 +815,7 @@ test.describe('Taro Plugin - Oracle Conversation Flow (Card Reveal)', () => {
 
   test('should validate situation text word count', async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/dashboard/taro');
+    await page.goto('/dashboard/tarot');
     await page.waitForLoadState('networkidle');
 
     // Create a session if needed

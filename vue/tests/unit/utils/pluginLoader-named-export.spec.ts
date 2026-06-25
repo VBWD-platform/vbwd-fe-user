@@ -76,8 +76,8 @@ describe('resolvePlugin — named export fallback', () => {
   })
 
   it('identifies IPlugin by presence of install method', () => {
-    const plugin = makePlugin('taro')
-    const module = { someString: 'hello', someNumber: 42, taroPlugin: plugin }
+    const plugin = makePlugin('tarot')
+    const module = { someString: 'hello', someNumber: 42, tarotPlugin: plugin }
     expect(resolvePlugin(module)).toBe(plugin)
   })
 })
@@ -125,9 +125,9 @@ describe('resolvePlugin — real plugin module shapes', () => {
     expect(resolvePlugin(module)!.name).toBe('landing1')
   })
 
-  it('handles taroPlugin named export', () => {
-    const taroPlugin = makePlugin('taro')
-    const module: Record<string, unknown> = { taroPlugin }
-    expect(resolvePlugin(module)!.name).toBe('taro')
+  it('handles tarotPlugin named export', () => {
+    const tarotPlugin = makePlugin('tarot')
+    const module: Record<string, unknown> = { tarotPlugin }
+    expect(resolvePlugin(module)!.name).toBe('tarot')
   })
 })

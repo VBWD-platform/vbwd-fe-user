@@ -53,14 +53,14 @@ describe('Runtime plugin manifest loading (fe-user)', () => {
   it('runtime manifest overrides build-time manifest', async () => {
     const buildTimeFallback: PluginManifest = {
       plugins: {
-        taro: { enabled: true, version: '1.0.0', source: 'local' },
+        tarot: { enabled: true, version: '1.0.0', source: 'local' },
         booking: { enabled: true, version: '1.0.0', source: 'local' },
       },
     };
 
     const runtimeManifest: PluginManifest = {
       plugins: {
-        taro: { enabled: true, version: '1.0.0', source: 'local' },
+        tarot: { enabled: true, version: '1.0.0', source: 'local' },
         booking: { enabled: false, version: '1.0.0', source: 'local' },
       },
     };
@@ -74,7 +74,7 @@ describe('Runtime plugin manifest loading (fe-user)', () => {
 
     // Runtime manifest disables booking, build-time had it enabled
     expect(result.plugins['booking'].enabled).toBe(false);
-    expect(result.plugins['taro'].enabled).toBe(true);
+    expect(result.plugins['tarot'].enabled).toBe(true);
   });
 
   it('enabled plugin names are derived from runtime manifest', async () => {

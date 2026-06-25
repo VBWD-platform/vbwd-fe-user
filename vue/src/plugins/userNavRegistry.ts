@@ -14,10 +14,10 @@ import { reactive } from 'vue';
 export interface UserNavItem {
   /** Unique plugin ID – used as map key for registration/deregistration */
   pluginName: string;
-  /** Absolute route path (e.g. '/dashboard/taro') */
+  /** Absolute route path (e.g. '/dashboard/tarot') */
   to: string;
   /**
-   * i18n key for the label (e.g. 'nav.taro').
+   * i18n key for the label (e.g. 'nav.tarot').
    * The plugin MUST provide this translation via sdk.addTranslations().
    */
   labelKey: string;

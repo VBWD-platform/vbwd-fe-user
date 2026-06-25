@@ -253,7 +253,7 @@ vbwd-fe-core/          # git submodule — shared component library
 | landing1 | [vbwd-fe-user-plugin-landing1](https://github.com/VBWD-platform/vbwd-fe-user-plugin-landing1) | Marketing landing page + embed widget |
 | paypal-payment | [vbwd-fe-user-plugin-paypal-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-paypal-payment) | PayPal redirect/success/cancel views |
 | stripe-payment | [vbwd-fe-user-plugin-stripe-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-stripe-payment) | Stripe redirect/success/cancel views |
-| taro | [vbwd-fe-user-plugin-taro](https://github.com/VBWD-platform/vbwd-fe-user-plugin-taro) | Tarot card reading UI |
+| tarot | [vbwd-fe-user-plugin-tarot](https://github.com/VBWD-platform/vbwd-fe-user-plugin-tarot) | Tarot card reading UI |
 | theme-switcher | [vbwd-fe-user-plugin-theme-switcher](https://github.com/VBWD-platform/vbwd-fe-user-plugin-theme-switcher) | Light/dark/system theme selector |
 | yookassa-payment | [vbwd-fe-user-plugin-yookassa-payment](https://github.com/VBWD-platform/vbwd-fe-user-plugin-yookassa-payment) | YooKassa redirect/success/cancel views |
 

@@ -1,7 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 
 /**
- * E2E Tests for Taro Oracle Conversation Flow
+ * E2E Tests for Tarot Oracle Conversation Flow
  * Tests the complete card reveal mechanic and Oracle dialog interaction
  */
 
@@ -29,10 +29,10 @@ async function loginAsTestUser(page: Page): Promise<void> {
 }
 
 /**
- * Helper: Create a new Taro session
+ * Helper: Create a new Tarot session
  */
-async function createTaroSession(page: Page): Promise<boolean> {
-  await page.goto('/dashboard/taro');
+async function createTarotSession(page: Page): Promise<boolean> {
+  await page.goto('/dashboard/tarot');
   await page.waitForLoadState('networkidle');
 
   const createBtn = page.locator('[data-testid="create-session-btn"]');
@@ -54,7 +54,7 @@ async function createTaroSession(page: Page): Promise<boolean> {
   return true;
 }
 
-test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
+test.describe('Tarot Oracle Flow - Card Reveal Mechanic', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
@@ -62,7 +62,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   test('[Oracle-1] Cards display in closed state on session load', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -90,7 +90,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   });
 
   test('[Oracle-2] Card back displays reveal hint text', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -109,7 +109,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   });
 
   test('[Oracle-3] First card reveals on click', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -134,7 +134,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   test('[Oracle-4] Opened card is not clickable (pointer-events disabled)', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -154,7 +154,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   });
 
   test('[Oracle-5] Multiple cards can be opened sequentially', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -185,7 +185,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   test('[Oracle-6] Closed card has dimmed appearance (opacity 0.7)', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -203,7 +203,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   });
 
   test('[Oracle-7] Opened card has full opacity (1.0)', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -223,7 +223,7 @@ test.describe('Taro Oracle Flow - Card Reveal Mechanic', () => {
   });
 });
 
-test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
+test.describe('Tarot Oracle Flow - Oracle Dialog Phases', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
@@ -231,7 +231,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-8] Oracle dialog appears after all 3 cards opened', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -259,7 +259,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-9] asking_mode phase shows conversation and buttons', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -292,7 +292,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-10] Clicking "Discuss" button transitions to asking_situation', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -319,7 +319,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-11] asking_situation phase has textarea with word counter', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -355,7 +355,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   });
 
   test('[Oracle-12] Submit button disabled when textarea empty', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -382,7 +382,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-13] Submit button enabled with valid situation text', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -411,7 +411,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   });
 
   test('[Oracle-14] Word counter updates in real-time', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -456,7 +456,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-15] Submit button disabled when text exceeds 100 words', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -488,7 +488,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   });
 
   test('[Oracle-16] reading phase shows loading state', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -521,7 +521,7 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   test('[Oracle-17] done phase shows Oracle message in conversation', async ({
     page,
   }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -564,13 +564,13 @@ test.describe('Taro Oracle Flow - Oracle Dialog Phases', () => {
   });
 });
 
-test.describe('Taro Oracle Flow - Error Handling & Edge Cases', () => {
+test.describe('Tarot Oracle Flow - Error Handling & Edge Cases', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
   });
 
   test('[Oracle-18] Rapid card clicks do not cause issues', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -596,7 +596,7 @@ test.describe('Taro Oracle Flow - Error Handling & Edge Cases', () => {
   test('[Oracle-19] Can close and reopen session without errors', async ({
     page,
   }) => {
-    let sessionCreated = await createTaroSession(page);
+    let sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -609,7 +609,7 @@ test.describe('Taro Oracle Flow - Error Handling & Edge Cases', () => {
     await page.waitForTimeout(500);
 
     // Create new session
-    sessionCreated = await createTaroSession(page);
+    sessionCreated = await createTarotSession(page);
     expect(sessionCreated).toBeTruthy();
 
     // Should be able to interact with new session
@@ -619,7 +619,7 @@ test.describe('Taro Oracle Flow - Error Handling & Edge Cases', () => {
   });
 
   test('[Oracle-20] Card count is always exactly 3', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }
@@ -641,7 +641,7 @@ test.describe('Taro Oracle Flow - Error Handling & Edge Cases', () => {
   });
 
   test('[Oracle-21] Conversation messages preserve order', async ({ page }) => {
-    const sessionCreated = await createTaroSession(page);
+    const sessionCreated = await createTarotSession(page);
     if (!sessionCreated) {
       test.skip();
     }

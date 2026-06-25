@@ -1,29 +1,29 @@
-# Plugin: taro (fe-user)
+# Plugin: tarot (fe-user)
 
 ## Purpose
 
-Tarot card reading UI with AI-powered interpretations. Full-featured oracle system with 3-card spread (Past/Present/Future), animated card reveals, conversation-based follow-up questions, situation readings, daily session limits, session history, and privacy-respecting conversation clearing on session expiry. Uses the backend `taro` plugin for LLM generation.
+Tarot card reading UI with AI-powered interpretations. Full-featured oracle system with 3-card spread (Past/Present/Future), animated card reveals, conversation-based follow-up questions, situation readings, daily session limits, session history, and privacy-respecting conversation clearing on session expiry. Uses the backend `tarot` plugin for LLM generation.
 
 ## Installation
 
 The plugin self-registers in `plugins/plugins.json`. Loaded by `vue/src/main.ts` via `pluginLoader`.
 
-Requires the backend `taro` plugin to be enabled.
+Requires the backend `tarot` plugin to be enabled.
 
 ## Routes Added
 
 | Path | Component | Auth required |
 |------|-----------|---------------|
-| `/dashboard/taro` | `Taro.vue` | Yes |
+| `/dashboard/tarot` | `Tarot.vue` | Yes |
 
 ## Stores
 
-**Store name:** `taro`
+**Store name:** `tarot`
 
 | State key | Type | Description |
 |-----------|------|-------------|
-| `currentSession` | `TaroSession \| null` | Active reading session |
-| `sessionHistory` | `TaroSession[]` | Past sessions (paginated) |
+| `currentSession` | `TarotSession \| null` | Active reading session |
+| `sessionHistory` | `TarotSession[]` | Past sessions (paginated) |
 | `dailyLimits` | `DailyLimits \| null` | Token/session limits from plan |
 | `openedCards` | `Set<string>` | Revealed cards in current spread |
 | `conversationMessages` | `ConversationMessage[]` | Oracle dialogue |
@@ -37,20 +37,20 @@ Requires the backend `taro` plugin to be enabled.
 
 ## i18n Keys
 
-Translations live in `plugins/taro/locales/`.
+Translations live in `plugins/tarot/locales/`.
 Available locales: `en`, `de`, `es`, `fr`, `ja`, `ru`, `th`, `zh`
 
 ## Config
 
-`plugins/taro/config.json` — user-facing enabled/disabled flag.
+`plugins/tarot/config.json` — user-facing enabled/disabled flag.
 
 ## Architecture
 
 ```
-plugins/taro/
+plugins/tarot/
 ├── index.ts
 ├── src/
-│   ├── Taro.vue                 # Main oracle view
+│   ├── Tarot.vue                 # Main oracle view
 │   ├── components/
 │   │   ├── CardDisplay.vue
 │   │   ├── CardsGrid.vue
@@ -61,7 +61,7 @@ plugins/taro/
 │   │   ├── DailyLimitsCard.vue
 │   │   └── ...
 │   ├── stores/
-│   │   └── taro.ts             # Full state machine + API calls
+│   │   └── tarot.ts             # Full state machine + API calls
 │   └── utils/
 │       └── markdownFormatter.ts # Oracle response formatting
 ├── assets/arcana/               # Card SVG assets (fetched from backend)
@@ -70,4 +70,4 @@ plugins/taro/
 
 ## Extending
 
-The oracle phase state machine (`oraclePhase`) controls which UI mode is active. Add new phases (e.g. `'sharing'` for social sharing) by extending the store's `setOraclePhase()` and adding corresponding UI branches in `Taro.vue`.
+The oracle phase state machine (`oraclePhase`) controls which UI mode is active. Add new phases (e.g. `'sharing'` for social sharing) by extending the store's `setOraclePhase()` and adding corresponding UI branches in `Tarot.vue`.
