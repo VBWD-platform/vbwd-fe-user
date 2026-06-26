@@ -35,7 +35,8 @@
   ],
   "exclude": [
     "node_modules",
-    "vue/tests/unit/server/**"
+    "vue/tests/unit/server/**",
+    "plugins/shop-pharma/**"
   ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -29,8 +29,9 @@ module.exports = {
   overrides: [
     {
       // bin/ holds operator CLI scripts and Playwright/screenshot drivers — console output
-      // and try{}catch{}-as-best-effort cleanup are the intended idioms.
-      files: ['bin/**/*.mjs', 'bin/**/*.js'],
+      // and try{}catch{}-as-best-effort cleanup are the intended idioms. The same applies
+      // to plugin e2e screenshot drivers under tests/e2e/.
+      files: ['bin/**/*.mjs', 'bin/**/*.js', '**/tests/e2e/*.mjs', '**/tests/e2e/*.js'],
       rules: {
         'no-console': 'off',
         'no-empty': 'off'
