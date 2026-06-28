@@ -17,10 +17,15 @@
  *   checkoutContextRegistry.unregister();
  */
 
-import { ref, type Component } from 'vue';
+import { shallowRef, type Component } from 'vue';
 
 class CheckoutContextRegistry {
-  private readonly _component = ref<Component | null>(null);
+  // shallowRef — NOT ref: a deep ref wraps the registered component in a reactive
+  // proxy, which makes <component :is> churn/remount the context banner on every
+  // tick (infinite loop → "Loading plan details…" forever + recurring backend
+  // requests). shallowRef keeps the component's raw identity while still reacting
+  // to register()/unregister() at the .value level.
+  private readonly _component = shallowRef<Component | null>(null);
 
   /** Register a component to render as checkout context. Only one at a time. */
   register(component: Component): void {
