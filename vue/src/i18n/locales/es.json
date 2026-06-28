@@ -42,14 +42,17 @@
       "registrationFailed": "Error en el registro",
       "paymentFailed": "Pago fallido. Por favor, inténtelo de nuevo.",
       "loginFailedRetry": "Error al iniciar sesión. Por favor, inténtelo de nuevo.",
-      "registrationFailedRetry": "Error en el registro. Por favor, inténtelo de nuevo."
+      "registrationFailedRetry": "Error en el registro. Por favor, inténtelo de nuevo.",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
     },
     "billingPeriods": {
       "month": "mes",
       "year": "año",
       "week": "semana",
       "oneTime": "una vez"
-    }
+    },
+    "login": "Iniciar sesión",
+    "saving": "Guardando..."
   },
   "nav": {
     "dashboard": "Panel",

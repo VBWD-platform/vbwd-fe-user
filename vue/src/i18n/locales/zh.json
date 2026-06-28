@@ -42,14 +42,17 @@
       "registrationFailed": "注册失败",
       "paymentFailed": "支付失败。请重试。",
       "loginFailedRetry": "登录失败。请重试。",
-      "registrationFailedRetry": "注册失败。请重试。"
+      "registrationFailedRetry": "注册失败。请重试。",
+      "generic": "出现错误，请重试。"
     },
     "billingPeriods": {
       "month": "月",
       "year": "年",
       "week": "周",
       "oneTime": "一次"
-    }
+    },
+    "login": "登录",
+    "saving": "正在保存..."
   },
   "nav": {
     "dashboard": "仪表板",

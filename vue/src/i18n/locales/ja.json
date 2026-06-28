@@ -42,14 +42,17 @@
       "registrationFailed": "登録に失敗しました",
       "paymentFailed": "支払いに失敗しました。もう一度試してください。",
       "loginFailedRetry": "ログインに失敗しました。もう一度試してください。",
-      "registrationFailedRetry": "登録に失敗しました。もう一度試してください。"
+      "registrationFailedRetry": "登録に失敗しました。もう一度試してください。",
+      "generic": "問題が発生しました。もう一度お試しください。"
     },
     "billingPeriods": {
       "month": "月",
       "year": "年",
       "week": "週",
       "oneTime": "一度"
-    }
+    },
+    "login": "ログイン",
+    "saving": "保存中..."
   },
   "nav": {
     "dashboard": "ダッシュボード",

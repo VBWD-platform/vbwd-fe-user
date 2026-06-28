@@ -42,14 +42,17 @@
       "registrationFailed": "Erreur d'enregistrement",
       "paymentFailed": "Paiement échoué. Veuillez réessayer.",
       "loginFailedRetry": "Erreur de connexion. Veuillez réessayer.",
-      "registrationFailedRetry": "Erreur d'enregistrement. Veuillez réessayer."
+      "registrationFailedRetry": "Erreur d'enregistrement. Veuillez réessayer.",
+      "generic": "Une erreur s'est produite. Veuillez réessayer."
     },
     "billingPeriods": {
       "month": "mois",
       "year": "année",
       "week": "semaine",
       "oneTime": "une seule fois"
-    }
+    },
+    "login": "Se connecter",
+    "saving": "Enregistrement..."
   },
   "nav": {
     "dashboard": "Tableau de bord",

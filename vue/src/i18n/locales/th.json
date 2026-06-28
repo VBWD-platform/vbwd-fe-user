@@ -42,14 +42,17 @@
       "registrationFailed": "การลงทะเบียนล้มเหลว",
       "paymentFailed": "ชำระเงินล้มเหลว กรุณาลองใหม่",
       "loginFailedRetry": "ล็อกอินล้มเหลว กรุณาลองใหม่",
-      "registrationFailedRetry": "การลงทะเบียนล้มเหลว กรุณาลองใหม่"
+      "registrationFailedRetry": "การลงทะเบียนล้มเหลว กรุณาลองใหม่",
+      "generic": "เกิดข้อผิดพลาด โปรดลองอีกครั้ง"
     },
     "billingPeriods": {
       "month": "เดือน",
       "year": "ปี",
       "week": "สัปดาห์",
       "oneTime": "ครั้งเดียว"
-    }
+    },
+    "login": "เข้าสู่ระบบ",
+    "saving": "กำลังบันทึก..."
   },
   "nav": {
     "dashboard": "แดชบอร์ด",

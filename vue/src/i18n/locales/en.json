@@ -42,7 +42,8 @@
       "registrationFailed": "Registration failed",
       "paymentFailed": "Payment failed. Please try again.",
       "loginFailedRetry": "Login failed. Please try again.",
-      "registrationFailedRetry": "Registration failed. Please try again."
+      "registrationFailedRetry": "Registration failed. Please try again.",
+      "generic": "Something went wrong. Please try again."
     },
     "billingPeriods": {
       "month": "month",
@@ -50,7 +51,9 @@
       "week": "week",
       "oneTime": "one-time"
     },
-    "search": "Search"
+    "search": "Search",
+    "login": "Log in",
+    "saving": "Saving..."
   },
   "nav": {
     "dashboard": "Dashboard",

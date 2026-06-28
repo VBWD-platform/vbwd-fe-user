@@ -42,14 +42,17 @@
       "registrationFailed": "Registrierung fehlgeschlagen",
       "paymentFailed": "Zahlung fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "loginFailedRetry": "Anmeldung fehlgeschlagen. Bitte versuchen Sie es erneut.",
-      "registrationFailedRetry": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut."
+      "registrationFailedRetry": "Registrierung fehlgeschlagen. Bitte versuchen Sie es erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut."
     },
     "billingPeriods": {
       "month": "Monat",
       "year": "Jahr",
       "week": "Woche",
       "oneTime": "Einmalig"
-    }
+    },
+    "login": "Anmelden",
+    "saving": "Wird gespeichert..."
   },
   "nav": {
     "dashboard": "Dashboard",
