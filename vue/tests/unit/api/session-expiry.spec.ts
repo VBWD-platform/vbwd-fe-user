@@ -55,6 +55,18 @@ describe('handleSessionExpiry', () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
+  test('on /checkout while ANONYMOUS (no token) → does NOT reload (prevents the 401 reload loop)', () => {
+    // Repro: a paid-plan quote 401s for an anonymous visitor → ApiClient emits
+    // token-expired → handleSessionExpiry. With no token there is no session to
+    // drop into anonymous mode, so reloading just re-fires the same 401 forever.
+    localStorage.removeItem('auth_token');
+    const reload = setLocation('/checkout?tarif_plan_id=enterprise');
+    handleSessionExpiry('jwt expired');
+
+    expect(reload).not.toHaveBeenCalled();
+    expect(sessionExpired.value).toBe(false); // still no modal on checkout
+  });
+
   test('on /checkout/confirmation → no modal, no redirect', () => {
     const reload = setLocation('/checkout/confirmation?invoice_id=abc');
     handleSessionExpiry('jwt expired');

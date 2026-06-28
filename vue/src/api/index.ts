@@ -49,6 +49,10 @@ export function handleSessionExpiry(message = 'Session expired'): void {
   // Only trigger once
   if (sessionExpired.value) return;
 
+  // Capture BEFORE clearing: was there actually a session to expire?
+  const hadToken =
+    typeof localStorage !== 'undefined' && !!localStorage.getItem('auth_token');
+
   // Always clear auth — whether or not we show the modal.
   clearApiAuth();
 
@@ -56,7 +60,13 @@ export function handleSessionExpiry(message = 'Session expired'): void {
     // Reload so PublicCheckoutView's `isAuthenticated` ref re-reads
     // localStorage and re-renders the EmailBlock in its anonymous state
     // (login + sign-up tabs). No modal, no /login redirect.
-    if (typeof window !== 'undefined') {
+    //
+    // BUT only when a token actually existed: ApiClient emits `token-expired`
+    // on *every* 401, including those an already-anonymous visitor gets from an
+    // auth-gated checkout call (e.g. a paid-plan token-payment quote). Reloading
+    // there fixes nothing — the next load re-fires the same 401 — so the page
+    // reloads ~3×/s forever. Guarding on `hadToken` breaks that loop.
+    if (hadToken && typeof window !== 'undefined') {
       window.location.reload();
     }
     return;
