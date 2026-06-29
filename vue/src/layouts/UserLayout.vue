@@ -69,10 +69,14 @@
           <!-- Dashboard -->
           <router-link
             to="/dashboard"
-            class="nav-item"
+            class="nav-item nav-item--with-icon"
             @click="closeMobileMenu"
           >
-            {{ $t('nav.dashboard') }}
+            <Icon
+              class="nav-icon"
+              name="dashboard"
+            />
+            <span class="nav-label">{{ $t('nav.dashboard') }}</span>
           </router-link>
 
           <!-- Plugin sidebar nav items (registered dynamically by plugins) -->
@@ -80,21 +84,29 @@
             v-for="item in sidebarNavItems"
             :key="item.to"
             :to="item.to"
-            class="nav-item"
+            class="nav-item nav-item--with-icon"
             :data-testid="item.testId"
             @click="closeMobileMenu"
           >
-            {{ $t(item.labelKey) }}
+            <Icon
+              class="nav-icon"
+              :name="item.icon || 'default'"
+            />
+            <span class="nav-label">{{ $t(item.labelKey) }}</span>
           </router-link>
 
           <!-- Invoices (core billing — stays in core per the agnostic split) -->
           <router-link
             to="/dashboard/subscription/invoices"
-            class="nav-item"
+            class="nav-item nav-item--with-icon"
             data-testid="nav-invoices"
             @click="closeMobileMenu"
           >
-            {{ $t('nav.invoices') }}
+            <Icon
+              class="nav-icon"
+              name="invoice"
+            />
+            <span class="nav-label">{{ $t('nav.invoices') }}</span>
           </router-link>
 
           <!-- Store (Tokens core; Plans/Add-Ons contributed by plugins) -->
@@ -104,7 +116,13 @@
               :class="{ active: expandedGroups.store }"
               @click="toggleGroup('store')"
             >
-              {{ $t('nav.store') }}
+              <span class="nav-group-label">
+                <Icon
+                  class="nav-icon"
+                  name="bag"
+                />
+                <span class="nav-label">{{ $t('nav.store') }}</span>
+              </span>
               <svg
                 class="chevron"
                 width="16"
@@ -122,10 +140,14 @@
             >
               <router-link
                 to="/dashboard/tokens"
-                class="nav-subitem"
+                class="nav-subitem nav-subitem--with-icon"
                 @click="closeMobileMenu"
               >
-                {{ $t('nav.tokens') }}
+                <Icon
+                  class="nav-icon"
+                  name="coin"
+                />
+                <span class="nav-label">{{ $t('nav.tokens') }}</span>
               </router-link>
               <!-- Plugin store group items (Plans/Add-Ons from the
                    subscription plugin; GHRM Software Catalogue; etc.) -->
@@ -133,11 +155,15 @@
                 v-for="item in storeGroupNavItems"
                 :key="item.to"
                 :to="item.to"
-                class="nav-subitem nav-subitem--external"
+                class="nav-subitem nav-subitem--external nav-subitem--with-icon"
                 :data-testid="item.testId"
                 @click="closeMobileMenu"
               >
-                {{ $t(item.labelKey) }}
+                <Icon
+                  class="nav-icon"
+                  :name="item.icon || 'default'"
+                />
+                <span class="nav-label">{{ $t(item.labelKey) }}</span>
                 <svg
                   v-if="item.externalIcon"
                   class="external-icon"
@@ -303,29 +329,41 @@
             <router-link
               v-if="hasUserPermission('manage_api')"
               to="/dashboard/api-keys"
-              class="user-dropdown-item"
+              class="user-dropdown-item user-dropdown-item--with-icon"
               data-testid="nav-manage-api"
               @click="closeUserMenu"
             >
-              {{ $t('nav.manage_api') }}
+              <Icon
+                class="nav-icon"
+                name="key"
+              />
+              <span class="nav-label">{{ $t('nav.manage_api') }}</span>
             </router-link>
             <router-link
               to="/dashboard/profile"
-              class="user-dropdown-item"
+              class="user-dropdown-item user-dropdown-item--with-icon"
               @click="closeUserMenu"
             >
-              {{ $t('nav.profile') }}
+              <Icon
+                class="nav-icon"
+                name="user"
+              />
+              <span class="nav-label">{{ $t('nav.profile') }}</span>
             </router-link>
             <!-- Plugin user-menu items (registered dynamically by plugins) -->
             <router-link
               v-for="item in menuNavItems"
               :key="item.pluginName"
               :to="item.to"
-              class="user-dropdown-item"
+              class="user-dropdown-item user-dropdown-item--with-icon"
               :data-testid="item.testId"
               @click="closeUserMenu"
             >
-              {{ $t(item.labelKey) }}
+              <Icon
+                class="nav-icon"
+                :name="item.icon || 'default'"
+              />
+              <span class="nav-label">{{ $t(item.labelKey) }}</span>
             </router-link>
             <button
               class="user-dropdown-item logout-btn"
@@ -356,7 +394,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useCartStore } from 'vbwd-view-component';
+import { useCartStore, Icon } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
 import { hasUserPermission } from '@/api';
@@ -634,6 +672,41 @@ onUnmounted(() => {
 .nav-item.router-link-active {
   background-color: var(--vbwd-sidebar-active-bg, rgba(255, 255, 255, 0.1));
   color: white;
+}
+
+/* Icon + label rows: align the glyph with the text. Doubled class selectors
+   so `display: flex` (and its gap) win over the single-class `.nav-item` /
+   `.nav-subitem` / `.user-dropdown-item` base rules that set `display: block`
+   later in this stylesheet — otherwise the gap is dropped and the icon sits
+   flush against the label (notably in the user-menu dropdown). */
+.nav-item.nav-item--with-icon,
+.nav-subitem.nav-subitem--with-icon,
+.user-dropdown-item.user-dropdown-item--with-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-group-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-icon {
+  opacity: 0.8;
+}
+
+.nav-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.nav-item--with-icon:hover .nav-icon,
+.nav-item--with-icon.router-link-active .nav-icon,
+.nav-subitem--with-icon:hover .nav-icon,
+.nav-subitem--with-icon.router-link-active .nav-icon {
+  opacity: 1;
 }
 
 .nav-group {

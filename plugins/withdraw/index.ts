@@ -54,6 +54,7 @@ export const withdrawPlugin: IPlugin = {
     userNavRegistry.register({
       pluginName: 'withdraw',
       to: '/withdraw',
+      icon: 'withdraw',
       labelKey: 'withdraw.title',
       testId: 'nav-withdraw',
     });

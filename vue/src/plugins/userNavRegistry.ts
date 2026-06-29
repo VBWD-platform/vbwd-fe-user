@@ -24,6 +24,12 @@ export interface UserNavItem {
   /** Optional data-testid attribute */
   testId?: string;
   /**
+   * Optional generic icon name from the shared fe-core registry
+   * (e.g. 'chat', 'layers', 'sparkles'). Rendered by UserLayout via the shared
+   * <Icon> component. Keep names domain-agnostic.
+   */
+  icon?: string;
+  /**
    * Where the item appears:
    *   'sidebar' – top-level nav link in the sidebar (default)
    *   'menu'    – entry in the user dropdown menu
