@@ -11,7 +11,7 @@ import zh from './locales/zh.json';
 
 export const withdrawPlugin: IPlugin = {
   name: 'withdraw',
-  version: '1.0.0',
+  version: '26.6.1',
   description:
     'Withdraw a token balance as money via payout-capable payment providers (S79).',
   _active: false,

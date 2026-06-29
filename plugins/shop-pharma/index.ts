@@ -11,7 +11,7 @@ import { pharmacyTranslations } from './shop-pharma/translations';
  */
 export const shopPharmaPlugin: IPlugin = {
   name: 'shop-pharma',
-  version: '26.6',
+  version: '26.6.1',
   dependencies: ['shop'],
   description: 'Pharmacy storefront — class-segmented catalogue + regulated product pages',
 

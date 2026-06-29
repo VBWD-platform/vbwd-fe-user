@@ -14,7 +14,7 @@ import en from './locales/en.json';
 
 export const cmsYoutubePlugin: IPlugin = {
   name: 'cms-youtube',
-  version: '1.0.0',
+  version: '26.6.1',
   description: 'YouTube content-block renderer for the cms unified post body',
   dependencies: ['cms'],
   _active: false,
