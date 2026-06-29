@@ -36,7 +36,7 @@ describe('Landing1 Plugin', () => {
     const plugin = registry.get('landing1')
     expect(plugin).toBeDefined()
     expect(plugin!.name).toBe('landing1')
-    expect(plugin!.version).toBe('1.0.0')
+    expect(plugin!.version).toBe('26.6.1')
   })
 
   it('should install route /landing1 with requiresAuth: false', async () => {

@@ -21,7 +21,7 @@ describe('Theme Switcher Plugin', () => {
 
   it('should have correct metadata', () => {
     expect(themeSwitcherPlugin.name).toBe('theme-switcher')
-    expect(themeSwitcherPlugin.version).toBe('1.0.0')
+    expect(themeSwitcherPlugin.version).toBe('26.6.1')
   })
 
   it('should register appearance route on install', async () => {

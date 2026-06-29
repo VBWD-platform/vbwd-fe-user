@@ -14,7 +14,7 @@ describe('PayPal Payment Plugin', () => {
   })
 
   it('should have correct version', () => {
-    expect(paypalPaymentPlugin.version).toBe('1.0.0')
+    expect(paypalPaymentPlugin.version).toBe('26.6.1')
   })
 
   it('should register three routes on install', async () => {

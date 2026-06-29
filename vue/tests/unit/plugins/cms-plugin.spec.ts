@@ -9,7 +9,7 @@ const NotFoundStub = { template: '<div>404</div>' }
 describe('CMS Plugin — metadata', () => {
   it('has correct name and version', () => {
     expect(cmsPlugin.name).toBe('cms')
-    expect(cmsPlugin.version).toBe('1.0.0')
+    expect(cmsPlugin.version).toBe('26.6.1')
   })
 
   it('has an install method', () => {

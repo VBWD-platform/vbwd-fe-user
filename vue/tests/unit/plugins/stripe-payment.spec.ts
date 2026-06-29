@@ -14,7 +14,7 @@ describe('Stripe Payment Plugin', () => {
   })
 
   it('should have correct version', () => {
-    expect(stripePaymentPlugin.version).toBe('1.0.0')
+    expect(stripePaymentPlugin.version).toBe('26.6.1')
   })
 
   it('should register three routes on install', async () => {
