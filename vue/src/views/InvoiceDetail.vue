@@ -256,6 +256,7 @@ import { PaymentDataBlock, TagChips, CustomFieldsDisplay, formatMoney } from 'vb
 import { useInvoicesStore } from '@/stores/invoices';
 import { useAppConfigStore } from '@/stores/appConfig';
 import { getInvoicePaymentMethods } from '@/extensions/invoicePaymentMethods';
+import { invoiceLineLinkRegistry } from '@/registries/invoiceLineLinkRegistry';
 import PriceBreakdown from '@/components/PriceBreakdown.vue';
 import type { PriceVO } from '@/utils/priceDisplay';
 
@@ -453,10 +454,11 @@ function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: str
       if (item.extra_data?.plugin === 'booking' && item.extra_data?.resource_slug) {
         return `/booking/${item.extra_data.resource_slug}`;
       }
-      return null;
-    default:
-      return null;
+      break;
   }
+  // Fall through to plugin-contributed resolvers for any line core does not
+  // link itself (e.g. a purchased dataset CUSTOM line). Core stays agnostic.
+  return invoiceLineLinkRegistry.resolve(item);
 }
 </script>
 

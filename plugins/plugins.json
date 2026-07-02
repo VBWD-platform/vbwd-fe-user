@@ -149,6 +149,17 @@
       "version": "0.1.0",
       "installedAt": "2026-06-22T00:00:00.000Z",
       "source": "local"
+    },
+    "dataset": {
+      "enabled": true,
+      "version": "26.6.1",
+      "installedAt": "2026-06-30T00:00:00.000Z",
+      "source": "local"
+    },
+    "marketplace": {
+      "enabled": true,
+      "version": "1.0.0",
+      "source": "local"
     }
   }
 }
