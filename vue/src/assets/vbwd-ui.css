@@ -1,0 +1,130 @@
+/*
+ * vbwd-ui.css — shared fe-user design primitives.
+ *
+ * Mirrors the fe-admin look (white rounded cards, #3498db primary, #2c3e50
+ * headings, #666 muted, #e9ecef borders, #f8f9fa table heads) so every fe-user
+ * CORE and PLUGIN page can share one consistent style layer instead of each
+ * component re-inventing scoped colours/spacing. Imported once in factory.ts.
+ *
+ * Values are exposed as CSS custom properties so a theme can override them
+ * without touching component markup; the defaults match fe-admin.
+ */
+:root {
+  --vbwd-primary: #3498db;
+  --vbwd-primary-hover: #2980b9;
+  --vbwd-heading: #2c3e50;
+  --vbwd-muted: #666;
+  --vbwd-border: #e9ecef;
+  --vbwd-table-border: #eee;
+  --vbwd-table-head-bg: #f8f9fa;
+  --vbwd-surface: #fff;
+  --vbwd-radius-card: 8px;
+  --vbwd-radius-control: 4px;
+}
+
+/* ── Card / panel ─────────────────────────────────────────────────────────── */
+.vbwd-card {
+  background: var(--vbwd-surface);
+  border-radius: var(--vbwd-radius-card);
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+/* ── Headings ─────────────────────────────────────────────────────────────── */
+.vbwd-heading {
+  margin: 0 0 16px;
+  color: var(--vbwd-heading);
+  font-size: 1.1rem;
+}
+.vbwd-subheading {
+  margin: 16px 0 8px;
+  color: var(--vbwd-muted);
+  font-size: 0.9rem;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────────────── */
+.vbwd-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--vbwd-radius-control);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.vbwd-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.vbwd-btn--primary {
+  background: var(--vbwd-primary);
+  color: #fff;
+}
+.vbwd-btn--primary:hover:not(:disabled) {
+  background: var(--vbwd-primary-hover);
+}
+.vbwd-btn--ghost {
+  background: #ecf0f1;
+  color: var(--vbwd-heading);
+}
+.vbwd-btn--ghost:hover:not(:disabled) {
+  background: #dfe4e6;
+}
+.vbwd-btn--sm {
+  padding: 5px 12px;
+  font-size: 0.8rem;
+}
+
+/* ── Tabs (fe-admin sub-tab pattern) ──────────────────────────────────────── */
+.vbwd-tabs {
+  display: flex;
+  border-bottom: 2px solid var(--vbwd-border);
+  margin-bottom: 20px;
+}
+.vbwd-tab {
+  padding: 12px 24px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--vbwd-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.vbwd-tab:hover {
+  color: var(--vbwd-primary);
+}
+.vbwd-tab.is-active {
+  color: var(--vbwd-primary);
+  border-bottom-color: var(--vbwd-primary);
+}
+
+/* ── Data table ───────────────────────────────────────────────────────────── */
+.vbwd-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.vbwd-table th,
+.vbwd-table td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--vbwd-table-border);
+}
+.vbwd-table th {
+  background: var(--vbwd-table-head-bg);
+  font-weight: 600;
+  color: var(--vbwd-heading);
+}
+
+/* ── Form controls ────────────────────────────────────────────────────────── */
+.vbwd-input,
+.vbwd-select {
+  padding: 8px 10px;
+  border: 1px solid var(--vbwd-border);
+  border-radius: var(--vbwd-radius-control);
+  font-size: 0.85rem;
+}

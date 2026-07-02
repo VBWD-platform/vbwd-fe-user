@@ -19,6 +19,9 @@ import { wireRouterGuards } from './router/wireGuards';
 // (default for vite library builds) — import once at the entry so e.g.
 // PaymentDataBlock's flex layout actually applies in the host.
 import 'vbwd-view-component/styles';
+// Shared fe-user design layer (tokens + .vbwd-* primitives mirroring fe-admin)
+// so core and plugin pages share one consistent card/table/button/tab style.
+import '@/assets/vbwd-ui.css';
 
 export interface VbwdUserAppOptions {
   plugins?: IPlugin[];
