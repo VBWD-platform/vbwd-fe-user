@@ -18,13 +18,13 @@ export const withdrawPlugin: IPlugin = {
 
   install(sdk: IPlatformSDK) {
     sdk.addRoute({
-      path: '/withdraw',
+      path: '/dashboard/withdraw',
       name: 'withdraw',
       component: () => import('./src/views/WithdrawView.vue'),
       meta: { requiresAuth: true },
     });
     sdk.addRoute({
-      path: '/withdraw/:id',
+      path: '/dashboard/withdraw/:id',
       name: 'withdraw-request-detail',
       component: () => import('./src/views/WithdrawRequestDetail.vue'),
       meta: { requiresAuth: true },
@@ -53,7 +53,7 @@ export const withdrawPlugin: IPlugin = {
     this._active = true;
     userNavRegistry.register({
       pluginName: 'withdraw',
-      to: '/withdraw',
+      to: '/dashboard/withdraw',
       icon: 'withdraw',
       labelKey: 'withdraw.title',
       testId: 'nav-withdraw',

@@ -1,0 +1,121 @@
+{
+  "marketplace": {
+    "nav": {
+      "title": "Verkäufer",
+      "listings": "Meine Angebote",
+      "categories": "Meine Kategorien",
+      "sales": "Meine Verkäufe",
+      "earnings": "Meine Einnahmen"
+    },
+    "common": {
+      "loading": "Wird geladen…",
+      "search": "Suchen…",
+      "entries": "Einträge",
+      "status": "Status",
+      "active": "Aktiv",
+      "inactive": "Inaktiv",
+      "selected": "{count} ausgewählt"
+    },
+    "types": {
+      "product": "Produkt",
+      "plan": "Tarif",
+      "software": "Software",
+      "booking": "Buchung"
+    },
+    "becomeVendor": {
+      "title": "Verkäufer werden",
+      "hint": "Bewirb dich, um auf dem Marktplatz zu verkaufen.",
+      "displayName": "Anzeigename",
+      "displayNamePlaceholder": "Name deines Shops oder Verkäufers",
+      "submit": "Verkäufer werden"
+    },
+    "listings": {
+      "title": "Meine Angebote",
+      "newListing": "Neues Angebot",
+      "type": "Typ",
+      "category": "Kategorie",
+      "empty": "Du hast noch keine Angebote.",
+      "filterAllTypes": "Alle Typen",
+      "filterAllCategories": "Alle Kategorien",
+      "showOnlyType": "Nur {type} anzeigen",
+      "showOnlyCategory": "Kategorie: {category}",
+      "bulkActivate": "Aktivieren",
+      "bulkDeactivate": "Deaktivieren",
+      "bulkDelete": "Löschen",
+      "confirmBulkDelete": "{count} Angebot(e) löschen? Dies kann nicht rückgängig gemacht werden.",
+      "bulkDeleted": "{count} Angebot(e) gelöscht",
+      "bulkActivated": "{count} Angebot(e) aktiviert",
+      "bulkDeactivated": "{count} Angebot(e) deaktiviert"
+    },
+    "categories": {
+      "title": "Meine Kategorien",
+      "editTitle": "Kategorie bearbeiten",
+      "newCategory": "Neue Kategorie",
+      "productCount": "Produkte",
+      "empty": "Noch keine Kategorien.",
+      "notFound": "Kategorie nicht gefunden.",
+      "bulkDelete": "Löschen",
+      "confirmBulkDelete": "{count} Kategorie(n) löschen? Dies kann nicht rückgängig gemacht werden.",
+      "bulkDeleted": "{count} Kategorie(n) gelöscht"
+    },
+    "newListing": {
+      "title": "Neues Angebot",
+      "create": "Erstellen",
+      "success": "Erfolgreich erstellt ({id})",
+      "tabs": {
+        "product": "Produkt",
+        "category": "Kategorie",
+        "plan": "Tarif",
+        "software": "Software",
+        "booking": "Buchungsressource"
+      }
+    },
+    "edit": {
+      "title": "Angebot bearbeiten",
+      "save": "Änderungen speichern",
+      "saved": "Gespeichert.",
+      "cancel": "Abbrechen",
+      "notFound": "Angebot nicht gefunden.",
+      "backToListings": "Zurück zu meinen Angeboten",
+      "backToCategories": "Zurück zu meinen Kategorien"
+    },
+    "fields": {
+      "name": "Name",
+      "slug": "Slug",
+      "description": "Beschreibung",
+      "price": "Preis",
+      "isDigital": "Digitales Produkt",
+      "billingPeriod": "Abrechnungszeitraum",
+      "trialDays": "Testtage",
+      "githubOwner": "GitHub-Eigentümer",
+      "githubRepo": "GitHub-Repository",
+      "capacity": "Kapazität"
+    },
+    "periods": {
+      "monthly": "Monatlich",
+      "yearly": "Jährlich",
+      "oneTime": "Einmalig"
+    },
+    "sales": {
+      "title": "Meine Verkäufe",
+      "invoice": "Rechnung",
+      "gross": "Bruttosumme",
+      "netCredit": "Nettogutschrift",
+      "searchPlaceholder": "Nach Rechnung suchen…",
+      "empty": "Noch keine Verkäufe."
+    },
+    "earnings": {
+      "title": "Meine Einnahmen",
+      "balanceLabel": "Auszahlbares Guthaben",
+      "entriesLabel": "Ledger-Einträge",
+      "withdraw": "Auszahlen",
+      "gross": "Brutto",
+      "commission": "Provision",
+      "netCredit": "Nettogutschrift",
+      "status": "Status",
+      "searchPlaceholder": "Nach Status suchen…",
+      "filterAllStatuses": "Alle Status",
+      "empty": "Noch keine Einnahmen."
+    }
+  }
+}

@@ -30,15 +30,17 @@ describe('withdraw plugin registration', () => {
     expect(typeof withdrawPlugin.deactivate).toBe('function');
   });
 
-  it('registers the auth-guarded /withdraw and /withdraw/:id routes', () => {
+  it('registers the auth-guarded /dashboard/withdraw and /dashboard/withdraw/:id routes', () => {
     const sdk = makeSdkSpy();
     withdrawPlugin.install!(sdk as never);
 
     const routes: AddedRoute[] = sdk.addRoute.mock.calls.map(
       (call) => call[0] as AddedRoute,
     );
-    const listRoute = routes.find((route) => route.path === '/withdraw');
-    const detailRoute = routes.find((route) => route.path === '/withdraw/:id');
+    const listRoute = routes.find((route) => route.path === '/dashboard/withdraw');
+    const detailRoute = routes.find(
+      (route) => route.path === '/dashboard/withdraw/:id',
+    );
 
     expect(listRoute).toBeDefined();
     expect(listRoute!.meta?.requiresAuth).toBe(true);
@@ -78,7 +80,7 @@ describe('withdraw plugin registration', () => {
       .getSidebarItems()
       .find((item) => item.pluginName === 'withdraw');
     expect(navItem).toBeDefined();
-    expect(navItem!.to).toBe('/withdraw');
+    expect(navItem!.to).toBe('/dashboard/withdraw');
     expect(navItem!.labelKey).toBe('withdraw.title');
     expect(navItem!.testId).toBe('nav-withdraw');
 

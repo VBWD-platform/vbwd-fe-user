@@ -1,0 +1,121 @@
+{
+  "marketplace": {
+    "nav": {
+      "title": "Vendor",
+      "listings": "My listings",
+      "categories": "My categories",
+      "sales": "My sales",
+      "earnings": "My earnings"
+    },
+    "common": {
+      "loading": "Loading…",
+      "search": "Search…",
+      "entries": "entries",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "selected": "{count} selected"
+    },
+    "types": {
+      "product": "Product",
+      "plan": "Tarif plan",
+      "software": "Software",
+      "booking": "Booking"
+    },
+    "becomeVendor": {
+      "title": "Become a vendor",
+      "hint": "Apply to start selling on the marketplace.",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Your shop or vendor name",
+      "submit": "Become a vendor"
+    },
+    "listings": {
+      "title": "My listings",
+      "newListing": "New listing",
+      "type": "Type",
+      "category": "Category",
+      "empty": "You have no listings yet.",
+      "filterAllTypes": "All types",
+      "filterAllCategories": "All categories",
+      "showOnlyType": "Show only {type}",
+      "showOnlyCategory": "Category: {category}",
+      "bulkActivate": "Activate",
+      "bulkDeactivate": "Deactivate",
+      "bulkDelete": "Delete",
+      "confirmBulkDelete": "Delete {count} listing(s)? This cannot be undone.",
+      "bulkDeleted": "{count} listing(s) deleted",
+      "bulkActivated": "{count} listing(s) activated",
+      "bulkDeactivated": "{count} listing(s) deactivated"
+    },
+    "categories": {
+      "title": "My categories",
+      "editTitle": "Edit category",
+      "newCategory": "New category",
+      "productCount": "Products",
+      "empty": "No categories yet.",
+      "notFound": "Category not found.",
+      "bulkDelete": "Delete",
+      "confirmBulkDelete": "Delete {count} category(ies)? This cannot be undone.",
+      "bulkDeleted": "{count} category(ies) deleted"
+    },
+    "newListing": {
+      "title": "New listing",
+      "create": "Create",
+      "success": "Created successfully ({id})",
+      "tabs": {
+        "product": "Product",
+        "category": "Category",
+        "plan": "Tarif plan",
+        "software": "Software",
+        "booking": "Booking resource"
+      }
+    },
+    "edit": {
+      "title": "Edit listing",
+      "save": "Save changes",
+      "saved": "Saved.",
+      "cancel": "Cancel",
+      "notFound": "Listing not found.",
+      "backToListings": "Back to my listings",
+      "backToCategories": "Back to my categories"
+    },
+    "fields": {
+      "name": "Name",
+      "slug": "Slug",
+      "description": "Description",
+      "price": "Price",
+      "isDigital": "Digital product",
+      "billingPeriod": "Billing period",
+      "trialDays": "Trial days",
+      "githubOwner": "GitHub owner",
+      "githubRepo": "GitHub repository",
+      "capacity": "Capacity"
+    },
+    "periods": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "oneTime": "One-time"
+    },
+    "sales": {
+      "title": "My sales",
+      "invoice": "Invoice",
+      "gross": "Gross total",
+      "netCredit": "Net credit",
+      "searchPlaceholder": "Search by invoice…",
+      "empty": "No sales yet."
+    },
+    "earnings": {
+      "title": "My earnings",
+      "balanceLabel": "Withdrawable balance",
+      "entriesLabel": "Ledger entries",
+      "withdraw": "Withdraw",
+      "gross": "Gross",
+      "commission": "Commission",
+      "netCredit": "Net credit",
+      "status": "Status",
+      "searchPlaceholder": "Search by status…",
+      "filterAllStatuses": "All statuses",
+      "empty": "No earnings yet."
+    }
+  }
+}

@@ -1,6 +1,8 @@
 <template>
   <div class="withdraw-view">
-    <h1>{{ t('withdraw.title') }}</h1>
+    <div class="withdraw-header">
+      <h2>{{ t('withdraw.title') }}</h2>
+    </div>
     <!-- Token defaults: the panel falls back to the core token balance
          endpoint + the 'tokens' balance source on its own. -->
     <WithdrawPanel />
@@ -13,3 +15,19 @@ import WithdrawPanel from '../components/WithdrawPanel.vue';
 
 const { t } = useI18n();
 </script>
+
+<style scoped>
+/* Match the vendor/admin card language (see marketplace My earnings). */
+.withdraw-view {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+.withdraw-header {
+  margin-bottom: 20px;
+}
+.withdraw-header h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+</style>

@@ -191,6 +191,60 @@
           <!-- Subscription nav (Subscription / Plans / Add-Ons) is
                contributed by the subscription plugin via userNavRegistry —
                no hardcoded subscription group in core. -->
+
+          <!-- Plugin-defined collapsible groups (e.g. the marketplace
+               'Vendor' block). Rendered generically from the nav registry so
+               core stays agnostic to which plugin owns which group. -->
+          <div
+            v-for="group in dynamicNavGroups"
+            :key="group.id"
+            class="nav-group"
+            :data-testid="`nav-group-${group.id}`"
+          >
+            <button
+              class="nav-item nav-group-toggle"
+              :class="{ active: expandedGroups[group.id] }"
+              :data-testid="`nav-group-toggle-${group.id}`"
+              @click="toggleGroup(group.id)"
+            >
+              <span class="nav-group-label">
+                <Icon
+                  class="nav-icon"
+                  :name="group.icon || 'default'"
+                />
+                <span class="nav-label">{{ $t(group.labelKey) }}</span>
+              </span>
+              <svg
+                class="chevron"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+              >
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+            <div
+              v-if="expandedGroups[group.id]"
+              class="nav-subgroup"
+            >
+              <router-link
+                v-for="item in groupNavItems(group.id)"
+                :key="item.to"
+                :to="item.to"
+                class="nav-subitem nav-subitem--with-icon"
+                :data-testid="item.testId"
+                @click="closeMobileMenu"
+              >
+                <Icon
+                  class="nav-icon"
+                  :name="item.icon || 'default'"
+                />
+                <span class="nav-label">{{ $t(item.labelKey) }}</span>
+              </router-link>
+            </div>
+          </div>
         </nav>
       </div>
 
@@ -413,6 +467,21 @@ const menuNavItems = computed(() =>
     (item) => !item.requiredUserPermission || hasUserPermission(item.requiredUserPermission)
   )
 );
+// Plugin-defined collapsible groups (e.g. the marketplace 'vendor' block).
+// The core 'store' group is rendered explicitly below, so getGroups() excludes
+// it. Keeps core agnostic to which plugin contributes which group.
+const dynamicNavGroups = computed(() => userNavRegistry.getGroups());
+
+function groupNavItems(groupId: string) {
+  return userNavRegistry
+    .getGroupItems(groupId)
+    .filter(
+      (item) =>
+        !item.requiredUserPermission ||
+        hasUserPermission(item.requiredUserPermission),
+    );
+}
+
 const storeGroupNavItems = computed(() =>
   userNavRegistry.getGroupItems('store').filter(
     (item) => !item.requiredUserPermission || hasUserPermission(item.requiredUserPermission)
@@ -434,7 +503,7 @@ const cartStore = {
 const showMobileMenu = ref(false);
 const showCart = ref(false);
 const showUserMenu = ref(false);
-const expandedGroups = ref({
+const expandedGroups = ref<Record<string, boolean>>({
   store: false,
 });
 
@@ -458,7 +527,7 @@ function closeMobileMenu() {
   showMobileMenu.value = false;
 }
 
-function toggleGroup(groupName: 'store') {
+function toggleGroup(groupName: string) {
   expandedGroups.value[groupName] = !expandedGroups.value[groupName];
 }
 

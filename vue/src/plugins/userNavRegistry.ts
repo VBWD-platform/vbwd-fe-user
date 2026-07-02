@@ -43,6 +43,16 @@ export interface UserNavItem {
    */
   group?: string;
   /**
+   * i18n key for the collapsible group's own label. Provided on the items of a
+   * plugin-defined group (e.g. 'vendor') so UserLayout can render the group
+   * header without core knowing the group. The first item that carries it wins.
+   */
+  groupLabelKey?: string;
+  /**
+   * Optional generic icon name for the group header (see `icon`).
+   */
+  groupIcon?: string;
+  /**
    * When true, an external-link icon (↗) is shown next to the label
    * to signal that the link opens a public-facing area.
    */
@@ -99,6 +109,33 @@ class UserNavRegistry {
     return Array.from(this._items.values()).filter(
       (i) => i.group === group,
     );
+  }
+
+  /**
+   * Distinct plugin-defined collapsible groups, derived from the registered
+   * items that carry a `group`. The core `store` group is rendered explicitly
+   * by UserLayout (it also hosts core Tokens), so it is excluded here to avoid
+   * a duplicate. Each descriptor carries the group id plus the label/icon taken
+   * from the first item that declared them — keeping core agnostic to which
+   * plugin owns which group.
+   */
+  getGroups(exclude: string[] = ['store']): Array<{
+    id: string;
+    labelKey: string;
+    icon?: string;
+  }> {
+    const groups = new Map<string, { id: string; labelKey: string; icon?: string }>();
+    for (const item of this._items.values()) {
+      if (!item.group || exclude.includes(item.group)) continue;
+      if (!groups.has(item.group)) {
+        groups.set(item.group, {
+          id: item.group,
+          labelKey: item.groupLabelKey ?? item.labelKey,
+          icon: item.groupIcon,
+        });
+      }
+    }
+    return Array.from(groups.values());
   }
 }
 

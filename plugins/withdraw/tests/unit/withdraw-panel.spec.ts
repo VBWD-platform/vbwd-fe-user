@@ -270,6 +270,6 @@ describe('WithdrawPanel', () => {
 
     const rowLink = wrapper.findComponent(RouterLinkStub);
     expect(rowLink.exists()).toBe(true);
-    expect(rowLink.props('to')).toBe('/withdraw/wr-1');
+    expect(rowLink.props('to')).toBe('/dashboard/withdraw/wr-1');
   });
 });
