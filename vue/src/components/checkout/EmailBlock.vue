@@ -118,8 +118,23 @@
     >
       <div class="logged-in-info">
         <span class="checkmark">✓</span>
-        <span v-if="userName">{{ $t('components.emailBlock.loggedIn.loggedInAsName', { name: userName, email: displayEmail }) }}</span>
-        <span v-else>{{ $t('components.emailBlock.loggedIn.loggedInAs', { email: displayEmail }) }}</span>
+        <i18n-t
+          v-if="userName"
+          keypath="components.emailBlock.loggedIn.loggedInAsName"
+          tag="span"
+          scope="global"
+        >
+          <template #name>
+            <strong data-testid="logged-in-name">{{ userName }}</strong>
+          </template>
+          <template #email>
+            <span data-testid="logged-in-email">{{ displayEmail }}</span>
+          </template>
+        </i18n-t>
+        <span
+          v-else
+          data-testid="logged-in-email"
+        >{{ $t('components.emailBlock.loggedIn.loggedInAs', { email: displayEmail }) }}</span>
       </div>
       <button
         class="btn secondary logout-btn"
@@ -300,14 +315,23 @@ onMounted(async () => {
   if (props.isAuthenticated || checkApiAuth()) {
     isLoggedIn.value = true;
     emailInput.value = props.initialEmail || localStorage.getItem('user_email') || '';
-    // Fetch user name for display
+    // Fetch the authoritative email + name for display. /user/profile carries
+    // both the account email (user.email) and the profile name (details.*), so
+    // it renders correctly even for a user who logged in via the main login
+    // page and therefore never populated the local `user_email` fallback.
     try {
-      const details = await api.get('/user/details') as Record<string, string | null>;
-      const parts = [details.first_name, details.last_name].filter(Boolean);
+      const profile = await api.get('/user/profile') as {
+        user?: { email?: string | null };
+        details?: { first_name?: string | null; last_name?: string | null } | null;
+      };
+      if (profile.user?.email) {
+        emailInput.value = profile.user.email;
+        localStorage.setItem('user_email', profile.user.email);
+      }
+      const parts = [profile.details?.first_name, profile.details?.last_name].filter(Boolean);
       if (parts.length > 0) userName.value = parts.join(' ');
-      if (details.email) emailInput.value = details.email;
     } catch {
-      // Not critical, email-only display is fine
+      // Not critical — the email fallback above still renders.
     }
   }
 });
