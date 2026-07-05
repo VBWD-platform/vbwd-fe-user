@@ -19,6 +19,11 @@
   var containerId = scriptTag.getAttribute('data-container') || 'vbwd-iframe';
   var height = scriptTag.getAttribute('data-height') || '600';
 
+  // Optional pricing-card presentation attributes, forwarded as query params.
+  var extraParams = { highlight: 'data-highlight', image: 'data-image',
+    features: 'data-features', heading: 'data-heading', subtitle: 'data-subtitle',
+    cta: 'data-cta', badge: 'data-badge' };
+
   // Sanitize origin — must be a valid URL
   try {
     new URL(origin);
@@ -38,6 +43,12 @@
   var iframeSrc = origin + '/embed/' + encodeURIComponent(embed) +
     '?locale=' + encodeURIComponent(locale) + '&theme=' + encodeURIComponent(theme) +
     (category ? '&category=' + encodeURIComponent(category) : '');
+
+  for (var param in extraParams) {
+    if (!Object.prototype.hasOwnProperty.call(extraParams, param)) continue;
+    var val = scriptTag.getAttribute(extraParams[param]);
+    if (val) iframeSrc += '&' + param + '=' + encodeURIComponent(val);
+  }
 
   // Create iframe
   var iframe = document.createElement('iframe');

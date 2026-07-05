@@ -81,8 +81,9 @@ describe('Landing1View', () => {
     vi.restoreAllMocks()
   })
 
-  function mountView() {
+  function mountView(props: Record<string, unknown> = {}) {
     return mount(Landing1View, {
+      props,
       global: {
         plugins: [createPinia()],
         stubs: { 'router-link': RouterLinkStub },
@@ -90,6 +91,18 @@ describe('Landing1View', () => {
       }
     })
   }
+
+  function mockPlans(plans: unknown[]) {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ plans })
+    } as Response)
+  }
+
+  const samplePlans = [
+    { id: '1', name: 'Basic', slug: 'basic', display_price: 9.99, display_currency: 'USD', billing_period: 'monthly', is_active: true },
+    { id: '2', name: 'Pro', slug: 'pro', display_price: 29.99, display_currency: 'USD', billing_period: 'monthly', is_active: true },
+  ]
 
   it('should render loading state initially', async () => {
     // Mock fetch to hang indefinitely
@@ -181,5 +194,73 @@ describe('Landing1View', () => {
     expect(wrapper.findAll('.plan-card')).toHaveLength(1)
     expect(wrapper.find('[data-testid="plan-card-basic"]').exists()).toBe(true)
     expect(wrapper.find('[data-testid="plan-card-legacy"]').exists()).toBe(false)
+  })
+
+  it('should apply the default theme class when no theme prop', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView()
+    await flushPromises()
+    expect(wrapper.find('.landing1--default').exists()).toBe(true)
+  })
+
+  it('should apply a named theme class', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ theme: 'teal' })
+    await flushPromises()
+    expect(wrapper.find('.landing1--teal').exists()).toBe(true)
+  })
+
+  it('should fall back to default theme for an unknown theme', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ theme: 'bogus' })
+    await flushPromises()
+    expect(wrapper.find('.landing1--default').exists()).toBe(true)
+  })
+
+  it('should render a feature checklist on every card', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ features: ['2000 MB Bandwidth', '5 GB Space', ' '] })
+    await flushPromises()
+    const lists = wrapper.findAll('[data-testid="plan-features"]')
+    expect(lists).toHaveLength(2)
+    // Blank feature entries are dropped.
+    expect(lists[0].findAll('.plan-features__item')).toHaveLength(2)
+    expect(wrapper.text()).toContain('2000 MB Bandwidth')
+  })
+
+  it('should not render a feature list when no features given', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView()
+    await flushPromises()
+    expect(wrapper.find('[data-testid="plan-features"]').exists()).toBe(false)
+  })
+
+  it('should mark the emphasized plan card as featured with a badge', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ highlightSlug: 'pro', badge: 'Best Value' })
+    await flushPromises()
+    const featured = wrapper.findAll('.plan-card--featured')
+    expect(featured).toHaveLength(1)
+    expect(wrapper.find('[data-testid="plan-card-pro"]').classes()).toContain('plan-card--featured')
+    expect(wrapper.find('[data-testid="plan-card-badge"]').text()).toBe('Best Value')
+    expect(wrapper.find('[data-testid="plan-card-basic"]').classes()).not.toContain('plan-card--featured')
+  })
+
+  it('should render a card image when imageUrl given', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ imageUrl: 'https://example.com/icon.png' })
+    await flushPromises()
+    const imgs = wrapper.findAll('.plan-card__image')
+    expect(imgs).toHaveLength(2)
+    expect(imgs[0].attributes('src')).toBe('https://example.com/icon.png')
+  })
+
+  it('should override heading, subtitle and CTA label', async () => {
+    mockPlans(samplePlans)
+    const wrapper = mountView({ heading: 'Our Pricing', subtitle: 'Fair & simple', ctaLabel: 'Get Started' })
+    await flushPromises()
+    expect(wrapper.find('[data-testid="landing1-title"]').text()).toBe('Our Pricing')
+    expect(wrapper.find('.subtitle').text()).toBe('Fair & simple')
+    expect(wrapper.find('[data-testid="choose-plan-basic"]').text()).toBe('Get Started')
   })
 })
