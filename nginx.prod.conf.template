@@ -92,6 +92,17 @@ server {
         proxy_read_timeout 60s;
     }
 
+    # IndexNow key-verification file, served at the site ROOT as /<key>.txt by the
+    # cms plugin (like robots.txt/sitemap.xml). The 8-128-char match excludes
+    # /robots.txt (6 chars). Backend 404s unless <key> matches the configured key.
+    location ~ "^/[A-Za-z0-9-]{8,128}\.txt$" {
+        proxy_pass http://$api_upstream;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_read_timeout 60s;
+    }
+
     # Server-Sent Events stream — MUST NOT be buffered, or the browser only
     # sees new messages on refresh (iOS uses polling and is unaffected). Disable
     # buffering at this hop AND re-assert `X-Accel-Buffering: no` downstream so
