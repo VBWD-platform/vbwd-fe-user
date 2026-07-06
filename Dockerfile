@@ -8,9 +8,16 @@ COPY . .
 # Build shared component library first so the file: dependency resolves
 RUN cd vbwd-fe-core && rm -f package-lock.json && npm install && npm run build && rm -rf node_modules
 
-# Install and build main application
-# Remove lockfile so npm resolves platform-specific optional deps (e.g. @rollup/rollup-linux-x64-musl)
-RUN rm -f package-lock.json && npm install
+# Install and build main application against the locally-built fe-core.
+# package.json pins vbwd-view-component to a registry alias
+# (npm:@vbwd-platform/vbwd-view-component) for platform/SDK consumers, but that
+# package is not published to GitHub Packages yet — override it to the built
+# submodule so this image resolves fe-core locally instead of 404ing on the
+# registry. Remove the lockfile so npm resolves platform-specific optional deps
+# (e.g. @rollup/rollup-linux-x64-musl).
+RUN rm -f package-lock.json \
+ && npm pkg set dependencies.vbwd-view-component=file:./vbwd-fe-core \
+ && npm install
 
 ARG VITE_API_URL=/api/v1
 ENV VITE_API_URL=$VITE_API_URL
