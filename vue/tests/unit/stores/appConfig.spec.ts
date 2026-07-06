@@ -49,7 +49,7 @@ describe('useAppConfigStore', () => {
     expect(store.pricesModeInDb).toBe('BRUTTO');
   });
 
-  it('load() fetches at most once (cached)', async () => {
+  it('load() fetches /config + /cms/config once each, then caches', async () => {
     vi.mocked(api.get).mockResolvedValue({
       default_currency: 'EUR',
       prices_display_mode: 'brutto',
@@ -60,7 +60,38 @@ describe('useAppConfigStore', () => {
     await store.load();
     await store.load();
 
-    expect(api.get).toHaveBeenCalledTimes(1);
+    // First load() hits both endpoints once; the second is cached (0 calls).
+    expect(api.get).toHaveBeenCalledTimes(2);
+    expect(api.get).toHaveBeenCalledWith('/config');
+    expect(api.get).toHaveBeenCalledWith('/cms/config');
+  });
+
+  it('load() adopts home_slug from the cms /cms/config endpoint (S120)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      Promise.resolve(
+        url === '/cms/config'
+          ? { home_slug: 'landing' }
+          : { default_currency: 'EUR', prices_display_mode: 'brutto', prices_mode_in_db: 'NETTO' },
+      ),
+    );
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.homeSlug).toBe('landing');
+  });
+
+  it('keeps the `index` home slug when /cms/config fails (S120)', async () => {
+    vi.mocked(api.get).mockImplementation((url: string) =>
+      url === '/cms/config'
+        ? Promise.reject(new Error('cms down'))
+        : Promise.resolve({ default_currency: 'EUR', prices_display_mode: 'brutto', prices_mode_in_db: 'NETTO' }),
+    );
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.homeSlug).toBe('index');
   });
 
   it('keeps the EUR default when the fetch fails (never breaks checkout)', async () => {
@@ -129,5 +160,39 @@ describe('useAppConfigStore', () => {
 
     expect(store.activeCurrencies).toEqual([]);
     expect(store.currencyRates).toEqual({});
+  });
+
+  // S120 — appConfig is the single source of truth for the homepage slug. The
+  // baked default is `index` (renders the home post at `/`), NEVER `/home`.
+  it('homeSlug falls back to `index` before the config is loaded', () => {
+    const store = useAppConfigStore();
+    expect(store.homeSlug).toBe('index');
+  });
+
+  it('load() adopts config.home_slug when the backend publishes it', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+      home_slug: 'welcome',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.homeSlug).toBe('welcome');
+  });
+
+  it('keeps the `index` home slug when home_slug is absent (back-compat)', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.homeSlug).toBe('index');
   });
 });

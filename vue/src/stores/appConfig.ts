@@ -27,6 +27,10 @@ interface PublicConfigResponse {
   base_currency?: string;
   active_currencies?: string[];
   currency_rates?: Record<string, string>;
+  // S120 — the canonical homepage slug. The `/` route renders this CMS post in
+  // place (no client redirect). Optional for back-compat with backends that
+  // don't publish it yet; the fe falls back to DEFAULT_HOME_SLUG.
+  home_slug?: string;
 }
 
 // The platform's documented baseline (DEFAULT_CORE_SETTINGS) — used until the
@@ -35,6 +39,11 @@ interface PublicConfigResponse {
 const FALLBACK_CURRENCY = 'EUR';
 const FALLBACK_DISPLAY_MODE: PricesDisplayMode = 'brutto';
 const FALLBACK_MODE_IN_DB: PricesModeInDb = 'NETTO';
+
+// The canonical homepage slug the `/` route renders when the backend has not
+// (yet) published `home_slug`. MUST render the home post — never the legacy
+// `/home` bounce target that produced the soft-404 (S120).
+const DEFAULT_HOME_SLUG = 'index';
 
 export const useAppConfigStore = defineStore('app-config', () => {
   const defaultCurrencyRef = ref<string>(FALLBACK_CURRENCY);
@@ -45,6 +54,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
   const baseCurrencyRef = ref<string>(FALLBACK_CURRENCY);
   const activeCurrenciesRef = ref<string[]>([]);
   const currencyRatesRef = ref<Record<string, string>>({});
+  const homeSlugRef = ref<string>(DEFAULT_HOME_SLUG);
   const loaded = ref(false);
 
   const defaultCurrency = computed(() => defaultCurrencyRef.value);
@@ -53,6 +63,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
   const baseCurrency = computed(() => baseCurrencyRef.value);
   const activeCurrencies = computed(() => activeCurrenciesRef.value);
   const currencyRates = computed(() => currencyRatesRef.value);
+  const homeSlug = computed(() => homeSlugRef.value);
 
   async function load(): Promise<void> {
     if (loaded.value) return;
@@ -71,9 +82,22 @@ export const useAppConfigStore = defineStore('app-config', () => {
       if (config.base_currency) baseCurrencyRef.value = config.base_currency;
       if (config.active_currencies) activeCurrenciesRef.value = config.active_currencies;
       if (config.currency_rates) currencyRatesRef.value = config.currency_rates;
+      // Back-compat: adopt home_slug if a future core /config ever publishes it.
+      if (config.home_slug) homeSlugRef.value = config.home_slug;
       loaded.value = true;
     } catch {
       // Keep the baseline; checkout still renders a valid currency.
+    }
+
+    // S120 — home_slug is published on the cms-owned public config (a plugin
+    // cannot add fields to the core /config). Fetched independently and
+    // best-effort: a cms-config hiccup never affects currency, and a miss keeps
+    // the baked `index` default so `/` always renders the home post.
+    try {
+      const cmsConfig = (await api.get('/cms/config')) as { home_slug?: string };
+      if (cmsConfig.home_slug) homeSlugRef.value = cmsConfig.home_slug;
+    } catch {
+      // Keep DEFAULT_HOME_SLUG.
     }
   }
 
@@ -84,6 +108,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
     baseCurrency,
     activeCurrencies,
     currencyRates,
+    homeSlug,
     load,
   };
 });

@@ -3,11 +3,13 @@ import { isAuthenticated, sessionExpired, hasUserPermission } from '../api';
 
 const routes: RouteRecordRaw[] = [
   {
-    // `/` is a redirect bouncer (Home.vue renders an empty <div/>), so it
-    // must never wear UserLayout chrome — otherwise an authenticated visitor
-    // sees a flash of dashboard chrome around nothing while the synchronous
-    // redirect resolves. App.vue:39 short-circuits on noLayout.
-    // See docs/dev_log/20260528/sprints/s29-fe-user-home-no-chrome-flash.md.
+    // Host fallback for `/`. When the CMS plugin is enabled it OVERRIDES this
+    // route by name (`home`) at factory install time — vue-router's `addRoute`
+    // replaces this record with the CMS home renderer (CmsHomePage) so `/`
+    // renders the home post in place. This inert Home.vue only renders when the
+    // CMS plugin is absent. `noLayout` keeps it chrome-free; the authenticated
+    // `/` → `/dashboard` redirect lives in `authNavigationGuard`, not here.
+    // See docs/dev_log/20260706/sprints/S120_home_slug_canonical_cleanup.md.
     path: '/',
     name: 'home',
     component: () => import('../views/Home.vue'),
@@ -81,8 +83,9 @@ const router = createRouter({
   routes
 });
 
-// Navigation guard for authentication
-router.beforeEach((to, _from, next) => {
+// Navigation guard for authentication. Exported so it can be unit-tested in
+// isolation (no router history / lazy-component loading required).
+export const authNavigationGuard: Parameters<typeof router.beforeEach>[0] = (to, _from, next) => {
   const authenticated = isAuthenticated();
 
   // If session has expired, redirect to login
@@ -99,6 +102,13 @@ router.beforeEach((to, _from, next) => {
     });
   } else if (to.name === 'login' && authenticated) {
     next({ name: 'dashboard' });
+  } else if (to.name === 'home' && authenticated) {
+    // S120 — `/` renders the marketing home CMS post for anonymous visitors,
+    // but an authenticated visitor belongs on their dashboard. This redirect
+    // resolves BEFORE the home component mounts (no chrome flash) and is the
+    // single home-owner of this product decision — the home component itself
+    // performs no navigation.
+    next({ name: 'dashboard' });
   } else {
     // Check user permission if route requires one
     const requiredPerm = to.meta.requiredUserPermission as string | undefined;
@@ -108,6 +118,8 @@ router.beforeEach((to, _from, next) => {
     }
     next();
   }
-});
+};
+
+router.beforeEach(authNavigationGuard);
 
 export default router;
