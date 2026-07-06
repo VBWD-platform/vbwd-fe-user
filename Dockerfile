@@ -42,5 +42,9 @@ ENV PLUGIN_API_UPSTREAM=plugin-api:3001
 # empty default keeps dynamic rendering OFF (backend 404 → static-prerender
 # fallback) until an instance sets a real token.
 ENV SEO_RENDER_TOKEN=""
+# S118 feature switch for the nginx crawler branch. "0" (default) = crawlers get
+# the static prerender exactly as pre-S118 (no dynamic render, no backend
+# round-trip, no redirect loop). An instance sets "1" (with a token) to enable.
+ENV SEO_RENDER_ON="0"
 
 EXPOSE 80

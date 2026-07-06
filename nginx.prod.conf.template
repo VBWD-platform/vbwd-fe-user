@@ -27,7 +27,11 @@ map $http_user_agent $seo_prefix {
 #   $vbwd_render_loopback— 1 when the request carries the renderer's own loop-guard
 #                          header (X-VBWD-Render); such fetches MUST get the SPA
 #                          shell so the renderer can render it — never re-routed.
-#   $serve_dynamic_render— 1 only for a crawler that is NOT the renderer loopback.
+#   ${SEO_RENDER_ON}     — "1" only when the feature is enabled for this instance
+#                          (env, default "0"). When "0" the crawler branch is a
+#                          pure no-op: crawlers get the static prerender exactly as
+#                          before, with NO backend round-trip and NO redirect loop.
+#   $serve_dynamic_render— 1 only for a crawler, NOT the renderer loopback, AND on.
 map $http_user_agent $ua_crawler {
     default 0;
     "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" 1;
@@ -36,9 +40,9 @@ map $http_x_vbwd_render $vbwd_render_loopback {
     default 0;
     "~.+"   1;
 }
-map "$ua_crawler$vbwd_render_loopback" $serve_dynamic_render {
+map "${ua_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_render {
     default 0;
-    "10"    1;
+    "101"   1;
 }
 
 server {
@@ -166,11 +170,16 @@ server {
         error_page 404 500 502 503 504 = @seo_static;
     }
 
-    # Static fallback for crawlers when dynamic render is off/unavailable: the
-    # content-only prerender file if present, else the SPA shell. Mirrors the
-    # pre-S118 crawler behaviour exactly.
+    # Static fallback for crawlers when the render misses/errs: the content-only
+    # prerender file if present, else the SPA shell — via @seo_shell so the shell
+    # is served WITHOUT re-entering `location /` (which would re-trigger the
+    # crawler → @seo_dynamic branch and loop into a redirect cycle → 404/500).
     location @seo_static {
         root /usr/share/nginx/html;
-        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri /index.html;
+        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri @seo_shell;
+    }
+    location @seo_shell {
+        root /usr/share/nginx/html;
+        try_files /index.html =404;
     }
 }
