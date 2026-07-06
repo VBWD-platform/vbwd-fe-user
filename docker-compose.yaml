@@ -4,11 +4,23 @@ services:
     image: nginx:alpine
     ports:
       - "8080:80"
+    # S120.1 — dev geo-block override: honour X-VBWD-Geo-Test as the country so
+    # the block is exercisable from localhost without a foreign IP / GeoIP DB.
+    environment:
+      - GEO_TEST_ALLOW=1
     volumes:
       - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
       # Serve the backend-written SEO prerender files to anon/bots/curl in dev
       # (read-only; backend is the only writer). Logged-in users still get Vite.
       - ${VBWD_VAR_DIR:-../var}/seo:/usr/share/nginx/seo:ro
+      # S120.1 njs geo-block: the handler + the dev entrypoint scripts that load
+      # the njs module (stock image ships the .so but does not load it) and emit
+      # the $geoip2_country_code fallback map (no GeoIP DB in dev).
+      - ./nginx/geo_block.js:/etc/nginx/njs/geo_block.js:ro
+      - ./nginx/docker-entrypoint.d/05-vbwd-dev-modules.sh:/docker-entrypoint.d/05-vbwd-dev-modules.sh:ro
+      - ./nginx/docker-entrypoint.d/25-vbwd-geoip2.sh:/docker-entrypoint.d/25-vbwd-geoip2.sh:ro
+      # geo-block.json the backend cms plugin writes (read-only; absent ⇒ fail-open).
+      - ${VBWD_VAR_DIR:-../var}/cms/nginx:/etc/nginx/geo:ro
     depends_on:
       dev:
         condition: service_healthy
@@ -29,7 +41,7 @@ services:
       # backend is the only writer, fe-user mounts read-only.
       - ${VBWD_VAR_DIR:-../var}/plugins/fe-user-plugins.json:/app/vue/public/plugins.json:ro
       - ${VBWD_VAR_DIR:-../var}/plugins/fe-user-plugins-config.json:/app/vue/public/config.json:ro
-    command: sh -c "npm install && npm run dev -- --host"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && npm run dev -- --host"
     environment:
       - VITE_API_URL=/api/v1
     healthcheck:
@@ -50,7 +62,7 @@ services:
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
       - plugin_api_node_modules:/app/server/node_modules
-    command: sh -c "npm install && npx tsc && npm start"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && npx tsc && npm start"
     environment:
       - PLUGIN_API_SECRET=8c78ba3cf582006f19f7aa2841794bec95ffb3bef08ec31ba8363382d067c198
       - PLUGIN_API_PORT=3001
@@ -67,7 +79,7 @@ services:
       - .:/app
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    command: sh -c "npm install && npm run test"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && npm run test"
     profiles:
       - test
 
@@ -79,7 +91,7 @@ services:
       - .:/app
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    command: sh -c "npm install && npm run test:watch"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && npm run test:watch"
     profiles:
       - test-watch
 
@@ -91,7 +103,7 @@ services:
       - .:/app
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    command: sh -c "npm install && ./bin/pre-commit-check.sh --style"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && ./bin/pre-commit-check.sh --style"
     profiles:
       - lint
 
@@ -103,7 +115,7 @@ services:
       - .:/app
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    command: sh -c "npm install && ./bin/pre-commit-check.sh --unit"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && ./bin/pre-commit-check.sh --unit"
     profiles:
       - unit
 
@@ -115,7 +127,7 @@ services:
       - .:/app
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
-    command: sh -c "npm install && ./bin/pre-commit-check.sh --integration"
+    command: sh -c "sh bin/npm-install-local-fe-core.sh && ./bin/pre-commit-check.sh --integration"
     profiles:
       - integration
 

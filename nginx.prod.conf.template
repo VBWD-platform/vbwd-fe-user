@@ -45,6 +45,14 @@ map "${ua_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_render
     "101"   1;
 }
 
+# S120.1 — nginx-layer geo-block. The njs handler owns `location /` and either
+# passes to the unchanged SPA/prerender chain (`@spa`) or blocks / grants a
+# bypass cookie. `$geoip2_country_code` is defined by the container-start
+# entrypoint (`00-vbwd-geoip2.conf`): the real geoip2 lookup when the GeoLite2 DB
+# is mounted, an empty-default map otherwise (fail-open). See geo_block.js.
+js_path "/etc/nginx/njs/";
+js_import geo from geo_block.js;
+
 server {
     listen 80;
 
@@ -147,7 +155,17 @@ server {
     # `${VAR_DIR}/seo` is bind-mounted read-only at /usr/share/nginx/html/seo
     # (shared with the backend prerender writer). Content changes never touch
     # this conf.
+    # S120.1 — the njs geo-block handler decides pass / block / bypass for every
+    # page request. "pass" → internalRedirect to @spa (the unchanged serving
+    # chain below), so with the feature OFF (or config/DB missing) serving is
+    # byte-identical to pre-S120.1.
     location / {
+        js_content geo.handle;
+    }
+
+    # SPA + prerender serving (the pre-S120.1 `location /` body, unchanged). Only
+    # reached via the geo handler's internalRedirect('@spa').
+    location @spa {
         root /usr/share/nginx/html;
         index index.html;
         # Crawlers (not the renderer's own loopback) → dynamic full-page render
@@ -157,7 +175,11 @@ server {
         # (SPA shell). `return` inside `if` is one of the safe `if` uses.
         error_page 418 = @seo_dynamic;
         if ($serve_dynamic_render) { return 418; }
-        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri /index.html;
+        # SPA-shell fallback goes to the named @seo_shell (serves /index.html)
+        # instead of the bare `/index.html`, which would internal-redirect back
+        # into `location /` (now the js_content geo handler) and re-evaluate —
+        # blocking passthrough URLs (assets, the locked slug) in a loop.
+        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri @seo_shell;
     }
 
     # Dynamic full-page render for crawlers. Proxies to the backend on-demand
