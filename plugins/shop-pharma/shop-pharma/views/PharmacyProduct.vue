@@ -335,7 +335,7 @@ interface PharmaProductDetail {
   primary_image_url: string | null;
   images: ProductImage[];
   has_variants: boolean;
-  is_digital?: boolean;
+  product_type_slug?: string | null;
   pharma_profile: PharmaProfile;
   variants: ProductVariant[];
   region: PharmaRegion | null;
@@ -474,7 +474,7 @@ function handleAddToCart(): void {
     currency: displayCurrency.value,
     quantity: finalQuantity,
     maxQuantity: maxQuantity.value ?? 999,
-    isDigital: product.value.is_digital ?? false,
+    isDigital: product.value.product_type_slug === 'digital',
     weight: 0,
     variantId: variant?.id,
     variantName: variant?.name,

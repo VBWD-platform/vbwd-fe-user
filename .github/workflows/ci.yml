@@ -9,6 +9,10 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   style:
     name: Style Checks
@@ -24,15 +28,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Build vbwd-fe-core submodule
-        run: |
-          cd vbwd-fe-core
-          npm install
-          npm run build
-          cd ..
-
       - name: Install dependencies
         run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install plugins
         run: |
@@ -58,15 +57,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Build vbwd-fe-core submodule
-        run: |
-          cd vbwd-fe-core
-          npm install
-          npm run build
-          cd ..
-
       - name: Install dependencies
         run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install plugins
         run: |
@@ -92,15 +86,10 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
-      - name: Build vbwd-fe-core submodule
-        run: |
-          cd vbwd-fe-core
-          npm install
-          npm run build
-          cd ..
-
       - name: Install dependencies
         run: npm install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install plugins
         run: |

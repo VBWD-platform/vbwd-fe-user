@@ -72,7 +72,6 @@ function makeProduct(overrides: Record<string, unknown> = {}, profileOverrides: 
     primary_image_url: '/uploads/images/sample.png',
     images: [{ url: '/uploads/images/sample.png', is_primary: true }],
     has_variants: true,
-    is_digital: false,
     pharma_profile: baseProfile(profileOverrides),
     variants: [
       { id: 'var-20', name: 'Pack of 20', sku: 'X-20', price: 4.99, price_float: 4.99, attributes: { pack: 'Pack of 20' } },
