@@ -19,6 +19,28 @@ map $http_user_agent $seo_prefix {
     "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" "/seo";
 }
 
+# S118 Track B — dynamic full-page rendering for crawlers.
+# A crawler is served a LIVE headless render of the fe-user SPA (full layout +
+# content), produced by the backend `/_seo-render` route (which caches + minifies)
+# — NOT the content-only static prerender. Humans are unaffected (live SPA).
+#   $ua_crawler          — 1 for crawler user-agents (same set as $seo_prefix).
+#   $vbwd_render_loopback— 1 when the request carries the renderer's own loop-guard
+#                          header (X-VBWD-Render); such fetches MUST get the SPA
+#                          shell so the renderer can render it — never re-routed.
+#   $serve_dynamic_render— 1 only for a crawler that is NOT the renderer loopback.
+map $http_user_agent $ua_crawler {
+    default 0;
+    "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" 1;
+}
+map $http_x_vbwd_render $vbwd_render_loopback {
+    default 0;
+    "~.+"   1;
+}
+map "$ua_crawler$vbwd_render_loopback" $serve_dynamic_render {
+    default 0;
+    "10"    1;
+}
+
 server {
     listen 80;
 
@@ -113,10 +135,42 @@ server {
     location / {
         root /usr/share/nginx/html;
         index index.html;
-        # Crawlers ($seo_prefix="/seo") resolve the prerendered /seo/<slug>.html
-        # for SEO; humans ($seo_prefix="") fall straight through to /index.html —
-        # the SPA shell — which renders the complete layout. Real asset paths
-        # ($uri) still resolve before the /index.html fallback.
+        # Crawlers (not the renderer's own loopback) → dynamic full-page render
+        # via the backend `/_seo-render` route (@seo_dynamic). Everyone else —
+        # humans, and the renderer's loopback fetch — falls through to try_files:
+        # $seo_prefix="/seo" only for crawlers (static prerender), "" for humans
+        # (SPA shell). `return` inside `if` is one of the safe `if` uses.
+        error_page 418 = @seo_dynamic;
+        if ($serve_dynamic_render) { return 418; }
+        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri /index.html;
+    }
+
+    # Dynamic full-page render for crawlers. Proxies to the backend on-demand
+    # renderer route (which caches + minifies). The path is passed as ?path=$uri
+    # — query args are dropped on purpose so the render cache is not fragmented by
+    # query strings. The shared secret token (injected here, matched by the backend
+    # `seo_render_internal_token`) gates the route; an empty token ⇒ backend 404 ⇒
+    # graceful fallback below, so the feature is OFF until a token is configured.
+    location @seo_dynamic {
+        proxy_pass http://$api_upstream/api/v1/cms/_seo-render?path=$uri;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-VBWD-Render-Token "${SEO_RENDER_TOKEN}";
+        # A cold headless render can take a few seconds; keep it bounded.
+        proxy_read_timeout 35s;
+        # Backend returns 404 (feature off / bad token) or 5xx (renderer miss/down)
+        # → serve the static prerender, then the SPA shell. The site never 5xx's to
+        # a crawler because of the renderer.
+        proxy_intercept_errors on;
+        error_page 404 500 502 503 504 = @seo_static;
+    }
+
+    # Static fallback for crawlers when dynamic render is off/unavailable: the
+    # content-only prerender file if present, else the SPA shell. Mirrors the
+    # pre-S118 crawler behaviour exactly.
+    location @seo_static {
+        root /usr/share/nginx/html;
         try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri /index.html;
     }
 }

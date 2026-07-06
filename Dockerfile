@@ -36,4 +36,11 @@ COPY nginx.prod.conf.template /etc/nginx/templates/default.conf.template
 ENV API_UPSTREAM=api:5000
 ENV PLUGIN_API_UPSTREAM=plugin-api:3001
 
+# S118 Track B: shared secret nginx injects on the crawler dynamic-render proxy
+# (X-VBWD-Render-Token), matched by the backend `seo_render_internal_token`. MUST
+# be defined so the nginx template's ${SEO_RENDER_TOKEN} substitutes cleanly; the
+# empty default keeps dynamic rendering OFF (backend 404 → static-prerender
+# fallback) until an instance sets a real token.
+ENV SEO_RENDER_TOKEN=""
+
 EXPOSE 80
