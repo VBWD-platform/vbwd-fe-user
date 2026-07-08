@@ -148,6 +148,19 @@ server {
         proxy_read_timeout 60s;
     }
 
+    # Content-hashed build assets: filenames change on every rebuild, so the bytes
+    # behind a given URL are immutable — cache them hard. A MISSING asset must 404
+    # (=404), NOT fall through to the SPA/prerender chain: a stale tab requesting an
+    # old chunk hash after a redeploy then gets a clean 404 instead of index.html
+    # served as text/html (which trips strict-MIME module loading). Served here
+    # directly so assets bypass the geo/SEO branching, which never applies to them.
+    location /assets/ {
+        root /usr/share/nginx/html;
+        try_files $uri =404;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
     # SPA + prerender serving.
     #   - logged-in (vbwd_session) → live CSR SPA (cache-bypass);
     #   - anonymous/bot → the prerendered `/seo/<slug>.html` if present, else the
@@ -213,6 +226,11 @@ server {
     }
     location @seo_shell {
         root /usr/share/nginx/html;
+        # The SPA entry document must always be revalidated so a redeploy's new
+        # asset hashes are picked up immediately. Without this, browsers
+        # heuristically cache index.html and keep requesting the previous build's
+        # (now-404) chunk hashes.
+        add_header Cache-Control "no-cache";
         try_files /index.html =404;
     }
 }
