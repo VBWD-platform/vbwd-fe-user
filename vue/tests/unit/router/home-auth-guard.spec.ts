@@ -11,7 +11,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const { isAuthenticated, hasUserPermission, sessionExpired } = vi.hoisted(() => ({
   isAuthenticated: vi.fn(() => false),
-  hasUserPermission: vi.fn(() => true),
+  hasUserPermission: vi.fn((_perm?: string) => true),
   sessionExpired: { value: false },
 }));
 
@@ -27,7 +27,11 @@ type NextArg = Parameters<typeof authNavigationGuard>[2];
 
 function runGuard(to: Record<string, unknown>) {
   const next = vi.fn() as unknown as NextArg;
-  authNavigationGuard(
+  // The guard is typed `NavigationGuardWithThis<undefined>` (this: undefined);
+  // call via .call(undefined, …) so a plain invocation's `this: void` doesn't
+  // trip TS2684.
+  authNavigationGuard.call(
+    undefined,
     { meta: {}, ...to } as Parameters<typeof authNavigationGuard>[0],
     undefined as unknown as Parameters<typeof authNavigationGuard>[1],
     next,
