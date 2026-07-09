@@ -16,7 +16,16 @@
         <span />
       </button>
       <div class="logo-mobile">
-        <h2>VBWD</h2>
+        <a
+          v-if="brandHref"
+          class="logo-brand-link"
+          :href="brandHref"
+          target="_blank"
+          rel="noopener"
+        ><h2>{{ siteName }}</h2></a>
+        <h2 v-else>
+          {{ siteName }}
+        </h2>
       </div>
       <!-- Mobile header cart button -->
       <button
@@ -59,9 +68,33 @@
       @click.self="closeMobileMenu"
     >
       <div class="sidebar-content">
-        <!-- Logo (Desktop only) -->
+        <!-- Logo (Desktop only). Single flex row: white-label brand name on the
+             left, plugin-contributed brand actions (e.g. a CMS "Home" icon) on
+             the right. The brand name links to a plugin-registered brand href
+             when present (core stays agnostic to what that URL means). -->
         <div class="logo">
-          <h2>VBWD</h2>
+          <a
+            v-if="brandHref"
+            class="logo-brand-link"
+            :href="brandHref"
+            target="_blank"
+            rel="noopener"
+          ><h2>{{ siteName }}</h2></a>
+          <h2 v-else>
+            {{ siteName }}
+          </h2>
+          <!-- Plugin-contributed brand actions rendered generically so core
+               stays agnostic to which plugin contributes which action. -->
+          <div
+            v-if="brandActions.length"
+            class="logo-actions"
+          >
+            <component
+              :is="action.component"
+              v-for="action in brandActions"
+              :key="action.id"
+            />
+          </div>
         </div>
 
         <!-- Navigation Menu -->
@@ -451,11 +484,21 @@ import { useRouter } from 'vue-router';
 import { useCartStore, Icon } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
+import { brandActionsRegistry } from '@/plugins/brandActionsRegistry';
 import { hasUserPermission } from '@/api';
 import ToastHost from '@/components/ToastHost.vue';
 import { useDisplayPrice } from '@/composables/useDisplayPrice';
+import { useAppConfigStore } from '@/stores/appConfig';
 
 const router = useRouter();
+
+// White-label brand name for the sidebar logo — sourced from the app-config
+// store (default "VBWD" until the backend publishes `site_name`).
+const { siteName } = storeToRefs(useAppConfigStore());
+
+// Optional URL the brand name should link to, published by a plugin (e.g. the
+// CMS "Home" link) via the generic brandActionsRegistry. Null → plain text.
+const brandHref = computed(() => brandActionsRegistry.getBrandHref());
 
 const sidebarNavItems = computed(() =>
   userNavRegistry.getSidebarItems().filter(
@@ -471,6 +514,10 @@ const menuNavItems = computed(() =>
 // The core 'store' group is rendered explicitly below, so getGroups() excludes
 // it. Keeps core agnostic to which plugin contributes which group.
 const dynamicNavGroups = computed(() => userNavRegistry.getGroups());
+
+// Plugin-contributed brand actions rendered inside the sidebar logo block
+// (e.g. the CMS "Home" link). Generic seam — core stays plugin-agnostic.
+const brandActions = computed(() => brandActionsRegistry.getAll());
 
 function groupNavItems(groupId: string) {
   return userNavRegistry
@@ -711,11 +758,26 @@ onUnmounted(() => {
 .logo {
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .logo h2 {
   margin: 0;
   font-size: 1.5rem;
+}
+
+/* Brand name → home link: inherit the heading colour, drop the underline so it
+   reads as the logo, not a text link. */
+.logo-brand-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.logo-actions {
+  display: flex;
+  align-items: center;
 }
 
 .nav-menu {

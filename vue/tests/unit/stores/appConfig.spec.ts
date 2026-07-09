@@ -195,4 +195,40 @@ describe('useAppConfigStore', () => {
 
     expect(store.homeSlug).toBe('index');
   });
+
+  // White-label brand name — the sidebar logo renders `site_name` from the
+  // public /config. Fallback stays "VBWD" so nothing breaks before/without
+  // backend support.
+  it('siteName falls back to "VBWD" before the config is loaded', () => {
+    const store = useAppConfigStore();
+    expect(store.siteName).toBe('VBWD');
+  });
+
+  it('load() adopts config.site_name when the backend publishes it', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+      site_name: 'Acme Corp',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.siteName).toBe('Acme Corp');
+  });
+
+  it('keeps the "VBWD" brand name when site_name is empty (back-compat)', async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      default_currency: 'EUR',
+      prices_display_mode: 'brutto',
+      prices_mode_in_db: 'NETTO',
+      site_name: '',
+    });
+
+    const store = useAppConfigStore();
+    await store.load();
+
+    expect(store.siteName).toBe('VBWD');
+  });
 });

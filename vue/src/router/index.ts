@@ -102,12 +102,17 @@ export const authNavigationGuard: Parameters<typeof router.beforeEach>[0] = (to,
     });
   } else if (to.name === 'login' && authenticated) {
     next({ name: 'dashboard' });
-  } else if (to.name === 'home' && authenticated) {
+  } else if (to.name === 'home' && authenticated && to.query?.public_home !== '1') {
     // S120 — `/` renders the marketing home CMS post for anonymous visitors,
     // but an authenticated visitor belongs on their dashboard. This redirect
     // resolves BEFORE the home component mounts (no chrome flash) and is the
     // single home-owner of this product decision — the home component itself
     // performs no navigation.
+    //
+    // Explicit-preview bypass: when `?public_home=1` is present the visitor
+    // has deliberately chosen to view the public homepage (e.g. via the CMS
+    // "Home" link in the private area), so we fall through and render it. The
+    // flag is generic (not CMS-named) so core stays plugin-agnostic.
     next({ name: 'dashboard' });
   } else {
     // Check user permission if route requires one

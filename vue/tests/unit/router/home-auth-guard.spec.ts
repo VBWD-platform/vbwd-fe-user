@@ -53,6 +53,29 @@ describe('router: authNavigationGuard — home vs dashboard', () => {
     expect(next).toHaveBeenCalledWith({ name: 'dashboard' });
   });
 
+  it('lets an AUTHENTICATED visitor preview the public home when public_home=1', () => {
+    isAuthenticated.mockReturnValue(true);
+    const next = runGuard({
+      name: 'home',
+      fullPath: '/?public_home=1',
+      query: { public_home: '1' },
+      meta: { requiresAuth: false },
+    });
+    expect(next).toHaveBeenCalledWith();
+    expect(next).not.toHaveBeenCalledWith({ name: 'dashboard' });
+  });
+
+  it('still bounces an AUTHENTICATED visitor to dashboard for a bare `/` (no flag)', () => {
+    isAuthenticated.mockReturnValue(true);
+    const next = runGuard({
+      name: 'home',
+      fullPath: '/',
+      query: {},
+      meta: { requiresAuth: false },
+    });
+    expect(next).toHaveBeenCalledWith({ name: 'dashboard' });
+  });
+
   it('lets an ANONYMOUS visitor render `/` in place (no redirect to /home or /login)', () => {
     isAuthenticated.mockReturnValue(false);
     const next = runGuard({ name: 'home', fullPath: '/', meta: { requiresAuth: false } });

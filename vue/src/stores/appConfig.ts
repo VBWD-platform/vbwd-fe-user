@@ -31,6 +31,10 @@ interface PublicConfigResponse {
   // place (no client redirect). Optional for back-compat with backends that
   // don't publish it yet; the fe falls back to DEFAULT_HOME_SLUG.
   home_slug?: string;
+  // White-label brand name shown in the sidebar logo. Empty/absent when unset;
+  // the fe falls back to DEFAULT_SITE_NAME so nothing breaks without backend
+  // support.
+  site_name?: string;
 }
 
 // The platform's documented baseline (DEFAULT_CORE_SETTINGS) — used until the
@@ -45,6 +49,10 @@ const FALLBACK_MODE_IN_DB: PricesModeInDb = 'NETTO';
 // `/home` bounce target that produced the soft-404 (S120).
 const DEFAULT_HOME_SLUG = 'index';
 
+// The display brand name shown in the sidebar logo until (and unless) the
+// backend publishes a white-label `site_name`.
+const DEFAULT_SITE_NAME = 'VBWD';
+
 export const useAppConfigStore = defineStore('app-config', () => {
   const defaultCurrencyRef = ref<string>(FALLBACK_CURRENCY);
   const pricesDisplayModeRef = ref<PricesDisplayMode>(FALLBACK_DISPLAY_MODE);
@@ -55,6 +63,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
   const activeCurrenciesRef = ref<string[]>([]);
   const currencyRatesRef = ref<Record<string, string>>({});
   const homeSlugRef = ref<string>(DEFAULT_HOME_SLUG);
+  const siteNameRef = ref<string>(DEFAULT_SITE_NAME);
   const loaded = ref(false);
 
   const defaultCurrency = computed(() => defaultCurrencyRef.value);
@@ -64,6 +73,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
   const activeCurrencies = computed(() => activeCurrenciesRef.value);
   const currencyRates = computed(() => currencyRatesRef.value);
   const homeSlug = computed(() => homeSlugRef.value);
+  const siteName = computed(() => siteNameRef.value);
 
   async function load(): Promise<void> {
     if (loaded.value) return;
@@ -84,6 +94,9 @@ export const useAppConfigStore = defineStore('app-config', () => {
       if (config.currency_rates) currencyRatesRef.value = config.currency_rates;
       // Back-compat: adopt home_slug if a future core /config ever publishes it.
       if (config.home_slug) homeSlugRef.value = config.home_slug;
+      // White-label brand name — adopt only a non-empty value so the "VBWD"
+      // fallback survives an empty/absent site_name.
+      if (config.site_name) siteNameRef.value = config.site_name;
       loaded.value = true;
     } catch {
       // Keep the baseline; checkout still renders a valid currency.
@@ -109,6 +122,7 @@ export const useAppConfigStore = defineStore('app-config', () => {
     activeCurrencies,
     currencyRates,
     homeSlug,
+    siteName,
     load,
   };
 });
