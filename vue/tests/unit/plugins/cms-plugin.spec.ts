@@ -1,8 +1,10 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { flushPromises } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
 import { PluginRegistry, PlatformSDK } from 'vbwd-view-component'
 import { cmsPlugin } from '../../../../plugins/cms'
 import { landing1Plugin } from '../../../../plugins/landing1'
+import { resolveCmsVueComponent } from '../../../../plugins/cms/src/registry/vueComponentRegistry'
 
 const NotFoundStub = { template: '<div>404</div>' }
 
@@ -200,6 +202,24 @@ describe('CMS Plugin — Vue Router integration', () => {
 
     await router.push('/login')
     expect(router.currentRoute.value.name).toBe('login')
+  })
+})
+
+describe('CMS Plugin — vue-component widget registry', () => {
+  it('registers the SuperHeader widget so it resolves from the registry after install', async () => {
+    const registry = new PluginRegistry()
+    const sdk = new PlatformSDK()
+
+    registry.register(landing1Plugin)
+    registry.register(cmsPlugin)
+    await registry.installAll(sdk)
+
+    // The built-in widgets are registered via async dynamic imports in
+    // install(); flush the pending microtasks before asserting resolution.
+    await flushPromises()
+    await flushPromises()
+
+    expect(resolveCmsVueComponent('SuperHeader')).toBeDefined()
   })
 })
 
