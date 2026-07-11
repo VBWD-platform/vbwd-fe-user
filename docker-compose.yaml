@@ -62,7 +62,10 @@ services:
       - ../vbwd-fe-core:/app/vbwd-fe-core
       - node_modules:/app/node_modules
       - plugin_api_node_modules:/app/server/node_modules
-    command: sh -c "sh bin/npm-install-local-fe-core.sh && npx tsc && npm start"
+    # NOTE: working_dir is /app/server, not /app — the fe-core install helper
+    # lives at /app/bin and this service has no vbwd-view-component dep, so it
+    # installs its own (express/tsc) deps directly.
+    command: sh -c "npm install && npx tsc && npm start"
     environment:
       - PLUGIN_API_SECRET=8c78ba3cf582006f19f7aa2841794bec95ffb3bef08ec31ba8363382d067c198
       - PLUGIN_API_PORT=3001
