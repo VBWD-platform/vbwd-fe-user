@@ -170,9 +170,10 @@ test.describe('E-commerce — Orders (API)', () => {
     const response = await fetch(`${API}/shop/products`);
     expect(response.status).toBe(200);
     const data = await response.json();
-    expect(data.products.length).toBeGreaterThan(0);
-    expect(data.products[0]).toHaveProperty('name');
-    expect(data.products[0]).toHaveProperty('price');
+    // Catalogue-list wire contract: the list endpoint emits `items`.
+    expect(data.items.length).toBeGreaterThan(0);
+    expect(data.items[0]).toHaveProperty('name');
+    expect(data.items[0]).toHaveProperty('price');
   });
 
   test('shop categories API returns data', async () => {
@@ -188,7 +189,7 @@ test.describe('E-commerce — Orders (API)', () => {
     // Get a product
     const productsResponse = await fetch(`${API}/shop/products`);
     const productsData = await productsResponse.json();
-    const product = productsData.products[0];
+    const product = productsData.items[0];
 
     // Checkout
     const checkoutResponse = await fetch(`${API}/shop/cart/checkout`, {

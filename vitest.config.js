@@ -19,6 +19,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./vue/src', import.meta.url))
-    }
+    },
+    // The fe-core catalogue composable (vbwd-view-component) calls useRoute()/
+    // useStore(); dedupe so it binds to the SAME vue/vue-router/pinia instance
+    // as the host app rather than the submodule's nested copy.
+    dedupe: ['vue', 'vue-router', 'pinia']
   }
 })

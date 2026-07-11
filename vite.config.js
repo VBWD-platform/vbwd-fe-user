@@ -11,7 +11,7 @@ export default defineConfig({
       '@': resolve(__dirname, 'vue/src'),
       '@plugins': resolve(__dirname, 'plugins')
     },
-    dedupe: ['pinia', 'vue']
+    dedupe: ['pinia', 'vue', 'vue-router']
   },
   server: {
     allowedHosts: true,
