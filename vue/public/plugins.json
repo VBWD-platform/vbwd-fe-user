@@ -105,6 +105,12 @@
       "enabled": true,
       "version": "26.6.1",
       "source": "local"
+    },
+    "license": {
+      "enabled": true,
+      "version": "26.7.1",
+      "installedAt": "2026-07-13T00:00:00.000Z",
+      "source": "local"
     }
   }
 }

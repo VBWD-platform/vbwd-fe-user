@@ -24,6 +24,7 @@ plugins/conekta-payment/
 plugins/ecommerce/
 plugins/ghrm/
 plugins/landing1/
+plugins/license/
 plugins/meinchat/
 plugins/mercado-pago-payment/
 plugins/paypal-payment/
