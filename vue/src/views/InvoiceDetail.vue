@@ -741,6 +741,8 @@ h1 {
 
 .actions {
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: 15px;
   padding-top: 15px;
   border-top: 1px solid #eee;
