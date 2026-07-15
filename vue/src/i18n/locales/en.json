@@ -409,5 +409,10 @@
   "currency": {
     "displayIn": "Display in",
     "billedIn": "Billed in {currency}"
+  },
+  "maintenance": {
+    "title": "Technical works",
+    "subtitle": "We'll be right back",
+    "message": "The site is temporarily unavailable while we carry out maintenance. Please check back again shortly."
   }
 }

@@ -7,6 +7,7 @@
 import { ApiClient } from 'vbwd-view-component';
 import { ref } from 'vue';
 import { isTokenExpired } from './token';
+import { installCmsMaintenanceDetector } from './cmsMaintenance';
 
 // Session expired state - reactive so components can react to it
 export const sessionExpired = ref(false);
@@ -16,6 +17,12 @@ export const sessionExpiredMessage = ref('');
 export const api = new ApiClient({
   baseURL: import.meta.env.VITE_API_URL || '/api/v1'
 });
+
+// Observe every request for a license-blocked CMS response (HTTP 402). When
+// the public site's CMS backend is license-gated, this flips the app-wide
+// "Technical works" maintenance state (see @/stores/maintenance). Installed on
+// the host's own singleton so the shared fe-core client stays untouched.
+installCmsMaintenanceDetector(api);
 
 /**
  * Initialize API client with token from localStorage
