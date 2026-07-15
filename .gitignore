@@ -15,6 +15,7 @@ test-results
 var/*
 !var/plugins
 # Plugin dirs are hosted in individual repos (vbwd-fe-user-plugin-*)
+plugins/crypto/
 plugins/booking/
 plugins/c2p2-payment/
 plugins/chat/
