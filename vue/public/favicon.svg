@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="VBWD">
+  <title>VBWD</title>
+  <defs>
+    <linearGradient id="vbwd-chevron" x1="200" y1="150" x2="300" y2="370" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#aab1ab"/>
+      <stop offset="0.5" stop-color="#8f968f"/>
+      <stop offset="0.62" stop-color="#e9eee9"/>
+      <stop offset="1" stop-color="#d3dad3"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" ry="118" fill="#0b0b0b"/>
+  <g transform="rotate(6 256 256)">
+    <path d="M196 158 L330 256 L196 354"
+          fill="none" stroke="url(#vbwd-chevron)" stroke-width="66"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+</svg>
