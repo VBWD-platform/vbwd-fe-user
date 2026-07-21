@@ -45,6 +45,18 @@ map "${ua_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_render
     "101"   1;
 }
 
+# TLS terminates at the OUTER (host) proxy; this container listens on plain :80,
+# so `$scheme` here is always "http". Relay the scheme the edge actually saw so
+# the backend can build `https://` redirect Locations (Flask reads it via
+# ProxyFix). Without this, any Werkzeug redirect — e.g. the `merge_slashes` 308
+# on a doubled-slash path like `/api/v1//ghrm/config` — emits an absolute
+# `http://` Location, which the browser blocks as mixed content on an HTTPS page.
+# Falls back to `$scheme` when the header is absent (direct container access).
+map $http_x_forwarded_proto $forwarded_proto {
+    default $http_x_forwarded_proto;
+    ""      $scheme;
+}
+
 # S120.1 — nginx-layer geo-block. The njs handler owns `location /` and either
 # passes to the unchanged SPA/prerender chain (`@spa`) or blocks / grants a
 # bypass cookie. `$geoip2_country_code` is defined by the container-start
@@ -55,6 +67,13 @@ js_import geo from geo_block.js;
 
 server {
     listen 80;
+
+    # This server listens on plain :80 behind a TLS-terminating proxy, so nginx
+    # would glue `http://$host` onto every redirect it generates itself (the njs
+    # geo-block 302s, try_files directory redirects). Keep those Locations
+    # relative — the browser resolves them against the current HTTPS origin.
+    absolute_redirect off;
+    port_in_redirect off;
 
     # Allow large image uploads (raw photo / base64-inflated e2e ciphertext).
     # Must exceed meinchat `attachment_max_bytes` (25 MB) + ~33% base64 overhead.
@@ -73,6 +92,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
 
@@ -83,6 +103,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
     location ~ ^/sitemap-\d+\.xml$ {
@@ -90,6 +111,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
     location = /robots.txt {
@@ -97,6 +119,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
 
@@ -108,6 +131,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
 
@@ -123,6 +147,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_buffering off;
         proxy_cache off;
         proxy_read_timeout 3600s;
@@ -135,6 +160,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
 
@@ -145,6 +171,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_read_timeout 60s;
     }
 
@@ -188,6 +215,14 @@ server {
         # (SPA shell). `return` inside `if` is one of the safe `if` uses.
         error_page 418 = @seo_dynamic;
         if ($serve_dynamic_render) { return 418; }
+        # Entry documents (the SPA shell and the prerendered .html snapshots) must
+        # always be revalidated so a redeploy's new asset hashes are picked up at
+        # once. `@seo_shell` sets this too, but it is only the FALLBACK arm: for
+        # `/` the `${seo_prefix}$uri/index.html` arm below resolves to /index.html
+        # and serves it from here, never reaching @seo_shell — which is why the
+        # shell shipped with no Cache-Control at all. Hashed assets are unaffected:
+        # they match the `location /assets/` block above (immutable, 1y).
+        add_header Cache-Control "no-cache" always;
         # SPA-shell fallback goes to the named @seo_shell (serves /index.html)
         # instead of the bare `/index.html`, which would internal-redirect back
         # into `location /` (now the js_content geo handler) and re-evaluate —
@@ -206,6 +241,7 @@ server {
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $forwarded_proto;
         proxy_set_header X-VBWD-Render-Token "${SEO_RENDER_TOKEN}";
         # A cold headless render can take a few seconds; keep it bounded.
         proxy_read_timeout 35s;
@@ -222,6 +258,8 @@ server {
     # crawler → @seo_dynamic branch and loop into a redirect cycle → 404/500).
     location @seo_static {
         root /usr/share/nginx/html;
+        # Same reasoning as @spa: this arm can serve the shell or a prerender.
+        add_header Cache-Control "no-cache" always;
         try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri @seo_shell;
     }
     location @seo_shell {
@@ -230,7 +268,7 @@ server {
         # asset hashes are picked up immediately. Without this, browsers
         # heuristically cache index.html and keep requesting the previous build's
         # (now-404) chunk hashes.
-        add_header Cache-Control "no-cache";
+        add_header Cache-Control "no-cache" always;
         try_files /index.html =404;
     }
 }
