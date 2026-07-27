@@ -8,24 +8,31 @@
  *
  * Values are exposed as CSS custom properties so a theme can override them
  * without touching component markup; the defaults match fe-admin.
+ *
+ * The tokens are namespaced `--vbwd-ui-*` ON PURPOSE. This file is imported
+ * globally and UNSCOPED, so a bare `--vbwd-<x>` here would define a name that
+ * components/themes elsewhere only consume defensively as
+ * `var(--vbwd-<x>, <fallback>)` — killing every one of those fallbacks and the
+ * CMS theme chains built on them. Guarded by
+ * vue/tests/unit/vbwd-ui-global-token-shadowing.spec.ts.
  */
 :root {
-  --vbwd-primary: #3498db;
-  --vbwd-primary-hover: #2980b9;
-  --vbwd-heading: #2c3e50;
-  --vbwd-muted: #666;
-  --vbwd-border: #e9ecef;
-  --vbwd-table-border: #eee;
-  --vbwd-table-head-bg: #f8f9fa;
-  --vbwd-surface: #fff;
-  --vbwd-radius-card: 8px;
-  --vbwd-radius-control: 4px;
+  --vbwd-ui-primary: #3498db;
+  --vbwd-ui-primary-hover: #2980b9;
+  --vbwd-ui-heading: #2c3e50;
+  --vbwd-ui-muted: #666;
+  --vbwd-ui-border: #e9ecef;
+  --vbwd-ui-table-border: #eee;
+  --vbwd-ui-table-head-bg: #f8f9fa;
+  --vbwd-ui-surface: #fff;
+  --vbwd-ui-radius-card: 8px;
+  --vbwd-ui-radius-control: 4px;
 }
 
 /* ── Card / panel ─────────────────────────────────────────────────────────── */
 .vbwd-card {
-  background: var(--vbwd-surface);
-  border-radius: var(--vbwd-radius-card);
+  background: var(--vbwd-ui-surface);
+  border-radius: var(--vbwd-ui-radius-card);
   padding: 20px;
   margin-bottom: 18px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -34,12 +41,12 @@
 /* ── Headings ─────────────────────────────────────────────────────────────── */
 .vbwd-heading {
   margin: 0 0 16px;
-  color: var(--vbwd-heading);
+  color: var(--vbwd-ui-heading);
   font-size: 1.1rem;
 }
 .vbwd-subheading {
   margin: 16px 0 8px;
-  color: var(--vbwd-muted);
+  color: var(--vbwd-ui-muted);
   font-size: 0.9rem;
 }
 
@@ -47,7 +54,7 @@
 .vbwd-btn {
   padding: 10px 20px;
   border: none;
-  border-radius: var(--vbwd-radius-control);
+  border-radius: var(--vbwd-ui-radius-control);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -58,15 +65,15 @@
   cursor: not-allowed;
 }
 .vbwd-btn--primary {
-  background: var(--vbwd-primary);
+  background: var(--vbwd-ui-primary);
   color: #fff;
 }
 .vbwd-btn--primary:hover:not(:disabled) {
-  background: var(--vbwd-primary-hover);
+  background: var(--vbwd-ui-primary-hover);
 }
 .vbwd-btn--ghost {
   background: #ecf0f1;
-  color: var(--vbwd-heading);
+  color: var(--vbwd-ui-heading);
 }
 .vbwd-btn--ghost:hover:not(:disabled) {
   background: #dfe4e6;
@@ -79,7 +86,7 @@
 /* ── Tabs (fe-admin sub-tab pattern) ──────────────────────────────────────── */
 .vbwd-tabs {
   display: flex;
-  border-bottom: 2px solid var(--vbwd-border);
+  border-bottom: 2px solid var(--vbwd-ui-border);
   margin-bottom: 20px;
 }
 .vbwd-tab {
@@ -90,16 +97,16 @@
   margin-bottom: -2px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--vbwd-muted);
+  color: var(--vbwd-ui-muted);
   cursor: pointer;
   transition: all 0.2s;
 }
 .vbwd-tab:hover {
-  color: var(--vbwd-primary);
+  color: var(--vbwd-ui-primary);
 }
 .vbwd-tab.is-active {
-  color: var(--vbwd-primary);
-  border-bottom-color: var(--vbwd-primary);
+  color: var(--vbwd-ui-primary);
+  border-bottom-color: var(--vbwd-ui-primary);
 }
 
 /* ── Data table ───────────────────────────────────────────────────────────── */
@@ -112,19 +119,19 @@
 .vbwd-table td {
   padding: 10px 12px;
   text-align: left;
-  border-bottom: 1px solid var(--vbwd-table-border);
+  border-bottom: 1px solid var(--vbwd-ui-table-border);
 }
 .vbwd-table th {
-  background: var(--vbwd-table-head-bg);
+  background: var(--vbwd-ui-table-head-bg);
   font-weight: 600;
-  color: var(--vbwd-heading);
+  color: var(--vbwd-ui-heading);
 }
 
 /* ── Form controls ────────────────────────────────────────────────────────── */
 .vbwd-input,
 .vbwd-select {
   padding: 8px 10px;
-  border: 1px solid var(--vbwd-border);
-  border-radius: var(--vbwd-radius-control);
+  border: 1px solid var(--vbwd-ui-border);
+  border-radius: var(--vbwd-ui-radius-control);
   font-size: 0.85rem;
 }
