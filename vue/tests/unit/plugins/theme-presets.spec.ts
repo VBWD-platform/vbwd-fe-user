@@ -14,6 +14,14 @@ describe('Theme Presets', () => {
     expect(defaultPreset!.id).toBe('default')
   })
 
+  it('default preset pins --color-border to the soft slate (CMS/ghrm border, not flat #dddddd)', () => {
+    // Applied globally on <html>; the CMS marketing `.vbwd-page` borders derive
+    // from --color-border, so a flat #dddddd here flattens every marketing
+    // stat/card hairline. Keep it #e2e8f0 to match the CMS light theme + ghrm.
+    const defaultPreset = themePresets.find(preset => preset.id === 'default')
+    expect(defaultPreset!.colors['--color-border']).toBe('#e2e8f0')
+  })
+
   it('should have all 5 expected presets', () => {
     const ids = themePresets.map(preset => preset.id)
     expect(ids).toContain('default')
