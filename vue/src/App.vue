@@ -126,4 +126,18 @@ body {
   --vbwd-surface: var(--color-surface, #ffffff);
   --vbwd-surface-soft: var(--color-surface-soft, #f8fafc);
 }
+
+/* The cookie-consent popup renders inside .vbwd-page, so it read a mix of the
+ * app-shell dark tokens (dark panel via --vbwd-card-bg, light title) and the
+ * remapped content text (dark summary) — dark-on-dark, and jarring against the
+ * now-light page. Pin the whole popup to the CMS light theme so it matches the
+ * page it sits on: light panel, dark heading + body, all readable. */
+#app.app--cms-content .cookie-consent {
+  --vbwd-card-bg: var(--color-surface, #ffffff);
+  --vbwd-text-heading: var(--color-heading, var(--color-text, #2c3e50));
+  --vbwd-text-body: var(--color-text, #333333);
+  --vbwd-text-muted: var(--color-text-muted, #666666);
+  --vbwd-border-color: var(--color-border, #d1d5db);
+  color: var(--color-text, #333333);
+}
 </style>
