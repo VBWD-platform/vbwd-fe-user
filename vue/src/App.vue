@@ -107,4 +107,17 @@ body {
   --vbwd-text-muted: var(--color-text-muted, #64748b);
   --vbwd-color-primary: var(--color-accent, #2563eb);
 }
+
+/* The exhibition content (.vbwd-page) derives --vbwd-text from
+ * --color-text-primary (a theme-switcher/Tarot token a dark preset turns light,
+ * #d1d5db) — so on a dark app theme the body/headings go light-on-white, i.e.
+ * unreadable, once the light --color-bg is forced above. Re-map the content's
+ * text roles to the CMS theme's own --color-text/-muted/-heading (which the
+ * theme-switcher never overrides), scoped to .vbwd-page so nothing outside CMS
+ * content is affected. Theme-aware; light-theme value is unchanged in practice. */
+#app.app--cms-content .vbwd-page {
+  --vbwd-text: var(--color-text, #0f172a);
+  --vbwd-text-muted: var(--color-text-muted, #475569);
+  --vbwd-heading: var(--color-heading, var(--color-text, #0b1220));
+}
 </style>
