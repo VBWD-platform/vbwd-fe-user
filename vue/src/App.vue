@@ -1,5 +1,8 @@
 <template>
-  <div id="app">
+  <div
+    id="app"
+    :class="{ 'app--cms-content': isCmsLayoutRoute }"
+  >
     <!-- License-blocked CMS backend (HTTP 402): show the full-page
          "Technical works" screen app-wide instead of a broken site. -->
     <MaintenanceScreen v-if="maintenanceActive" />
@@ -80,5 +83,16 @@ body {
 
 #app {
   min-height: 100vh;
+}
+
+/* Public CMS/marketing pages (route meta cmsLayout) render their own CMS theme.
+ * The global `body` background uses the app-chrome token `--vbwd-page-bg`, which
+ * a theme-switcher dark preset turns navy (#16213e) — that would show through
+ * behind the light CMS content. Paint the CMS theme's own background token
+ * (`--color-bg`, white for the default light theme, dark for a dark CMS theme)
+ * on #app so the app-chrome background never bleeds onto public content. Theme
+ * of the logged-in app (dashboard) is untouched — it has no `app--cms-content`. */
+#app.app--cms-content {
+  background-color: var(--color-bg, #ffffff);
 }
 </style>

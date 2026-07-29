@@ -64,4 +64,16 @@ describe('App.vue maintenance rendering', () => {
     expect(wrapper.find('.router-view').exists()).toBe(false);
     expect(wrapper.find('.user-layout').exists()).toBe(false);
   });
+
+  it('marks #app with app--cms-content on public CMS pages (cmsLayout route) so the app-chrome background never bleeds onto CMS content', () => {
+    routeMeta.value = { cmsLayout: true };
+    const wrapper = mountApp();
+    expect(wrapper.find('#app').classes()).toContain('app--cms-content');
+  });
+
+  it('does NOT mark #app with app--cms-content on app/dashboard routes (keeps --vbwd-page-bg chrome)', () => {
+    routeMeta.value = { requiresAuth: true };
+    const wrapper = mountApp();
+    expect(wrapper.find('#app').classes()).not.toContain('app--cms-content');
+  });
 });
