@@ -85,55 +85,44 @@ body {
   min-height: 100vh;
 }
 
-/* Public CMS/marketing pages (route meta cmsLayout) render their own CMS theme.
- * The global `body` background uses the app-chrome token `--vbwd-page-bg`, which
- * a theme-switcher dark preset turns navy (#16213e) — that would show through
- * behind the light CMS content. Paint the CMS theme's own background token
- * (`--color-bg`, white for the default light theme, dark for a dark CMS theme)
- * on #app so the app-chrome background never bleeds onto public content. Theme
- * of the logged-in app (dashboard) is untouched — it has no `app--cms-content`. */
+/* ---------------------------------------------------------------------------
+ * Public CMS pages must always render in the CMS (light) theme, even when the
+ * theme-switcher's app preset is dark. The app preset applies its tokens inline
+ * on <html>: the app-chrome roles (`--vbwd-*`) AND a duplicate CMS-namespace
+ * block (`--color-text-primary`, `--color-background-secondary`, …) that a dark
+ * preset turns dark/light — those bleed into every CMS widget (nav, breadcrumb,
+ * exhibition cards, pricing cards via `--tpc-* : var(--vbwd-*)`, …).
+ *
+ * Rather than patch each widget, neutralise the whole app-preset override on
+ * the public CMS wrapper: re-map every bled token to the CMS content theme's
+ * own `--color-*` roles, which the theme-switcher NEVER overrides (so operator
+ * edits to the active CMS style still flow through). The logged-in app
+ * (dashboard) has no `app--cms-content`, so its theme is untouched. Borders use
+ * a light fallback because the app preset also overrides `--color-border`. */
 #app.app--cms-content {
   background-color: var(--color-bg, #ffffff);
-}
+  color: var(--color-text, #0f172a);
 
-/* The fe-core breadcrumb inherits the app-shell dark-theme text tokens
- * (--vbwd-text-body / --vbwd-color-primary) — light-on-white, hence faint —
- * once a CMS page forces the light --color-bg above. Re-map ONLY the
- * breadcrumb's own tokens to the CMS theme so it stays readable, without
- * touching the shared tokens the cookie-consent modal needs (dark panel + light
- * text). Theme-aware: a dark CMS theme carries its own --color-* through. */
-#app.app--cms-content .vbwd-breadcrumb {
-  --vbwd-text-body: var(--color-text, #1e293b);
-  --vbwd-text-muted: var(--color-text-muted, #64748b);
+  --vbwd-page-bg: var(--color-bg, #ffffff);
+  --vbwd-card-bg: var(--color-surface, #ffffff);
+  --vbwd-text-body: var(--color-text, #333333);
+  --vbwd-text-heading: var(--color-heading, var(--color-text, #2c3e50));
+  --vbwd-text-muted: var(--color-text-muted, #666666);
   --vbwd-color-primary: var(--color-accent, #2563eb);
+  --vbwd-color-primary-hover: var(--color-accent-dark, #1d4ed8);
+  --vbwd-border-color: var(--color-border, #e2e8f0);
+  --vbwd-border-light: #eeeeee;
+
+  --color-text-primary: var(--color-text, #0f172a);
+  --color-text-secondary: var(--color-text-muted, #475569);
+  --color-background: var(--color-bg, #ffffff);
+  --color-background-secondary: var(--color-surface, #ffffff);
+  --color-primary: var(--color-accent, #2563eb);
 }
 
-/* The exhibition content (.vbwd-page) derives --vbwd-text from
- * --color-text-primary (a theme-switcher/Tarot token a dark preset turns light,
- * #d1d5db) — so on a dark app theme the body/headings go light-on-white, i.e.
- * unreadable, once the light --color-bg is forced above. Re-map the content's
- * text roles to the CMS theme's own --color-text/-muted/-heading (which the
- * theme-switcher never overrides), scoped to .vbwd-page so nothing outside CMS
- * content is affected. Theme-aware; light-theme value is unchanged in practice. */
-#app.app--cms-content .vbwd-page {
-  --vbwd-text: var(--color-text, #0f172a);
-  --vbwd-text-muted: var(--color-text-muted, #475569);
-  --vbwd-heading: var(--color-heading, var(--color-text, #0b1220));
-  /* Cards/stat boxes take their fill from --vbwd-surface, which the stale CSS
-   * derives from --color-background-secondary (a dark preset turns it #1a1a2e).
-   * On the forced-light page that is dark-card + now-dark text = invisible.
-   * Re-map to the CMS --color-surface (never overridden) so cards stay light. */
-  --vbwd-surface: var(--color-surface, #ffffff);
-  --vbwd-surface-soft: var(--color-surface-soft, #f8fafc);
-}
-
-/* The cookie-consent popup is a public consent widget, but it reads the
- * app-shell --vbwd-card-bg / --vbwd-text-* tokens, so a dark app theme renders
- * it dark (and, with the content remap above, dark-on-dark unreadable summary).
- * It is Teleported to <body> (outside #app), so it can't be scoped via the
- * page wrapper — pin it directly to the CMS theme tokens (--color-surface /
- * --color-text, which the theme-switcher never overrides) so it's always the
- * light, readable version that matches the public page it overlays. */
+/* The cookie-consent popup Teleports to <body> (outside #app), so the wrapper
+ * remap above can't reach it — pin the same CMS-light roles directly. It only
+ * ever overlays public pages, so it stays light/readable there. */
 .cookie-consent {
   --vbwd-card-bg: var(--color-surface, #ffffff);
   --vbwd-text-heading: var(--color-heading, var(--color-text, #2c3e50));
