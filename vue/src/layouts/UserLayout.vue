@@ -472,7 +472,10 @@
     />
 
     <!-- Main Content -->
-    <main class="main-content">
+    <main
+      class="main-content"
+      :class="{ 'main-content--full-height': isFullHeightRoute }"
+    >
       <slot />
     </main>
   </div>
@@ -480,7 +483,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useCartStore, Icon } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
 import { userNavRegistry } from '@/plugins/userNavRegistry';
@@ -491,6 +494,24 @@ import { useDisplayPrice } from '@/composables/useDisplayPrice';
 import { useAppConfigStore } from '@/stores/appConfig';
 
 const router = useRouter();
+const route = useRoute();
+
+/**
+ * Opt-in bounded-height layout, mirroring App.vue's `route.meta.cmsLayout`
+ * pattern.
+ *
+ * `.main-content` is `min-height: 100vh`, so its computed height is `auto` and
+ * it grows with its content. That is right for a document page, and wrong for
+ * an app-like view that manages its own scrolling: a child asking for
+ * `height: 100%` resolves against `auto` and gets nothing, so a "virtualised"
+ * grid quietly renders every row instead of a window (VBWD Spreadsheets was
+ * painting ~13,000 cells).
+ *
+ * Routes opt in with `meta: { fullHeight: true }`. Deliberately opt-IN: making
+ * every page bounded would change scrolling across the whole user app for the
+ * sake of one view.
+ */
+const isFullHeightRoute = computed(() => route.meta.fullHeight === true);
 
 // White-label brand name for the sidebar logo — sourced from the app-config
 // store (default "VBWD" until the backend publishes `site_name`).
@@ -1170,6 +1191,25 @@ onUnmounted(() => {
   padding: 30px;
   background-color: var(--vbwd-page-bg, #f5f5f5);
   min-height: 100vh;
+  /* Without this, a wide child (a spreadsheet grid) stretches the flex item
+     instead of scrolling inside it, pushing the whole page sideways. */
+  min-width: 0;
+}
+
+/* Opt-in via `route.meta.fullHeight` — see `isFullHeightRoute`. Gives the page
+   a REAL height so a child's `height: 100%` resolves, and hands scrolling to
+   that child rather than the document. */
+.main-content--full-height {
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content--full-height > * {
+  min-height: 0;
+  flex: 1;
 }
 
 /* Mobile Menu Overlay */
