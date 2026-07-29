@@ -119,5 +119,11 @@ body {
   --vbwd-text: var(--color-text, #0f172a);
   --vbwd-text-muted: var(--color-text-muted, #475569);
   --vbwd-heading: var(--color-heading, var(--color-text, #0b1220));
+  /* Cards/stat boxes take their fill from --vbwd-surface, which the stale CSS
+   * derives from --color-background-secondary (a dark preset turns it #1a1a2e).
+   * On the forced-light page that is dark-card + now-dark text = invisible.
+   * Re-map to the CMS --color-surface (never overridden) so cards stay light. */
+  --vbwd-surface: var(--color-surface, #ffffff);
+  --vbwd-surface-soft: var(--color-surface-soft, #f8fafc);
 }
 </style>
