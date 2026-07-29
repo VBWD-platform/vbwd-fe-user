@@ -95,4 +95,16 @@ body {
 #app.app--cms-content {
   background-color: var(--color-bg, #ffffff);
 }
+
+/* The fe-core breadcrumb inherits the app-shell dark-theme text tokens
+ * (--vbwd-text-body / --vbwd-color-primary) — light-on-white, hence faint —
+ * once a CMS page forces the light --color-bg above. Re-map ONLY the
+ * breadcrumb's own tokens to the CMS theme so it stays readable, without
+ * touching the shared tokens the cookie-consent modal needs (dark panel + light
+ * text). Theme-aware: a dark CMS theme carries its own --color-* through. */
+#app.app--cms-content .vbwd-breadcrumb {
+  --vbwd-text-body: var(--color-text, #1e293b);
+  --vbwd-text-muted: var(--color-text-muted, #64748b);
+  --vbwd-color-primary: var(--color-accent, #2563eb);
+}
 </style>
