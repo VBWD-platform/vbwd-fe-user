@@ -40,8 +40,18 @@ vi.mock('vbwd-view-component', () => ({
   Icon: { props: ['name'], template: '<span class="vbwd-icon" :data-icon="name" />' },
 }));
 
+// `useRoute` is mocked alongside `useRouter` because UserLayout reads
+// `route.meta` for its opt-in layout modes (`fullHeight`, `autoHideNav`).
+// `routeMetaRef` lets a test drive those flags.
+const routeMetaRef = ref<Record<string, unknown>>({});
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: vi.fn(), resolve: vi.fn(() => ({ href: '/' })) }),
+  useRoute: () => ({
+    get meta() {
+      return routeMetaRef.value;
+    },
+    fullPath: '/dashboard',
+  }),
 }));
 
 vi.mock('@/plugins/userNavRegistry', () => ({
@@ -105,5 +115,59 @@ describe('UserLayout sidebar logo', () => {
     expect(link.attributes('href')).toBe('/?public_home=1');
     expect(link.attributes('target')).toBe('_blank');
     expect(link.text()).toContain('VBWD');
+  });
+});
+
+
+describe('UserLayout — opt-in auto-hiding nav (route.meta.autoHideNav)', () => {
+  beforeEach(() => {
+    routeMetaRef.value = {};
+  });
+
+  it('leaves the nav alone on an ordinary dashboard route', () => {
+    const wrapper = mountLayout();
+
+    expect(wrapper.find('.sidebar').classes()).not.toContain('sidebar--auto-hidden');
+    expect(wrapper.find('.main-content').classes()).not.toContain('main-content--nav-hidden');
+    // No toggle where there is nothing to reveal.
+    expect(wrapper.find('[data-testid="nav-reveal-toggle"]').exists()).toBe(false);
+  });
+
+  it('hides the nav and reclaims the width when the route opts in', () => {
+    routeMetaRef.value = { autoHideNav: true };
+    const wrapper = mountLayout();
+
+    expect(wrapper.find('.sidebar').classes()).toContain('sidebar--auto-hidden');
+    expect(wrapper.find('.main-content').classes()).toContain('main-content--nav-hidden');
+  });
+
+  it('always renders a reveal toggle on an auto-hide route', () => {
+    // A nav you cannot get back to is a trap, so the toggle is not optional.
+    routeMetaRef.value = { autoHideNav: true };
+    const wrapper = mountLayout();
+
+    expect(wrapper.find('[data-testid="nav-reveal-toggle"]').exists()).toBe(true);
+  });
+
+  it('the toggle reveals the nav and hides it again', async () => {
+    routeMetaRef.value = { autoHideNav: true };
+    const wrapper = mountLayout();
+    const toggle = wrapper.find('[data-testid="nav-reveal-toggle"]');
+
+    await toggle.trigger('click');
+    expect(wrapper.find('.sidebar').classes()).not.toContain('sidebar--auto-hidden');
+    expect(toggle.attributes('aria-expanded')).toBe('true');
+
+    await toggle.trigger('click');
+    expect(wrapper.find('.sidebar').classes()).toContain('sidebar--auto-hidden');
+    expect(toggle.attributes('aria-expanded')).toBe('false');
+  });
+
+  it('fullHeight and autoHideNav are independent opt-ins', () => {
+    routeMetaRef.value = { fullHeight: true };
+    const wrapper = mountLayout();
+
+    expect(wrapper.find('.main-content').classes()).toContain('main-content--full-height');
+    expect(wrapper.find('.main-content').classes()).not.toContain('main-content--nav-hidden');
   });
 });

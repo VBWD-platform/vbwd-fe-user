@@ -61,10 +61,31 @@
       </button>
     </header>
 
+    <!-- Reveal toggle for auto-hide routes (an app-like page such as VBWD
+         Office hides the dashboard nav to reclaim the width). Rendered ONLY on
+         those routes, so every other page is untouched — and always rendered
+         there, so the nav can never become unreachable. -->
+    <button
+      v-if="isAutoHideNavRoute"
+      type="button"
+      class="nav-reveal-toggle"
+      :class="{ 'nav-reveal-toggle--shifted': navRevealed }"
+      :aria-expanded="navRevealed"
+      :aria-label="navRevealed ? 'Hide navigation' : 'Show navigation'"
+      :title="navRevealed ? 'Hide navigation' : 'Show navigation'"
+      data-testid="nav-reveal-toggle"
+      @click="navRevealed = !navRevealed"
+    >
+      <span aria-hidden="true">{{ navRevealed ? '‹' : '›' }}</span>
+    </button>
+
     <!-- Sidebar (Desktop and Mobile Expanded) -->
     <aside
       class="sidebar"
-      :class="{ 'sidebar-mobile-open': showMobileMenu }"
+      :class="{
+        'sidebar-mobile-open': showMobileMenu,
+        'sidebar--auto-hidden': isNavAutoHidden,
+      }"
       @click.self="closeMobileMenu"
     >
       <div class="sidebar-content">
@@ -474,7 +495,10 @@
     <!-- Main Content -->
     <main
       class="main-content"
-      :class="{ 'main-content--full-height': isFullHeightRoute }"
+      :class="{
+        'main-content--full-height': isFullHeightRoute,
+        'main-content--nav-hidden': isNavAutoHidden,
+      }"
     >
       <slot />
     </main>
@@ -482,7 +506,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { useCartStore, Icon } from 'vbwd-view-component';
 import { storeToRefs } from 'pinia';
@@ -512,6 +536,33 @@ const route = useRoute();
  * sake of one view.
  */
 const isFullHeightRoute = computed(() => route.meta.fullHeight === true);
+
+/**
+ * Opt-in auto-hiding of the dashboard nav, for app-like pages that want the full
+ * width (VBWD Office). Same `route.meta` pattern as `fullHeight` above.
+ *
+ * Auto-hide, not remove: the sidebar starts collapsed and a reveal toggle is
+ * ALWAYS rendered on these routes, so the rest of the dashboard stays reachable.
+ * A nav you cannot get back to is a trap, not a feature.
+ *
+ * `navRevealed` deliberately resets when the route changes: leaving the nav
+ * pinned open would defeat the point on the next Office page, and remembering it
+ * across a whole session is a preference nobody asked for.
+ */
+const isAutoHideNavRoute = computed(() => route.meta.autoHideNav === true);
+const navRevealed = ref(false);
+
+//: Hidden only when the route opts in AND the user has not revealed it. Mobile is
+//: unaffected — there the sidebar is already off-canvas behind the burger menu,
+//: and `showMobileMenu` still governs it.
+const isNavAutoHidden = computed(() => isAutoHideNavRoute.value && !navRevealed.value);
+
+watch(
+  () => route.fullPath,
+  () => {
+    navRevealed.value = false;
+  },
+);
 
 // White-label brand name for the sidebar logo — sourced from the app-config
 // store (default "VBWD" until the backend publishes `site_name`).
@@ -1194,6 +1245,67 @@ onUnmounted(() => {
   /* Without this, a wide child (a spreadsheet grid) stretches the flex item
      instead of scrolling inside it, pushing the whole page sideways. */
   min-width: 0;
+}
+
+/* ── Opt-in auto-hiding nav (`route.meta.autoHideNav`) ──────────────────────
+   An app-like page (VBWD Office) reclaims the 250px the dashboard nav occupies.
+   The sidebar slides out rather than being removed, so revealing it is instant
+   and its scroll position survives. */
+.sidebar--auto-hidden {
+  transform: translateX(-100%);
+}
+.sidebar {
+  transition: transform 0.18s ease;
+}
+.main-content--nav-hidden {
+  margin-left: 0;
+}
+.main-content {
+  transition: margin-left 0.18s ease;
+}
+
+/* Always rendered on auto-hide routes: a nav you cannot get back to is a trap.
+   Sits above the sidebar so it stays clickable in both states. */
+.nav-reveal-toggle {
+  position: fixed;
+  top: 12px;
+  left: 0;
+  z-index: 1001;
+  width: 22px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--vbwd-color-border, #e9ecef);
+  border-left: none;
+  border-radius: 0 6px 6px 0;
+  background: var(--vbwd-color-surface, #fff);
+  color: var(--vbwd-color-text-secondary, #6b7684);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  transition: left 0.18s ease;
+}
+.nav-reveal-toggle:hover {
+  color: var(--vbwd-color-text-primary, #2c3e50);
+}
+/* Rides out with the sidebar so it never sits on top of the nav it opened. */
+.nav-reveal-toggle--shifted {
+  left: 250px;
+}
+
+/* Mobile keeps its own off-canvas behaviour: the sidebar is already hidden
+   behind the burger menu there, so the desktop auto-hide must not fight it. */
+@media (max-width: 1024px) {
+  .sidebar--auto-hidden {
+    transform: none;
+  }
+  .main-content--nav-hidden {
+    margin-left: 0;
+  }
+  .nav-reveal-toggle {
+    display: none;
+  }
 }
 
 /* Opt-in via `route.meta.fullHeight` — see `isFullHeightRoute`. Gives the page
