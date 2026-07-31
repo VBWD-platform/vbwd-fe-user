@@ -1,7 +1,7 @@
 <template>
   <div
     id="app"
-    :class="{ 'app--cms-content': isCmsLayoutRoute }"
+    :class="{ 'app--public-light': isPublicLightRoute }"
   >
     <!-- License-blocked CMS backend (HTTP 402): show the full-page
          "Technical works" screen app-wide instead of a broken site. -->
@@ -58,6 +58,15 @@ const isEmbedRoute = computed(() => route.meta.embed === true);
 // They must never be wrapped in UserLayout, even when the user is authenticated.
 const isCmsLayoutRoute = computed(() => route.meta.cmsLayout === true);
 
+// Public-facing storefront pages (CMS/marketing `cmsLayout` + bare public routes
+// like `/checkout`, `/login` marked `noLayout`) must always render in the CMS
+// light theme, never the theme-switcher's dark app preset — that preset is for
+// the authenticated dashboard (UserLayout) only. Drives the `app--public-light`
+// token remap in <style>.
+const isPublicLightRoute = computed(
+  () => route.meta.cmsLayout === true || route.meta.noLayout === true,
+);
+
 // Show UserLayout when: user is authenticated, OR the route explicitly opts in to the layout
 // (publicLayout: true) for unauthenticated visitors on CMS/plugin pages.
 const showLayout = computed(() => {
@@ -97,9 +106,9 @@ body {
  * the public CMS wrapper: re-map every bled token to the CMS content theme's
  * own `--color-*` roles, which the theme-switcher NEVER overrides (so operator
  * edits to the active CMS style still flow through). The logged-in app
- * (dashboard) has no `app--cms-content`, so its theme is untouched. Borders use
+ * (dashboard) has no `app--public-light`, so its theme is untouched. Borders use
  * a light fallback because the app preset also overrides `--color-border`. */
-#app.app--cms-content {
+#app.app--public-light {
   background-color: var(--color-bg, #ffffff);
   color: var(--color-text, #0f172a);
 

@@ -65,15 +65,21 @@ describe('App.vue maintenance rendering', () => {
     expect(wrapper.find('.user-layout').exists()).toBe(false);
   });
 
-  it('marks #app with app--cms-content on public CMS pages (cmsLayout route) so the app-chrome background never bleeds onto CMS content', () => {
+  it('marks #app with app--public-light on public CMS pages (cmsLayout route) so the app dark theme never bleeds onto public content', () => {
     routeMeta.value = { cmsLayout: true };
     const wrapper = mountApp();
-    expect(wrapper.find('#app').classes()).toContain('app--cms-content');
+    expect(wrapper.find('#app').classes()).toContain('app--public-light');
   });
 
-  it('does NOT mark #app with app--cms-content on app/dashboard routes (keeps --vbwd-page-bg chrome)', () => {
+  it('marks #app with app--public-light on bare public routes (noLayout, e.g. /checkout, /login)', () => {
+    routeMeta.value = { requiresAuth: false, noLayout: true };
+    const wrapper = mountApp();
+    expect(wrapper.find('#app').classes()).toContain('app--public-light');
+  });
+
+  it('does NOT mark #app with app--public-light on authenticated app/dashboard routes (keeps the dark app chrome)', () => {
     routeMeta.value = { requiresAuth: true };
     const wrapper = mountApp();
-    expect(wrapper.find('#app').classes()).not.toContain('app--cms-content');
+    expect(wrapper.find('#app').classes()).not.toContain('app--public-light');
   });
 });
