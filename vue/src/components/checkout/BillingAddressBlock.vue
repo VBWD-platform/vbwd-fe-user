@@ -139,6 +139,20 @@
         </div>
       </div>
 
+      <!-- State / Region (optional) -->
+      <div class="form-group">
+        <label for="state">{{ $t('components.billingAddress.stateLabel') }}</label>
+        <input
+          id="state"
+          v-model="address.state"
+          type="text"
+          :placeholder="$t('components.billingAddress.statePlaceholder')"
+          data-testid="billing-state"
+          :disabled="props.readonly"
+          :class="{ disabled: props.readonly }"
+        >
+      </div>
+
       <!-- Country -->
       <div class="form-group">
         <label for="country">{{ $t('components.billingAddress.countryLabel') }}</label>
@@ -184,6 +198,7 @@ export interface BillingAddressData {
   company: string;
   street: string;
   city: string;
+  state: string;
   zip: string;
   country: string;
 }
@@ -213,6 +228,7 @@ const address = reactive<BillingAddressData>({
   company: '',
   street: '',
   city: '',
+  state: '',
   zip: '',
   country: '',
 });
@@ -272,6 +288,7 @@ const loadSavedAddress = async () => {
     address.company = saved.company || '';
     address.street = saved.address_line_1 || '';
     address.city = saved.city || '';
+    address.state = saved.state || '';
     address.zip = saved.postal_code || '';
     address.country = saved.country || '';
 

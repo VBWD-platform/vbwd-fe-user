@@ -203,6 +203,17 @@
           </div>
 
           <div class="form-group">
+            <label for="state">{{ $t('profile.address.state') }}</label>
+            <input
+              id="state"
+              v-model="formData.state"
+              type="text"
+              data-testid="state-input"
+              :placeholder="$t('profile.address.statePlaceholder')"
+            >
+          </div>
+
+          <div class="form-group">
             <label for="country">{{ $t('profile.address.country') }}</label>
             <select
               id="country"
@@ -409,6 +420,7 @@ interface FormData {
   address_line_1: string;
   address_line_2: string;
   city: string;
+  state: string;
   postal_code: string;
   country: string;
   language: LocaleCode;
@@ -424,6 +436,7 @@ const formData = reactive<FormData>({
   address_line_1: '',
   address_line_2: '',
   city: '',
+  state: '',
   postal_code: '',
   country: '',
   language: 'en',
@@ -511,6 +524,7 @@ async function loadProfile(): Promise<void> {
         address_line_1?: string;
         address_line_2?: string;
         city?: string;
+        state?: string;
         postal_code?: string;
         country?: string;
         balance?: number;
@@ -531,6 +545,7 @@ async function loadProfile(): Promise<void> {
       formData.address_line_1 = response.details.address_line_1 || '';
       formData.address_line_2 = response.details.address_line_2 || '';
       formData.city = response.details.city || '';
+      formData.state = response.details.state || '';
       formData.postal_code = response.details.postal_code || '';
       formData.country = response.details.country || '';
     }
@@ -571,6 +586,7 @@ async function handleUpdateProfile(): Promise<void> {
       address_line_1: formData.address_line_1,
       address_line_2: formData.address_line_2,
       city: formData.city,
+      state: formData.state,
       postal_code: formData.postal_code,
       country: formData.country,
     });

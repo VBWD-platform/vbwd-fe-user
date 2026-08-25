@@ -156,6 +156,8 @@
       "cityPlaceholder": "Berlin",
       "postalCode": "Postal Code",
       "postalCodePlaceholder": "10115",
+      "state": "State / Region",
+      "statePlaceholder": "California",
       "country": "Country",
       "countryPlaceholder": "Germany"
     },
@@ -314,6 +316,8 @@
       "cityPlaceholder": "City",
       "zipLabel": "ZIP Code *",
       "zipPlaceholder": "ZIP",
+      "stateLabel": "State / Region",
+      "statePlaceholder": "State or region",
       "countryLabel": "Country *",
       "countryPlaceholder": "Select country",
       "errors": {
