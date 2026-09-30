@@ -76,6 +76,14 @@ server {
     absolute_redirect off;
     port_in_redirect off;
 
+    # S151 — canonical host. `CANONICAL_HOST` (env, default "" = off) names the
+    # apex; a request for `www.<apex>` gets one 301 to the apex, path + query kept.
+    # Unset renders `$host = "www."`, which no real host matches. Opt-in, so an
+    # instance whose canonical host IS www (apex→www at the edge) never loops.
+    if ($host = "www.${CANONICAL_HOST}") {
+        return 301 https://${CANONICAL_HOST}$request_uri;
+    }
+
     # Allow large image uploads (raw photo / base64-inflated e2e ciphertext).
     # Must exceed meinchat `attachment_max_bytes` (25 MB) + ~33% base64 overhead.
     client_max_body_size 40m;

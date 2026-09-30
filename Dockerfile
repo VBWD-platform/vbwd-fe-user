@@ -98,5 +98,8 @@ ENV SEO_RENDER_TOKEN=""
 # the static prerender exactly as pre-S118 (no dynamic render, no backend
 # round-trip, no redirect loop). An instance sets "1" (with a token) to enable.
 ENV SEO_RENDER_ON="0"
+# S151 — canonical apex host for the www → apex 301; "" = off. Declared so the
+# template's ${CANONICAL_HOST} always substitutes.
+ENV CANONICAL_HOST=""
 
 EXPOSE 80
