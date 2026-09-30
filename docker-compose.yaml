@@ -10,6 +10,10 @@ services:
       - GEO_TEST_ALLOW=1
     volumes:
       - ./nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+      # S150 — shared snippets nginx.dev.conf `include`s (crawler UA map body +
+      # robots/sitemap/IndexNow backend locations).
+      - ./nginx/crawler-user-agents.conf:/etc/nginx/snippets/crawler-user-agents.conf:ro
+      - ./nginx/seo-proxy-locations.conf:/etc/nginx/snippets/seo-proxy-locations.conf:ro
       # Serve the backend-written SEO prerender files to anon/bots/curl in dev
       # (read-only; backend is the only writer). Logged-in users still get Vite.
       - ${VBWD_VAR_DIR:-../var}/seo:/usr/share/nginx/seo:ro

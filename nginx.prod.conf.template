@@ -14,16 +14,21 @@
 # unstyled, layout-less page: the SPA can't cleanly take over a #app that the
 # prerender already filled with bare content. $seo_prefix is "/seo" only for
 # crawler user-agents; empty for everyone else.
-map $http_user_agent $seo_prefix {
+# S150 — $vbwd_is_crawler (1 for crawler user-agents) is the ONE crawler map; its
+# UA list is the shared snippet baked into the image at /etc/nginx/snippets/.
+map $http_user_agent $vbwd_is_crawler {
+    include /etc/nginx/snippets/crawler-user-agents.conf;
+}
+map $vbwd_is_crawler $seo_prefix {
     default "";
-    "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" "/seo";
+    1       "/seo";
 }
 
 # S118 Track B — dynamic full-page rendering for crawlers.
 # A crawler is served a LIVE headless render of the fe-user SPA (full layout +
 # content), produced by the backend `/_seo-render` route (which caches + minifies)
 # — NOT the content-only static prerender. Humans are unaffected (live SPA).
-#   $ua_crawler          — 1 for crawler user-agents (same set as $seo_prefix).
+#   $vbwd_is_crawler     — 1 for crawler user-agents (defined above).
 #   $vbwd_render_loopback— 1 when the request carries the renderer's own loop-guard
 #                          header (X-VBWD-Render); such fetches MUST get the SPA
 #                          shell so the renderer can render it — never re-routed.
@@ -32,15 +37,11 @@ map $http_user_agent $seo_prefix {
 #                          pure no-op: crawlers get the static prerender exactly as
 #                          before, with NO backend round-trip and NO redirect loop.
 #   $serve_dynamic_render— 1 only for a crawler, NOT the renderer loopback, AND on.
-map $http_user_agent $ua_crawler {
-    default 0;
-    "~*(bot|crawl|spider|slurp|mediapartners|googlebot|bingbot|yandex|baiduspider|duckduckbot|facebookexternalhit|twitterbot|linkedinbot|telegrambot|whatsapp|discordbot|slackbot|embedly|pinterest|redditbot|curl|wget|python-requests|headlesschrome)" 1;
-}
 map $http_x_vbwd_render $vbwd_render_loopback {
     default 0;
     "~.+"   1;
 }
-map "${ua_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_render {
+map "${vbwd_is_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_render {
     default 0;
     "101"   1;
 }
@@ -100,7 +101,7 @@ server {
     # root; proxy them to the backend so they don't fall through to the SPA.
     location = /sitemap.xml {
         proxy_pass http://$api_upstream;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
@@ -108,7 +109,7 @@ server {
     }
     location ~ ^/sitemap-\d+\.xml$ {
         proxy_pass http://$api_upstream;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
@@ -116,7 +117,7 @@ server {
     }
     location = /robots.txt {
         proxy_pass http://$api_upstream;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
@@ -128,7 +129,7 @@ server {
     # /robots.txt (6 chars). Backend 404s unless <key> matches the configured key.
     location ~ "^/[A-Za-z0-9-]{8,128}\.txt$" {
         proxy_pass http://$api_upstream;
-        proxy_set_header Host $host;
+        proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
