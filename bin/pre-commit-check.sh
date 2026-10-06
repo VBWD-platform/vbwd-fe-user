@@ -156,8 +156,12 @@ run_unit() {
         # Only count NON-e2e specs: Playwright e2e specs (tests/e2e/) are not run
         # by vitest, so a plugin with only e2e specs has no unit tests to run.
         if find "plugins/$PLUGIN_NAME/tests" -name "*.spec.ts" -not -path "*/e2e/*" 2>/dev/null | head -1 | grep -q .; then
+            # Same ``set -e`` guard as the full-suite branch below, so a failing
+            # run prints its reason instead of aborting silently.
+            set +e
             VITEST_OUT=$(npx vitest run "plugins/$PLUGIN_NAME/" 2>&1)
             VITEST_EXIT=$?
+            set -e
             echo "$VITEST_OUT" | tail -20
             if [[ "$VITEST_EXIT" == "0" ]]; then
                 print_success "Unit tests passed"
