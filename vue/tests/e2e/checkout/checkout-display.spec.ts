@@ -39,7 +39,7 @@ test.describe('Checkout Page Display', () => {
     await expect(page.locator('[data-testid="checkout-error"]')).toBeVisible();
   });
 
-  test('redirects unauthenticated user to login', async ({ page }) => {
+  test('offers inline sign-in to an unauthenticated user', async ({ page }) => {
     // Clear all auth state (cookies and localStorage)
     await page.context().clearCookies();
     await page.evaluate(() => {
@@ -47,12 +47,13 @@ test.describe('Checkout Page Display', () => {
       sessionStorage.clear();
     });
 
-    // Navigate to checkout without auth
-    await page.goto('/checkout/pro');
+    // Checkout keeps an anonymous visitor on the page and offers the inline
+    // email block (login / sign-up) instead of detouring through /login, so the
+    // checkout context is not lost.
+    await page.goto('/dashboard/checkout/pro');
 
-    // Wait for redirect to login page with redirect param
-    await page.waitForURL(/\/login/, { timeout: 10000 });
-    await expect(page).toHaveURL(/\/login/);
-    await expect(page).toHaveURL(/redirect=.*checkout.*pro/);
+    await expect(page.locator('[data-testid="email-block"]')).toBeVisible();
+    await expect(page.locator('[data-testid="order-summary"]')).toBeVisible();
+    await expect(page).toHaveURL(/\/dashboard\/checkout\/pro$/);
   });
 });

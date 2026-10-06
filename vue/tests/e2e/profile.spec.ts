@@ -11,14 +11,14 @@ test.describe('Profile Management', () => {
   });
 
   test('displays profile information', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/dashboard/profile');
 
     await expect(page.locator('[data-testid="profile-name"]')).toBeVisible();
     await expect(page.locator('[data-testid="profile-email"]')).toBeVisible();
   });
 
   test('can update profile name', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/dashboard/profile');
 
     await page.fill('[data-testid="name-input"]', 'New Name');
     await page.click('[data-testid="save-profile"]');
@@ -27,7 +27,7 @@ test.describe('Profile Management', () => {
   });
 
   test('can change password', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/dashboard/profile');
 
     // Change to new password
     await page.fill('[data-testid="current-password"]', 'TestPass123@');

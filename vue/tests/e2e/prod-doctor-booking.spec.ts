@@ -12,7 +12,7 @@ import { test, expect } from '@playwright/test';
 
 const DOCTOR_BASE = process.env.DOCTOR_BASE_URL || 'https://doctor.vbwd.cc';
 
-test.describe('doctor.vbwd.cc — booking flow', () => {
+test.describe('doctor.vbwd.cc — booking flow', { tag: '@prod' }, () => {
   test('booking plugin is enabled in the frontend manifest', async ({ request }) => {
     const response = await request.get(`${DOCTOR_BASE}/plugins.json`);
     expect(response.status()).toBe(200);

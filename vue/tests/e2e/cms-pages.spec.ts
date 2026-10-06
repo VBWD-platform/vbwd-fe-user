@@ -91,10 +91,8 @@ test.describe('CMS Pages — Navigation Between Pages', () => {
     const aboutLink = page.locator('a[href*="about"], a:has-text("About")').first();
     if (await aboutLink.isVisible()) {
       await aboutLink.click();
-      await page.waitForLoadState('networkidle');
-
-      const url = page.url();
-      expect(url).toContain('about');
+      // SPA navigation: retry until the router has moved to the about page.
+      await expect(page).toHaveURL(/about/);
     }
   });
 
@@ -106,10 +104,8 @@ test.describe('CMS Pages — Navigation Between Pages', () => {
     const privacyLink = page.locator('a[href*="privacy"], a:has-text("Privacy")').first();
     if (await privacyLink.isVisible()) {
       await privacyLink.click();
-      await page.waitForLoadState('networkidle');
-
-      const url = page.url();
-      expect(url).toContain('privacy');
+      // SPA navigation: retry until the router has moved to the privacy page.
+      await expect(page).toHaveURL(/privacy/);
     }
   });
 
@@ -120,10 +116,8 @@ test.describe('CMS Pages — Navigation Between Pages', () => {
     const contactLink = page.locator('a[href*="contact"], a:has-text("Contact")').first();
     if (await contactLink.isVisible()) {
       await contactLink.click();
-      await page.waitForLoadState('networkidle');
-
-      const url = page.url();
-      expect(url).toContain('contact');
+      // SPA navigation: retry until the router has moved to the contact page.
+      await expect(page).toHaveURL(/contact/);
     }
   });
 });
@@ -151,11 +145,9 @@ test.describe('CMS Pages — Breadcrumb Navigation', () => {
       const homeLink = breadcrumb.locator('a:has-text("Home"), a[href="/"], a[href="/home1"]').first();
       if (await homeLink.isVisible()) {
         await homeLink.click();
-        await page.waitForLoadState('networkidle');
 
-        const url = page.url();
-        const isHome = url.endsWith('/') || url.includes('home');
-        expect(isHome).toBeTruthy();
+        // SPA navigation: retry until the router has moved to the home page.
+        await expect(page).toHaveURL(/\/$|home/);
       }
     }
   });

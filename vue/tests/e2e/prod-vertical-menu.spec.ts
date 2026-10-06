@@ -51,7 +51,7 @@ const targets = SINGLE
   : DEFAULTS;
 
 for (const [vertical, exp] of Object.entries(targets)) {
-  test.describe(`vertical menu — ${vertical}`, () => {
+  test.describe(`vertical menu — ${vertical}`, { tag: '@prod' }, () => {
     test(`${exp.domain} header exposes expected items`, async ({ page }) => {
       const navLabels: string[] = [];
       await page.goto(exp.domain + '/', { waitUntil: 'networkidle' });

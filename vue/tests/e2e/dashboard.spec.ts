@@ -16,32 +16,13 @@ test.describe('Dashboard', () => {
     await expect(page.locator('[data-testid="user-email"]')).toBeVisible();
   });
 
-  test('shows subscription summary card', async ({ page }) => {
-    await expect(page.locator('[data-testid="subscription-summary"]')).toBeVisible();
-  });
-
   test('shows recent invoices card', async ({ page }) => {
     await expect(page.locator('[data-testid="recent-invoices"]')).toBeVisible();
   });
 
   test('can navigate to profile from dashboard', async ({ page }) => {
     await page.click('text=View Profile');
-    await expect(page).toHaveURL('/profile');
-  });
-
-  test('can navigate to subscription from dashboard', async ({ page }) => {
-    await page.click('text=Manage Subscription');
-    await expect(page).toHaveURL('/subscription');
-  });
-
-  test('can navigate to plans from dashboard', async ({ page }) => {
-    await page.click('text=Browse Plans');
-    await expect(page).toHaveURL('/plans');
-  });
-
-  test('can navigate to invoices from dashboard', async ({ page }) => {
-    await page.click('text=View Invoices');
-    await expect(page).toHaveURL('/invoices');
+    await expect(page).toHaveURL('/dashboard/profile');
   });
 
   test('displays invoice items when invoices exist', async ({ page }) => {

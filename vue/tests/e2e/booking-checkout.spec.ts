@@ -5,16 +5,34 @@
  * 1. New user registers on checkout page and pays
  * 2. Already logged-in user books and pays
  * 3. Existing user logs in on checkout page and pays
+ * 4. Logged-in user books and pays by Invoice (no Stripe) — the same
+ *    resource → slot → form → pay → confirmation chain, run without keys.
+ *
+ * After payment the SPA lands on `/checkout/confirmation?invoice_id=…`
+ * (Stripe: via `/pay/stripe/success`, which polls then redirects). The
+ * booking card there is the BookingConfirmationDetails section the booking
+ * plugin registers into the confirmation page — there is no
+ * `/booking/success` redirect (S152 16b: the old assertions waited for one and
+ * never ran).
  *
  * Prerequisites:
  * - Backend running with booking + stripe plugins enabled
  * - Stripe test mode configured
  * - Demo data populated (dr-smith resource exists)
  *
+ * Tagged `@stripe`: scenarios 1–3 redirect to the real hosted Stripe
+ * Checkout, so the suite is skipped unless Stripe test keys are configured
+ * (STRIPE_TEST_SECRET_KEY set — the CI stack writes them into the stripe
+ * plugin's sandbox config from secrets).
+ *
  * Run:
- *   npx playwright test vue/tests/e2e/booking-checkout.spec.ts
+ *   STRIPE_TEST_SECRET_KEY=sk_test_... npx playwright test vue/tests/e2e/booking-checkout.spec.ts
  */
 import { test, expect, type Page } from '@playwright/test';
+
+const STRIPE_TEST_KEYS_PRESENT = Boolean(process.env.STRIPE_TEST_SECRET_KEY);
+const STRIPE_SKIP_REASON =
+  'STRIPE_TEST_SECRET_KEY is not set — the hosted Stripe Checkout redirect cannot happen without Stripe test keys';
 
 const RESOURCE_SLUG = 'dr-smith';
 const BOOKING_FORM_SLUG = 'booking-form';
@@ -101,7 +119,11 @@ async function fillBookingFormAndConfirm(page: Page) {
   await page.waitForURL(/\/book\/pay/, { timeout: 15000 });
 }
 
-async function fillCheckoutAndPay(page: Page) {
+const STRIPE_METHOD_LABEL = 'Pay with Stripe';
+const INVOICE_METHOD_LABEL = 'Invoice';
+const CONFIRMATION_URL = /\/checkout\/confirmation\?invoice_id=/;
+
+async function fillCheckoutAndPay(page: Page, paymentMethodLabel: string = STRIPE_METHOD_LABEL) {
   await page.waitForLoadState('networkidle');
 
   // Wait for billing address block
@@ -132,11 +154,11 @@ async function fillCheckoutAndPay(page: Page) {
   await page.waitForSelector('[data-testid="payment-methods-block"]', { timeout: 10000 }).catch(() => {});
   await page.waitForSelector('[data-testid="payment-methods-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
-  // Select Stripe payment method (not Invoice)
-  const stripeRadio = page.locator('text=Pay with Stripe').locator('..');
-  if (await stripeRadio.isVisible().catch(() => false)) {
-    await stripeRadio.click();
-  } else {
+  // Select the payment method (Stripe by default)
+  const methodRadio = page.locator(`text=${paymentMethodLabel}`).first().locator('..');
+  if (await methodRadio.isVisible().catch(() => false)) {
+    await methodRadio.click();
+  } else if (paymentMethodLabel === STRIPE_METHOD_LABEL) {
     // Fallback: click the Stripe radio button directly
     const stripeInput = page.locator('input[type="radio"]').filter({ hasText: /stripe/i });
     if (await stripeInput.count() > 0) {
@@ -238,6 +260,34 @@ async function fillStripeCheckout(page: Page) {
   console.log('Returned from Stripe:', page.url());
 }
 
+/**
+ * The real post-payment page: the shared checkout confirmation with the
+ * booking plugin's BookingConfirmationDetails section. Custom fields appear
+ * once the booking exists (paid); a pending invoice shows the line metadata.
+ */
+async function expectBookingConfirmation(page: Page, options: { paid: boolean }) {
+  await page.waitForURL(CONFIRMATION_URL, { timeout: 60000 });
+  const confirmation = page.locator('[data-testid="checkout-confirmation"]');
+  await expect(confirmation.locator('[data-testid="confirmation-banner"]')).toBeVisible({ timeout: 15000 });
+
+  // Invoice details: BK- invoice number + status badge + amount
+  await expect(confirmation.locator('.confirmation-mono')).toHaveText(/^BK-/);
+  await expect(confirmation.locator('.status-badge').first()).toBeVisible();
+  await expect(confirmation.getByText('50.00').first()).toBeVisible();
+
+  // BookingConfirmationDetails section (resource + booking details)
+  const bookingSection = confirmation.locator('.booking-price').locator('xpath=ancestor::div[contains(@class,"card")][1]');
+  await expect(bookingSection.locator('.resource-name-link')).toContainText('Dr. Smith', { timeout: 15000 });
+  // Operating currency, never "undefined" (S85.1 dropped resource.currency)
+  await expect(bookingSection.locator('.booking-price')).toHaveText(/^50 EUR\//);
+  await expect(bookingSection.getByText(/Date & time/i)).toBeVisible();
+  await expect(bookingSection.getByText('E2E test booking')).toBeVisible();
+  if (options.paid) {
+    // Custom fields from the form (filled by fillBookingFormAndConfirm)
+    await expect(bookingSection.getByText('Symptoms')).toBeVisible();
+  }
+}
+
 function getNextWeekday(targetDay: number): string {
   const now = new Date();
   const daysUntilTarget = (targetDay - now.getDay() + 7) % 7 || 7;
@@ -262,7 +312,9 @@ function captureConsoleLogs(page: Page) {
 
 // ── Scenario 1: New user registers and books ────────────────────────────────
 
-test.describe('Booking Checkout — New User Registration', () => {
+test.describe('Booking Checkout — New User Registration', { tag: '@stripe' }, () => {
+  test.skip(!STRIPE_TEST_KEYS_PRESENT, STRIPE_SKIP_REASON);
+
   test('new user registers on checkout, fills Stripe, and completes booking', async ({ page }) => {
     captureConsoleLogs(page);
     const email = uniqueEmail('booking-new');
@@ -322,8 +374,10 @@ test.describe('Booking Checkout — New User Registration', () => {
 
 // ── Scenario 2: Logged-in user books ─────────────────────────────────────────
 
-test.describe('Booking Checkout — Logged-in User', () => {
-  test('logged-in user selects slot, fills form, pays via Stripe, sees success page with booking details', async ({ page }) => {
+test.describe('Booking Checkout — Logged-in User', { tag: '@stripe' }, () => {
+  test.skip(!STRIPE_TEST_KEYS_PRESENT, STRIPE_SKIP_REASON);
+
+  test('logged-in user selects slot, fills form, pays via Stripe, sees the confirmation with booking details', async ({ page }) => {
     captureConsoleLogs(page);
     // 1. Login first
     await page.goto('/login');
@@ -348,73 +402,17 @@ test.describe('Booking Checkout — Logged-in User', () => {
     // 6. Fill Stripe hosted checkout
     await fillStripeCheckout(page);
 
-    // 7. Stripe redirects to /pay/stripe/success → polls → redirects to /checkout/confirmation
-    //    → BookingConfirmationDetails auto-redirects to /booking/success?invoice_id=...
-    expect(page.url()).toContain('/pay/stripe/success');
-
-    // 8. Wait for the redirect chain to complete → booking success page
-    await page.waitForURL(
-      url => url.toString().includes('/booking/success') || url.toString().includes('/checkout/confirmation'),
-      { timeout: 30000 }
-    ).catch(() => {
-      // If no redirect happens (session polling takes time), navigate manually
-      console.log('No auto-redirect, staying on:', page.url());
-    });
-
-    // If we landed on checkout/confirmation, wait for booking redirect
-    if (page.url().includes('/checkout/confirmation')) {
-      await page.waitForURL('**/booking/success**', { timeout: 15000 }).catch(() => {});
-    }
-
-    // 9. Verify the booking success page shows complete booking details
-    if (page.url().includes('/booking/success')) {
-      await page.waitForTimeout(2000);
-
-      // Status banner should be visible
-      const banner = page.locator('.confirmation-banner');
-      await expect(banner).toBeVisible({ timeout: 10000 });
-
-      // Invoice details card
-      const invoiceCard = page.locator('.card').first();
-      await expect(invoiceCard).toBeVisible();
-
-      // Invoice number (BK-XXXXXXXX format)
-      await expect(page.locator('.confirmation-mono')).toBeVisible();
-
-      // Status badge
-      await expect(page.locator('.status-badge')).toBeVisible();
-
-      // Amount shown
-      await expect(page.getByText('50.00')).toBeVisible();
-      await expect(page.getByText('EUR')).toBeVisible();
-
-      // Resource name — Dr. Smith
-      await expect(page.getByText('Dr. Smith')).toBeVisible();
-
-      // Resource type
-      await expect(page.getByText('specialist')).toBeVisible();
-
-      // Date & Time shown
-      await expect(page.getByText('Date & Time')).toBeVisible();
-
-      // Custom fields from form (filled by fillBookingFormAndConfirm)
-      await expect(page.getByText('symptoms')).toBeVisible();
-
-      // Notes
-      await expect(page.getByText('E2E test booking')).toBeVisible();
-
-      // Action buttons
-      await expect(page.getByText('Back to catalogue')).toBeVisible();
-      await expect(page.getByText('View My Bookings')).toBeVisible();
-
-      console.log('SUCCESS: Booking success page shows all booking details');
-    }
+    // 7. Stripe returns to /pay/stripe/success, which polls the session then
+    //    redirects to /checkout/confirmation with the booking section.
+    await expectBookingConfirmation(page, { paid: true });
   });
 });
 
 // ── Scenario 3: Existing user logs in on checkout ────────────────────────────
 
-test.describe('Booking Checkout — Existing User Login on Checkout', () => {
+test.describe('Booking Checkout — Existing User Login on Checkout', { tag: '@stripe' }, () => {
+  test.skip(!STRIPE_TEST_KEYS_PRESENT, STRIPE_SKIP_REASON);
+
   test('existing user logs in on checkout page and pays via Stripe', async ({ page }) => {
     captureConsoleLogs(page);
     // 1. Browse resource → select slot → Book Now (not logged in)
@@ -459,5 +457,25 @@ test.describe('Booking Checkout — Existing User Login on Checkout', () => {
     // 6. Verify success
     // Verify we landed on the success page
     expect(page.url()).toContain('/pay/stripe/success');
+  });
+});
+
+// ── Scenario 4: Logged-in user pays by Invoice (no Stripe keys needed) ──────
+
+test.describe('Booking Checkout — Logged-in User, Invoice payment', () => {
+  test('logged-in user books, pays by invoice, sees the confirmation with booking details', async ({ page }) => {
+    captureConsoleLogs(page);
+    await page.goto('/login');
+    await page.waitForLoadState('networkidle');
+    await page.locator('[data-testid="email"]').fill('test@example.com');
+    await page.locator('[data-testid="password"]').fill('TestPass123@');
+    await page.locator('[data-testid="login-button"]').click();
+    await page.waitForURL('**/dashboard', { timeout: 15000 });
+
+    await selectSlotAndBookNow(page);
+    await fillBookingFormAndConfirm(page);
+    await fillCheckoutAndPay(page, INVOICE_METHOD_LABEL);
+
+    await expectBookingConfirmation(page, { paid: false });
   });
 });

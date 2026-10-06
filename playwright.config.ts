@@ -1,4 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
+import { consentStorageState } from './vue/tests/e2e/infrastructure/consent-storage-state';
+
+const baseURL = process.env.E2E_BASE_URL || 'http://localhost:5173';
 
 export default defineConfig({
   // Host-app tests live under vue/tests/e2e; each plugin owns its own
@@ -19,7 +22,8 @@ export default defineConfig({
   globalTeardown: './vue/tests/e2e/infrastructure/global-teardown.ts',
 
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
+    baseURL,
+    storageState: consentStorageState(baseURL),
     trace: 'on-first-retry',
   },
   projects: [

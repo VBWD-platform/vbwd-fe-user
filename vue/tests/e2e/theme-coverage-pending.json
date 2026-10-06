@@ -1,0 +1,154 @@
+[
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2"
+  },
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2/cancel"
+  },
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2/success"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta/success"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta/voucher"
+  },
+  {
+    "plugin": "crypto",
+    "path": "/pay/crypto"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/ghrm/auth/github/callback"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software/:package_slug"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software/search"
+  },
+  {
+    "plugin": "landing1",
+    "path": "/embed/landing1"
+  },
+  {
+    "plugin": "landing1",
+    "path": "/landing1"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/categories"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/categories/:id/edit"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/dashboard"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/earnings"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings/:type/:id/edit"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings/new"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/sales"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago/cancel"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago/success"
+  },
+  {
+    "plugin": "office",
+    "path": "/s/:token"
+  },
+  {
+    "plugin": "promptpay-payment",
+    "path": "/pay/promptpay"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy/c/:slug"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy/p/:slug"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss/cancel"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss/success"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney/cancel"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney/success"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa/cancel"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa/success"
+  }
+]

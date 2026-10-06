@@ -59,7 +59,7 @@ async function assertConfirmationPageSeeded(req: APIRequestContext, base: string
 }
 
 // ─── vbwd.cc — subscription on /pricing-embedded ────────────────────────────
-test.describe('vbwd.cc /pricing-embedded — subscription checkout', () => {
+test.describe('vbwd.cc /pricing-embedded — subscription checkout', { tag: '@prod' }, () => {
   const BASE = 'https://vbwd.cc';
 
   test('checkout-confirmation CMS page is seeded', async ({ request }) => {
@@ -116,7 +116,7 @@ const BOOKING_INSTANCES: Array<{ name: string; base: string }> = [
 ];
 
 for (const inst of BOOKING_INSTANCES) {
-  test.describe(`${inst.name} /booking — booking checkout`, () => {
+  test.describe(`${inst.name} /booking — booking checkout`, { tag: '@prod' }, () => {
     test('checkout-confirmation CMS page is seeded', async ({ request }) => {
       await assertConfirmationPageSeeded(request, inst.base);
     });
@@ -178,7 +178,7 @@ for (const inst of BOOKING_INSTANCES) {
 }
 
 // ─── ghrm.vbwd.cc /category/backend — software subscription ─────────────────
-test.describe('ghrm.vbwd.cc /category/backend — subscription checkout', () => {
+test.describe('ghrm.vbwd.cc /category/backend — subscription checkout', { tag: '@prod' }, () => {
   const BASE = 'https://ghrm.vbwd.cc';
 
   test('checkout-confirmation CMS page is seeded', async ({ request }) => {

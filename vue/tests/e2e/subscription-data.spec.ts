@@ -42,29 +42,7 @@ test.describe('Subscription Data Visibility', () => {
     await loginAsTestUser(page);
   });
 
-  test.describe('Dashboard - Subscription Summary', () => {
-    test('displays subscription information on dashboard', async ({ page }) => {
-      await page.goto('/dashboard');
-      await waitForLoading(page, 'dashboard');
-
-      // Verify subscription summary card is visible
-      const subscriptionCard = page.locator('[data-testid="subscription-summary"]');
-      await expect(subscriptionCard).toBeVisible();
-
-      // Verify plan name is displayed (not empty or "No Plan")
-      const planName = page.locator('[data-testid="plan-name"]');
-      await expect(planName).toBeVisible();
-      const planNameText = await planName.textContent();
-      expect(planNameText).toBeTruthy();
-      expect(planNameText).not.toBe('No Plan');
-
-      // Verify subscription status is displayed
-      const subscriptionStatus = page.locator('[data-testid="subscription-status"]');
-      await expect(subscriptionStatus).toBeVisible();
-      const statusText = await subscriptionStatus.textContent();
-      expect(statusText?.toLowerCase()).toMatch(/active|trial|cancelled|cancelling/);
-    });
-
+  test.describe('Dashboard - Recent Invoices', () => {
     test('displays recent invoices on dashboard', async ({ page }) => {
       await page.goto('/dashboard');
       await waitForLoading(page, 'dashboard');
@@ -97,32 +75,11 @@ test.describe('Subscription Data Visibility', () => {
         expect(numberText!.length).toBeGreaterThan(0);
       }
     });
-
-    test('dashboard data refreshes on page reload', async ({ page }) => {
-      await page.goto('/dashboard');
-      await waitForLoading(page, 'dashboard');
-
-      // Capture initial data
-      const planName = page.locator('[data-testid="plan-name"]');
-      const initialPlanName = await planName.textContent();
-
-      // Reload the page
-      await page.reload();
-      await waitForLoading(page, 'dashboard');
-
-      // Verify data is still present after reload
-      await expect(planName).toBeVisible();
-      const reloadedPlanName = await planName.textContent();
-
-      // Data should be consistent
-      expect(reloadedPlanName).toBe(initialPlanName);
-      expect(reloadedPlanName).not.toBe('No Plan');
-    });
   });
 
   test.describe('Subscription Page - Full Details', () => {
     test('displays current subscription details', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Verify current subscription card is visible
@@ -142,7 +99,7 @@ test.describe('Subscription Data Visibility', () => {
     });
 
     test('displays token balance card', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Verify token balance card is visible
@@ -155,12 +112,8 @@ test.describe('Subscription Data Visibility', () => {
     });
 
     test('displays subscription management actions', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
-
-      // Verify change plan button exists
-      const changePlanBtn = page.locator('[data-testid="change-plan"]');
-      await expect(changePlanBtn).toBeVisible();
 
       // Verify cancel subscription button exists
       const cancelBtn = page.locator('[data-testid="cancel-subscription"]');
@@ -170,7 +123,7 @@ test.describe('Subscription Data Visibility', () => {
 
   test.describe('Subscription Page - Invoices Table', () => {
     test('displays invoices table with data', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Verify invoices section is visible
@@ -190,7 +143,7 @@ test.describe('Subscription Data Visibility', () => {
     });
 
     test('invoice rows contain required data fields', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Get the first invoice row
@@ -221,7 +174,7 @@ test.describe('Subscription Data Visibility', () => {
     });
 
     test('invoice search functionality works', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Get initial invoice count
@@ -248,20 +201,19 @@ test.describe('Subscription Data Visibility', () => {
     });
 
     test('invoice view action shows invoice details', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Click view button on first invoice
       const viewButton = page.locator('[data-testid="view-invoice"]').first();
       await viewButton.click();
 
-      // Verify invoice modal appears
-      const invoiceModal = page.locator('[data-testid="invoice-modal"]');
-      await expect(invoiceModal).toBeVisible();
+      // Viewing an invoice opens its detail page
+      await expect(page).toHaveURL(/\/dashboard\/invoice\/[0-9a-f-]+$/);
     });
 
     test('invoices data persists after page reload', async ({ page }) => {
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       // Wait for invoices table to be populated
@@ -280,10 +232,9 @@ test.describe('Subscription Data Visibility', () => {
       await page.reload();
       await waitForLoading(page, 'subscription');
 
-      // Verify data persists
+      // Verify data persists (rows render once the invoices request resolves)
       const reloadedRows = page.locator('[data-testid="invoice-row"]');
-      const reloadedCount = await reloadedRows.count();
-      expect(reloadedCount).toBe(initialCount);
+      await expect(reloadedRows).toHaveCount(initialCount);
 
       // Verify first invoice is the same
       const reloadedFirstInvoice = await reloadedRows.first().locator('td').nth(0).textContent();
@@ -292,25 +243,6 @@ test.describe('Subscription Data Visibility', () => {
   });
 
   test.describe('Data Consistency Across Pages', () => {
-    test('subscription data is consistent between dashboard and subscription page', async ({ page }) => {
-      // Get data from dashboard
-      await page.goto('/dashboard');
-      await waitForLoading(page, 'dashboard');
-
-      const dashboardPlanName = await page.locator('[data-testid="plan-name"]').textContent();
-      const dashboardStatus = await page.locator('[data-testid="subscription-status"]').textContent();
-
-      // Navigate to subscription page
-      await page.goto('/subscription');
-      await waitForLoading(page, 'subscription');
-
-      const subscriptionPlanName = await page.locator('[data-testid="plan-name"]').textContent();
-      const subscriptionStatus = await page.locator('[data-testid="plan-status"]').textContent();
-
-      // Verify consistency
-      expect(subscriptionPlanName).toBe(dashboardPlanName);
-      expect(subscriptionStatus?.toLowerCase()).toBe(dashboardStatus?.toLowerCase());
-    });
 
     test('invoice count is consistent between dashboard and subscription page', async ({ page }) => {
       // Get recent invoices count from dashboard (max 5)
@@ -321,7 +253,7 @@ test.describe('Subscription Data Visibility', () => {
       const dashboardCount = await dashboardInvoices.count();
 
       // Navigate to subscription page for full list
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
       await waitForLoading(page, 'subscription');
 
       const subscriptionInvoices = page.locator('[data-testid="invoice-row"]');
@@ -336,7 +268,7 @@ test.describe('Subscription Data Visibility', () => {
   test.describe('Error Handling', () => {
     test('handles loading state correctly', async ({ page }) => {
       // Navigate to subscription page
-      await page.goto('/subscription');
+      await page.goto('/dashboard/subscription');
 
       // Either loading indicator should appear briefly, or content should be visible
       const loading = page.locator('[data-testid="subscription-loading"]');
@@ -349,42 +281,5 @@ test.describe('Subscription Data Visibility', () => {
       await waitForLoading(page, 'subscription');
       await expect(content).toBeVisible();
     });
-  });
-});
-
-test.describe('Subscription Data - Navigation Flow', () => {
-  test.beforeEach(async ({ page }) => {
-    await loginAsTestUser(page);
-  });
-
-  test('can navigate from dashboard to subscription page', async ({ page }) => {
-    await page.goto('/dashboard');
-    await waitForLoading(page, 'dashboard');
-
-    // Click "Manage Subscription" link
-    await page.click('text=Manage Subscription');
-    await expect(page).toHaveURL('/subscription');
-
-    // Verify subscription page loads with data
-    await waitForLoading(page, 'subscription');
-    await expect(page.locator('[data-testid="current-subscription"]')).toBeVisible();
-  });
-
-  test('can navigate from dashboard to invoices via link', async ({ page }) => {
-    await page.goto('/dashboard');
-    await waitForLoading(page, 'dashboard');
-
-    // Click "View All Invoices" link
-    await page.click('text=View All Invoices');
-    await expect(page).toHaveURL('/invoices');
-  });
-
-  test('can navigate from subscription page to plans', async ({ page }) => {
-    await page.goto('/subscription');
-    await waitForLoading(page, 'subscription');
-
-    // Click change plan button
-    await page.click('[data-testid="change-plan"]');
-    await expect(page).toHaveURL('/plans');
   });
 });

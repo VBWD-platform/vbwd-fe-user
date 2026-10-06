@@ -75,6 +75,9 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 COPY nginx.prod.conf.template /etc/nginx/templates/default.conf.template
 # S150 — the shared crawler user-agent map body the template `include`s.
 COPY nginx/crawler-user-agents.conf /etc/nginx/snippets/crawler-user-agents.conf
+# S152-11a — the frontend router snippets the template `include`s (maps + locations).
+COPY nginx/frontend-router-map.conf /etc/nginx/snippets/frontend-router-map.conf
+COPY nginx/frontend-router.conf /etc/nginx/snippets/frontend-router.conf
 
 # API_UPSTREAM is the backend service host:port within the Docker network.
 # PLUGIN_API_UPSTREAM is the plugin-api sidecar (/_plugins endpoint).

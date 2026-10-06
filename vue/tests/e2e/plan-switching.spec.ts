@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { loginAsTestUser } from './fixtures/checkout.fixtures';
+import { loginAsTestUser, navigateToCheckout, fillCheckoutRequirements } from './fixtures/checkout.fixtures';
 
 test.describe('Plan Selection and Switching', () => {
   test.beforeEach(async ({ page }) => {
@@ -7,29 +7,29 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('displays available plans', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
 
     // Wait for plans to load
     await page.waitForSelector('[data-testid="plans-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Should show plans grid
-    await expect(page.locator('[data-testid="plans-grid"]')).toBeVisible();
+    await expect(page.locator('[data-testid="tariff-plan-grid"]')).toBeVisible();
   });
 
   test('shows plan details with price', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await page.waitForSelector('[data-testid="plans-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Check for plan cards
-    const planCards = page.locator('[data-testid^="plan-"]');
+    const planCards = page.locator('[data-testid^="tariff-plan-card-"]');
     await expect(planCards.first()).toBeVisible();
 
     // Each plan should have a price
-    await expect(page.locator('.price').first()).toBeVisible();
+    await expect(page.locator('.tariff-plan-card__price').first()).toBeVisible();
   });
 
   test('can select a plan and navigate to checkout', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await page.waitForSelector('[data-testid="plans-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Click select button on first non-current plan
@@ -41,7 +41,7 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('checkout page shows order summary', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await page.waitForSelector('[data-testid="plans-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Select a plan
@@ -58,18 +58,22 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('checkout page has confirm button', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
 
     // Wait for loading to complete
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     await expect(page.locator('[data-testid="confirm-checkout"]')).toBeVisible();
+    // Enabled once the billing / payment / terms requirements are met.
+    await fillCheckoutRequirements(page);
     await expect(page.locator('[data-testid="confirm-checkout"]')).toBeEnabled();
   });
 
   test('completing checkout creates invoice', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     // Click confirm
     await page.click('[data-testid="confirm-checkout"]');
@@ -84,8 +88,10 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('checkout success shows subscription status', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     await page.click('[data-testid="confirm-checkout"]');
     await page.waitForSelector('[data-testid="checkout-success"]', { timeout: 15000 });
@@ -95,8 +101,10 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('checkout success shows payment required message', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     await page.click('[data-testid="confirm-checkout"]');
     await page.waitForSelector('[data-testid="checkout-success"]', { timeout: 15000 });
@@ -105,8 +113,10 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('checkout success shows invoice line items', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     await page.click('[data-testid="confirm-checkout"]');
     await page.waitForSelector('[data-testid="checkout-success"]', { timeout: 15000 });
@@ -115,8 +125,10 @@ test.describe('Plan Selection and Switching', () => {
   });
 
   test('can navigate to invoice after checkout', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     await page.click('[data-testid="confirm-checkout"]');
     await page.waitForSelector('[data-testid="checkout-success"]', { timeout: 15000 });
@@ -125,13 +137,15 @@ test.describe('Plan Selection and Switching', () => {
     await page.click('[data-testid="view-invoice-btn"]');
 
     // Should navigate to invoices page
-    await expect(page).toHaveURL(/\/invoices/);
+    await expect(page).toHaveURL(/\/dashboard\/invoice\//);
   });
 
   test('new invoice appears in invoices list after checkout', async ({ page }) => {
     // First complete a checkout
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
+
+    await fillCheckoutRequirements(page);
 
     await page.click('[data-testid="confirm-checkout"]');
     await page.waitForSelector('[data-testid="checkout-success"]', { timeout: 15000 });
@@ -141,7 +155,7 @@ test.describe('Plan Selection and Switching', () => {
     const invoiceNumber = invoiceNumberText?.replace('Invoice: ', '').trim();
 
     // Navigate to invoices page
-    await page.goto('/invoices');
+    await page.goto('/dashboard/subscription/invoices');
     await page.waitForSelector('[data-testid="invoices-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Search for the invoice
@@ -161,7 +175,7 @@ test.describe('Plan Switching with Token Bundles', () => {
   });
 
   test('can add token bundle to checkout', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Add token bundle if available
@@ -180,7 +194,7 @@ test.describe('Plan Switching with Token Bundles', () => {
   });
 
   test('invoice includes token bundle after checkout with bundle', async ({ page }) => {
-    await page.goto('/checkout/pro');
+    await navigateToCheckout(page, 'pro');
     await page.waitForSelector('[data-testid="checkout-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Add token bundle if available
@@ -190,6 +204,8 @@ test.describe('Plan Switching with Token Bundles', () => {
     if (hasBundles) {
       await page.locator('[data-testid="token-bundle-1000"]').first().click();
     }
+
+    await fillCheckoutRequirements(page);
 
     // Complete checkout
     await page.click('[data-testid="confirm-checkout"]');

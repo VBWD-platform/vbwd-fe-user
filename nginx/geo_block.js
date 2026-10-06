@@ -3,7 +3,9 @@
  *
  * Runs as a `js_content` handler on the fe-user `location /`. Its single job is
  * to decide, per request, whether the visitor may see the CMS site:
- *   - "pass"  → `r.internalRedirect('@spa')`, handing off to the unchanged SPA /
+ *   - "pass"  → `r.internalRedirect(<pass location>)`: the named location the
+ *               conf put in `$vbwd_geo_pass_location` (S152-11a: `@frontend`
+ *               for HTML navigations), else `@spa` — the unchanged SPA /
  *               prerender serving chain (byte-identical to pre-S120.1);
  *   - "block" → `302 → blocked_target_slug` (or `451` when the slug is empty);
  *   - "grant" → mint a signed bypass cookie and `302` to the clean URL.
@@ -27,6 +29,7 @@ const CONFIG_CACHE_TTL_MS = 5000
 const BYPASS_COOKIE_NAME = 'vbwd_geo_bypass'
 const SECONDS_PER_DAY = 86400
 const SPA_LOCATION = '@spa'
+const PASS_LOCATION_VARIABLE = 'vbwd_geo_pass_location'
 const NO_STORE = 'private, no-store'
 const REDIRECT_FOUND = 302
 const HTTP_UNAVAILABLE_FOR_LEGAL_REASONS = 451
@@ -209,8 +212,11 @@ function resolveCountry(request) {
   return code ? String(code).toUpperCase() : ''
 }
 
+// The nginx location decides where a passed request goes (S152-11a): `location /`
+// sets `$vbwd_geo_pass_location` from the page-location map; a location that sets
+// nothing (or an unset variable) keeps the pre-S152 `@spa` hand-off.
 function pass(request) {
-  request.internalRedirect(SPA_LOCATION)
+  request.internalRedirect(request.variables[PASS_LOCATION_VARIABLE] || SPA_LOCATION)
 }
 
 function block(request, config) {

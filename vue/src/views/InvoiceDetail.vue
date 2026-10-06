@@ -113,7 +113,7 @@
                     <span
                       class="type-badge"
                       :class="item.type?.toLowerCase()"
-                    >{{ itemTypeLabel(item.type, item.extra_data) }}</span>
+                    >{{ itemTypeLabel(item.type, item.metadata) }}</span>
                   </td>
                   <td>
                     <router-link
@@ -158,7 +158,7 @@
                 <span
                   class="type-badge"
                   :class="item.type?.toLowerCase()"
-                >{{ itemTypeLabel(item.type, item.extra_data) }}</span>
+                >{{ itemTypeLabel(item.type, item.metadata) }}</span>
                 <span class="item-card-total">{{ formatAmount(item.total_price, invoice.currency) }}</span>
               </div>
               <div class="item-card-desc">
@@ -283,7 +283,8 @@ interface LineItem {
   net_amount?: string;
   tax_amount?: string;
   tax_breakdown?: LineItemTax[];
-  extra_data?: Record<string, unknown>;
+  // The line's extra data, as core ``InvoiceLineItem.to_dict`` publishes it.
+  metadata?: Record<string, unknown>;
   // S77: frozen snapshot of the source item's tags + custom-fields (read-only).
   tags?: string[];
   custom_fields?: Record<string, unknown>;
@@ -413,12 +414,19 @@ function formatDate(dateStr: string | null | undefined): string {
   }
 }
 
-function itemTypeLabel(type?: string, extraData?: Record<string, unknown>): string {
+// A CUSTOM line is sent with its plugin name as ``type``; ``metadata.plugin``
+// names the plugin either way.
+function isBookingLine(metadata?: Record<string, unknown>): boolean {
+  return metadata?.plugin === 'booking';
+}
+
+function itemTypeLabel(type?: string, metadata?: Record<string, unknown>): string {
+  if (isBookingLine(metadata)) return 'Booking';
   const labels: Record<string, string> = {
     subscription: 'Plan',
     token_bundle: 'Token Bundle',
     add_on: 'Add-On',
-    custom: extraData?.plugin === 'booking' ? 'Booking' : 'Custom',
+    custom: 'Custom',
   };
   return labels[type?.toLowerCase() || ''] || type || 'Item';
 }
@@ -441,7 +449,10 @@ function formatAmount(value: string | number | null | undefined, currency?: stri
   return formatMoney(num, { currency: currency || invoiceCurrency.value });
 }
 
-function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string; extra_data?: Record<string, unknown> }): string | null {
+function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: string; metadata?: Record<string, unknown> }): string | null {
+  if (isBookingLine(item.metadata) && item.metadata?.resource_slug) {
+    return `/booking/${item.metadata.resource_slug}`;
+  }
   const catalogId = item.catalog_item_id;
   switch (item.type?.toUpperCase()) {
     case 'SUBSCRIPTION':
@@ -450,11 +461,6 @@ function itemLink(item: { type?: string; item_id?: string; catalog_item_id?: str
       return catalogId ? `/dashboard/tokens/${catalogId}` : null;
     case 'ADD_ON':
       return catalogId ? `/dashboard/add-ons/info/${catalogId}` : null;
-    case 'CUSTOM':
-      if (item.extra_data?.plugin === 'booking' && item.extra_data?.resource_slug) {
-        return `/booking/${item.extra_data.resource_slug}`;
-      }
-      break;
   }
   // Fall through to plugin-contributed resolvers for any line core does not
   // link itself (e.g. a purchased dataset CUSTOM line). Core stays agnostic.

@@ -1,0 +1,327 @@
+[
+  {
+    "plugin": "booking",
+    "path": "/booking",
+    "sample": "/booking"
+  },
+  {
+    "plugin": "booking",
+    "path": "/booking-form/:slug",
+    "sample": "/booking-form/dr-smith"
+  },
+  {
+    "plugin": "booking",
+    "path": "/booking/:slug",
+    "sample": "/booking/dr-smith"
+  },
+  {
+    "plugin": "booking",
+    "path": "/booking/:slug/book/pay",
+    "sample": "/booking/dr-smith/book/pay"
+  },
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2",
+    "sample": "/pay/c2p2?invoice=TEST"
+  },
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2/cancel",
+    "sample": "/pay/c2p2/cancel"
+  },
+  {
+    "plugin": "c2p2-payment",
+    "path": "/pay/c2p2/success",
+    "sample": "/pay/c2p2/success"
+  },
+  {
+    "plugin": "checkout",
+    "path": "/checkout",
+    "sample": "/checkout?source=shop"
+  },
+  {
+    "plugin": "checkout",
+    "path": "/checkout/confirmation",
+    "sample": "/checkout/confirmation"
+  },
+  {
+    "plugin": "cms",
+    "path": "/",
+    "sample": "/"
+  },
+  {
+    "plugin": "cms",
+    "path": "/:slug(.+)",
+    "sample": "/about"
+  },
+  {
+    "plugin": "cms",
+    "path": "/cms/embed/:type/:category",
+    "sample": "/cms/embed/post/news"
+  },
+  {
+    "plugin": "cms",
+    "path": "/cms/embed/:type/post/:slug",
+    "sample": "/cms/embed/post/post/about"
+  },
+  {
+    "plugin": "cms",
+    "path": "/pages",
+    "sample": "/pages"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta",
+    "sample": "/pay/conekta?invoice=TEST"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta/success",
+    "sample": "/pay/conekta/success"
+  },
+  {
+    "plugin": "conekta-payment",
+    "path": "/pay/conekta/voucher",
+    "sample": "/pay/conekta/voucher"
+  },
+  {
+    "plugin": "core",
+    "path": "/login",
+    "sample": "/login"
+  },
+  {
+    "plugin": "crypto",
+    "path": "/pay/crypto",
+    "sample": "/pay/crypto?invoice=TEST"
+  },
+  {
+    "plugin": "dataset",
+    "path": "/data-store",
+    "sample": "/data-store"
+  },
+  {
+    "plugin": "dataset",
+    "path": "/data-store/:category_slug",
+    "sample": "/data-store/environment"
+  },
+  {
+    "plugin": "dataset",
+    "path": "/data-store/:category_slug/:dataset_slug",
+    "sample": "/data-store/environment/air-quality"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/ghrm/auth/github/callback",
+    "sample": "/ghrm/auth/github/callback"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software",
+    "sample": "/software"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software/:package_slug",
+    "sample": "/software/backend"
+  },
+  {
+    "plugin": "ghrm",
+    "path": "/software/search",
+    "sample": "/software/search?q=backend"
+  },
+  {
+    "plugin": "landing1",
+    "path": "/embed/landing1",
+    "sample": "/embed/landing1"
+  },
+  {
+    "plugin": "landing1",
+    "path": "/landing1",
+    "sample": "/landing1"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/categories",
+    "sample": "/marketplace/categories"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/categories/:id/edit",
+    "sample": "/marketplace/categories/00000000-0000-0000-0000-000000000000/edit"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/dashboard",
+    "sample": "/marketplace/dashboard"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/earnings",
+    "sample": "/marketplace/earnings"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings",
+    "sample": "/marketplace/listings"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings/:type/:id/edit",
+    "sample": "/marketplace/listings/product/00000000-0000-0000-0000-000000000000/edit"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/listings/new",
+    "sample": "/marketplace/listings/new"
+  },
+  {
+    "plugin": "marketplace",
+    "path": "/marketplace/sales",
+    "sample": "/marketplace/sales"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago",
+    "sample": "/pay/mercado-pago?invoice=TEST"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago/cancel",
+    "sample": "/pay/mercado-pago/cancel"
+  },
+  {
+    "plugin": "mercado-pago-payment",
+    "path": "/pay/mercado-pago/success",
+    "sample": "/pay/mercado-pago/success"
+  },
+  {
+    "plugin": "office",
+    "path": "/s/:token",
+    "sample": "/s/sample-share-token"
+  },
+  {
+    "plugin": "paypal-payment",
+    "path": "/pay/paypal",
+    "sample": "/pay/paypal?invoice=TEST"
+  },
+  {
+    "plugin": "paypal-payment",
+    "path": "/pay/paypal/cancel",
+    "sample": "/pay/paypal/cancel"
+  },
+  {
+    "plugin": "paypal-payment",
+    "path": "/pay/paypal/success",
+    "sample": "/pay/paypal/success"
+  },
+  {
+    "plugin": "promptpay-payment",
+    "path": "/pay/promptpay",
+    "sample": "/pay/promptpay?invoice=TEST"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop",
+    "sample": "/shop"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop/cart",
+    "sample": "/shop/cart"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop/category/:slug",
+    "sample": "/shop/category/electronics"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop/orders",
+    "sample": "/shop/orders"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop/orders/:id",
+    "sample": "/shop/orders/00000000-0000-0000-0000-000000000000"
+  },
+  {
+    "plugin": "shop",
+    "path": "/shop/product/:slug",
+    "sample": "/shop/product/wireless-headphones-pro"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy",
+    "sample": "/pharmacy"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy/c/:slug",
+    "sample": "/pharmacy/c/otc-medicines"
+  },
+  {
+    "plugin": "shop-pharma",
+    "path": "/pharmacy/p/:slug",
+    "sample": "/pharmacy/p/ibuprofen-400mg"
+  },
+  {
+    "plugin": "stripe-payment",
+    "path": "/pay/stripe",
+    "sample": "/pay/stripe?invoice=TEST"
+  },
+  {
+    "plugin": "stripe-payment",
+    "path": "/pay/stripe/cancel",
+    "sample": "/pay/stripe/cancel"
+  },
+  {
+    "plugin": "stripe-payment",
+    "path": "/pay/stripe/success",
+    "sample": "/pay/stripe/success"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss",
+    "sample": "/pay/toss?invoice=TEST"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss/cancel",
+    "sample": "/pay/toss/cancel"
+  },
+  {
+    "plugin": "toss-payments-payment",
+    "path": "/pay/toss/success",
+    "sample": "/pay/toss/success"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney",
+    "sample": "/pay/truemoney?invoice=TEST"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney/cancel",
+    "sample": "/pay/truemoney/cancel"
+  },
+  {
+    "plugin": "truemoney-payment",
+    "path": "/pay/truemoney/success",
+    "sample": "/pay/truemoney/success"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa",
+    "sample": "/pay/yookassa?invoice=TEST"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa/cancel",
+    "sample": "/pay/yookassa/cancel"
+  },
+  {
+    "plugin": "yookassa-payment",
+    "path": "/pay/yookassa/success",
+    "sample": "/pay/yookassa/success"
+  }
+]

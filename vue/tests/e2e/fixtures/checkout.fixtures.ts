@@ -13,12 +13,39 @@ export async function loginAsTestUser(page: Page): Promise<void> {
   await page.waitForURL('/dashboard');
 }
 
+/**
+ * A complete billing profile for the test user. For an authenticated buyer the
+ * checkout shows the billing address read-only from `/user/details`, so the
+ * profile itself must be complete (other specs, e.g. profile.spec.ts, edit it).
+ */
+const TEST_USER_BILLING_DETAILS = {
+  first_name: 'Test',
+  last_name: 'User',
+  address_line_1: '123 Test Street',
+  city: 'Test City',
+  postal_code: '12345',
+  country: 'DE',
+};
+
+async function ensureBillingDetailsForSignedInUser(page: Page): Promise<void> {
+  const authToken = await page.evaluate(() => localStorage.getItem('auth_token'));
+  if (!authToken) return;
+  const response = await page.request.put('/api/v1/user/details', {
+    headers: { Authorization: `Bearer ${authToken}` },
+    data: TEST_USER_BILLING_DETAILS,
+  });
+  if (!response.ok()) {
+    throw new Error(`could not set test user billing details: ${response.status()} ${await response.text()}`);
+  }
+}
+
 export async function navigateToCheckout(page: Page, planSlug: string = 'pro'): Promise<void> {
-  await page.goto(`/checkout/${planSlug}`);
+  await ensureBillingDetailsForSignedInUser(page);
+  await page.goto(`/dashboard/checkout/${planSlug}`);
 }
 
 export async function selectPlanFromList(page: Page): Promise<void> {
-  await page.goto('/plans');
+  await page.goto('/dashboard/plans');
   await page.click('[data-testid^="select-plan-"]');
   await page.waitForURL(/\/checkout\//);
 }
@@ -38,14 +65,16 @@ export async function fillCheckoutRequirements(page: Page): Promise<void> {
   await page.waitForSelector('[data-testid="billing-address-block"]');
   await page.waitForSelector('[data-testid="billing-street"]', { timeout: 5000 });
 
-  // Fill billing address (required fields: street, city, zip, country)
-  await page.fill('[data-testid="billing-street"]', '123 Test Street');
-  await page.fill('[data-testid="billing-city"]', 'Test City');
-  await page.fill('[data-testid="billing-zip"]', '12345');
-
-  // Select first country option
-  const countrySelect = page.locator('[data-testid="billing-country"]');
-  await countrySelect.selectOption({ index: 1 });
+  // An authenticated buyer's address is read-only (taken from the profile, see
+  // navigateToCheckout); an anonymous buyer fills the required fields.
+  if (await page.locator('[data-testid="billing-street"]').isEditable()) {
+    await page.fill('[data-testid="billing-first-name"]', 'Test');
+    await page.fill('[data-testid="billing-last-name"]', 'User');
+    await page.fill('[data-testid="billing-street"]', '123 Test Street');
+    await page.fill('[data-testid="billing-city"]', 'Test City');
+    await page.fill('[data-testid="billing-zip"]', '12345');
+    await page.locator('[data-testid="billing-country"]').selectOption({ index: 1 });
+  }
 
   // Wait for payment methods block to finish loading
   await page.waitForSelector('[data-testid="payment-methods-block"]');

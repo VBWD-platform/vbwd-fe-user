@@ -4,7 +4,7 @@ import { loginAsTestUser } from './fixtures/checkout.fixtures';
 test.describe('Subscription Page Display', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
   });
 
   test('displays subscription page', async ({ page }) => {
@@ -36,28 +36,17 @@ test.describe('Subscription Page Display', () => {
     await expect(page.locator('[data-testid="purchase-tokens-btn"]')).toBeVisible();
   });
 
-  test('purchase tokens button navigates to plans', async ({ page }) => {
+  test('purchase tokens button navigates to the token bundles page', async ({ page }) => {
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
     await page.click('[data-testid="purchase-tokens-btn"]');
-    await expect(page).toHaveURL('/plans');
-  });
-
-  test('change plan button is visible', async ({ page }) => {
-    await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
-    await expect(page.locator('[data-testid="change-plan"]')).toBeVisible();
-  });
-
-  test('change plan button navigates to plans', async ({ page }) => {
-    await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
-    await page.click('[data-testid="change-plan"]');
-    await expect(page).toHaveURL('/plans');
+    await expect(page).toHaveURL('/dashboard/tokens');
   });
 });
 
 test.describe('Subscription Page - Invoices Section', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
   });
 
@@ -149,7 +138,7 @@ test.describe('Subscription Page - Invoice Payment Flow', () => {
   });
 
   test('can pay pending invoice from subscription page', async ({ page }) => {
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     const payButton = page.locator('[data-testid="pay-invoice"]').first();
@@ -165,7 +154,7 @@ test.describe('Subscription Page - Invoice Payment Flow', () => {
   });
 
   test('payment page shows invoice amount', async ({ page }) => {
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     const payButton = page.locator('[data-testid="pay-invoice"]').first();
@@ -186,7 +175,7 @@ test.describe('Subscription Page - Invoice Payment Flow', () => {
   });
 
   test('can complete payment', async ({ page }) => {
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     const payButton = page.locator('[data-testid="pay-invoice"]').first();
@@ -222,7 +211,7 @@ test.describe('Subscription Page - Invoice Payment Flow', () => {
 test.describe('Subscription Page - Cancel Subscription', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
   });
 
@@ -265,7 +254,7 @@ test.describe('Subscription Page - Cancel Subscription', () => {
 test.describe('Subscription Page - Navigation', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/subscription');
+    await page.goto('/dashboard/subscription');
     await page.waitForSelector('[data-testid="subscription-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
   });
 
@@ -276,7 +265,7 @@ test.describe('Subscription Page - Navigation', () => {
     // If there's a view subscription button (after checkout), it should work
     if (hasViewButton) {
       await viewButton.click();
-      await expect(page).toHaveURL('/subscription');
+      await expect(page).toHaveURL('/dashboard/subscription');
     }
   });
 
@@ -286,7 +275,7 @@ test.describe('Subscription Page - Navigation', () => {
 
     if (hasBackButton) {
       await backButton.click();
-      await expect(page).toHaveURL('/plans');
+      await expect(page).toHaveURL('/dashboard/plans');
     }
   });
 });

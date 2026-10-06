@@ -18,7 +18,10 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./vue/src', import.meta.url))
+      '@': fileURLToPath(new URL('./vue/src', import.meta.url)),
+      // Mirrors vite.config.js so the real plugin loader (which imports the
+      // build-time manifest via `@plugins/plugins.json`) runs under vitest.
+      '@plugins': fileURLToPath(new URL('./plugins', import.meta.url))
     },
     // The fe-core catalogue composable (vbwd-view-component) calls useRoute()/
     // useStore(); dedupe so it binds to the SAME vue/vue-router/pinia instance

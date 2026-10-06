@@ -46,17 +46,17 @@ test.describe('E-commerce — Public Catalog', () => {
   });
 
   test('can view product detail page', async ({ page }) => {
-    await page.goto(`${BASE}/shop/product/wireless-headphones`);
+    await page.goto(`${BASE}/shop/product/wireless-headphones-pro`);
     await expect(page.locator('[data-testid="product-detail"]')).toBeVisible();
-    await expect(page.locator('[data-testid="product-name"]')).toContainText('Wireless Headphones');
-    await expect(page.locator('[data-testid="product-price"]')).toBeVisible();
+    await expect(page.locator('[data-testid="product-detail-name"]')).toContainText('Wireless Headphones');
+    await expect(page.locator('[data-testid="product-detail-price"]')).toBeVisible();
   });
 });
 
 test.describe('E-commerce — Cart', () => {
   test('can add product to cart', async ({ page }) => {
-    await page.goto(`${BASE}/shop/product/usb-c-cable`);
-    await page.locator('[data-testid="add-to-cart-btn"]').click();
+    await page.goto(`${BASE}/shop/product/usb-c-cable-2m`);
+    await page.locator('[data-testid="product-detail-add-to-cart"]').click();
 
     // Navigate to cart
     await page.goto(`${BASE}/shop/cart`);
@@ -66,8 +66,8 @@ test.describe('E-commerce — Cart', () => {
 
   test('cart persists after page reload', async ({ page }) => {
     // Add item
-    await page.goto(`${BASE}/shop/product/usb-c-cable`);
-    await page.locator('[data-testid="add-to-cart-btn"]').click();
+    await page.goto(`${BASE}/shop/product/usb-c-cable-2m`);
+    await page.locator('[data-testid="product-detail-add-to-cart"]').click();
 
     // Reload and check cart
     await page.reload();
@@ -77,11 +77,11 @@ test.describe('E-commerce — Cart', () => {
   });
 
   test('can update quantity in cart', async ({ page }) => {
-    await page.goto(`${BASE}/shop/product/usb-c-cable`);
-    await page.locator('[data-testid="add-to-cart-btn"]').click();
+    await page.goto(`${BASE}/shop/product/usb-c-cable-2m`);
+    await page.locator('[data-testid="product-detail-add-to-cart"]').click();
 
     await page.goto(`${BASE}/shop/cart`);
-    const increaseButton = page.locator('[data-testid="cart-increase-qty"]').first();
+    const increaseButton = page.locator('[data-testid="cart-item-increase"]').first();
     await increaseButton.click();
 
     // Quantity should be 2

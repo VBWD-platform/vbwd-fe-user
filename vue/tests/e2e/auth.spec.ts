@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication', () => {
   test('redirects to login when not authenticated', async ({ page }) => {
-    await page.goto('/profile');
+    await page.goto('/dashboard/profile');
     await expect(page).toHaveURL(/.*login/);
   });
 

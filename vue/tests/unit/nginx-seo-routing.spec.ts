@@ -190,3 +190,270 @@ describe('S150 Phase 3 — one crawler user-agent map covering AI fetchers', () 
     expect(confText).not.toMatch(/"~\*\(bot\|/)
   })
 })
+
+/**
+ * S152-11a — the frontend router (D5, D7, W2). One conf serves both frontend
+ * modes: after the geo-block, an HTML navigation asks the backend first
+ * (`@frontend`, marked `X-VBWD-Render: 1`, at the ORIGINAL URI) and falls back to
+ * the unchanged `@spa` chain on 404/5xx; `/dashboard` and `/tuktuk` never reach
+ * the backend; `/_render/*` (fragments, theme assets) proxies with the bearer.
+ */
+const ROUTER_SNIPPET_PATH = resolve(SNIPPET_DIR, 'frontend-router.conf')
+const ROUTER_MAP_SNIPPET_PATH = resolve(SNIPPET_DIR, 'frontend-router-map.conf')
+const DOCKERFILE_PATH = resolve(REPO_ROOT, 'Dockerfile')
+const DEV_COMPOSE_PATH = resolve(REPO_ROOT, 'docker-compose.yaml')
+const SPA_ONLY_MATCHER = '~ ^/(dashboard|tuktuk)(/|$)'
+const RENDER_MATCHER = '^~ /_render/'
+const PAGE_LOCATION_MAP_HEADER = 'map "$request_method:$http_accept" $vbwd_page_location {'
+const FORWARDED_PROTO_MAP_HEADER = 'map $http_x_forwarded_proto $forwarded_proto {'
+const BACKEND_PROXY_PASS = /proxy_pass\s+(\$backend|http:\/\/\$api_upstream)\S*;/
+
+/** Conf text with comments dropped, so prose never looks like a directive. */
+function withoutComments(confText: string): string {
+  return confText.replace(/(^|\s)#.*$/gm, '$1')
+}
+
+/** Every `location <matcher> { ... }` block: matcher + body (nested braces kept). */
+function locationBlocks(confText: string): Array<{ matcher: string; body: string }> {
+  const text = withoutComments(confText)
+  const header = /location\s+((?:"[^"]*"|[^{;"])+?)\s*\{/g
+  const blocks: Array<{ matcher: string; body: string }> = []
+  let match: RegExpExecArray | null
+  while ((match = header.exec(text)) !== null) {
+    const body = locationBody(text, match[1]) ?? ''
+    blocks.push({ matcher: match[1], body })
+    header.lastIndex = match.index + match[0].length + body.length
+  }
+  return blocks
+}
+
+/** The `{ ... }` body of a top-level `map <source> <variable>` block. */
+function mapBody(confText: string, mapHeader: string): string | null {
+  const start = confText.indexOf(mapHeader)
+  if (start === -1) return null
+  const end = confText.indexOf('}', start)
+  return confText.slice(start + mapHeader.length, end)
+}
+
+function pageLocationRegex(): RegExp {
+  const body = mapBody(readText(ROUTER_MAP_SNIPPET_PATH), PAGE_LOCATION_MAP_HEADER) ?? ''
+  const match = body.match(/"~(.+)"\s+@frontend;/)
+  if (!match) throw new Error('frontend-router-map.conf holds no "~..." @frontend; line')
+  return new RegExp(match[1])
+}
+
+const resolvedConf = (confPath: string) =>
+  withoutComments(resolveSnippetIncludes(readText(confPath)))
+
+const usesGeoBlock = (confPath: string) => readText(confPath).includes('js_content geo.handle;')
+
+describe('S152-11a — theme-candidate map (D5)', () => {
+  it.each([
+    ['GET', 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'],
+    ['HEAD', 'text/html'],
+    ['GET', 'application/xhtml+xml, text/html'],
+  ])('routes a %s navigation (Accept: %s) to @frontend', (method, accept) => {
+    expect(pageLocationRegex().test(`${method}:${accept}`)).toBe(true)
+  })
+
+  it.each([
+    ['POST', 'text/html'],
+    ['PUT', 'text/html'],
+    ['GET', '*/*'],
+    ['GET', 'application/json'],
+    ['GET', ''],
+    ['OPTIONS', 'text/html'],
+  ])('keeps a %s request (Accept: %s) on @spa', (method, accept) => {
+    expect(pageLocationRegex().test(`${method}:${accept}`)).toBe(false)
+  })
+
+  it('defaults every other request to @spa', () => {
+    const body = mapBody(readText(ROUTER_MAP_SNIPPET_PATH), PAGE_LOCATION_MAP_HEADER) ?? ''
+    expect(body).toMatch(/^\s*default\s+@spa;$/m)
+  })
+
+  it.each(['/dashboard', '/dashboard/', '/dashboard/invoices/1', '/tuktuk', '/tuktuk/reports'])(
+    'the SPA-only matcher catches %s',
+    (path) => {
+      expect(new RegExp(SPA_ONLY_MATCHER.slice(2)).test(path)).toBe(true)
+    },
+  )
+
+  it.each(['/dashboardx', '/tuktukfoo', '/shop/dashboard', '/', '/shop'])(
+    'the SPA-only matcher leaves %s alone',
+    (path) => {
+      expect(new RegExp(SPA_ONLY_MATCHER.slice(2)).test(path)).toBe(false)
+    },
+  )
+})
+
+describe('S152-11a — frontend router in every served conf (D5/D7/W2)', () => {
+  for (const conf of servedConfs) {
+    describe(conf.name, () => {
+      it('carries the page-location map and the @frontend / @spa locations', () => {
+        const confText = resolvedConf(conf.path)
+        expect(confText).toContain(PAGE_LOCATION_MAP_HEADER)
+        expect(locationBody(confText, '@frontend')).not.toBeNull()
+        expect(locationBody(confText, '@spa')).not.toBeNull()
+      })
+
+      it('@frontend proxies the ORIGINAL uri to the backend, marked, without a bearer', () => {
+        const body = locationBody(resolvedConf(conf.path), '@frontend') ?? ''
+        expect(body).toMatch(/proxy_pass\s+(\$backend|http:\/\/\$api_upstream);/)
+        expect(body).not.toContain('/_render')
+        expect(body).toMatch(/proxy_set_header\s+X-VBWD-Render\s+1;/)
+        expect(body).toMatch(/proxy_set_header\s+Authorization\s+"";/)
+        expect(body).toMatch(/proxy_set_header\s+Host\s+\$http_host;/)
+        expect(body).toMatch(/proxy_set_header\s+X-Forwarded-For\s+\$proxy_add_x_forwarded_for;/)
+        expect(body).toMatch(/proxy_set_header\s+X-Forwarded-Proto\s+\$forwarded_proto;/)
+      })
+
+      it('@frontend degrades to @spa on 404 / 502 / 503 / 504', () => {
+        const body = locationBody(resolvedConf(conf.path), '@frontend') ?? ''
+        expect(body).toMatch(/proxy_intercept_errors\s+on;/)
+        // The fallback is a SECOND error_page hop for @spa's own 418 branches.
+        expect(body).toMatch(/recursive_error_pages\s+on;/)
+        expect(body).toMatch(/error_page\s+404 502 503 504\s+=\s+@spa;/)
+      })
+
+      it('/_render/ passes the bearer through and never marks a render', () => {
+        const body = locationBody(resolvedConf(conf.path), RENDER_MATCHER)
+        expect(body, `missing location ${RENDER_MATCHER}`).not.toBeNull()
+        expect(body).toMatch(/proxy_pass\s+(\$backend|http:\/\/\$api_upstream);/)
+        expect(body).not.toMatch(/Authorization/)
+        expect(body).toMatch(/proxy_set_header\s+X-VBWD-Render\s+"";/)
+        expect(body).not.toMatch(/error_page/)
+      })
+
+      it('every other backend proxy location blanks a client-sent X-VBWD-Render', () => {
+        const backendLocations = locationBlocks(resolvedConf(conf.path)).filter(
+          (block) => block.matcher !== '@frontend' && BACKEND_PROXY_PASS.test(block.body),
+        )
+        expect(backendLocations.length).toBeGreaterThan(0)
+        for (const block of backendLocations) {
+          expect(block.body, `location ${block.matcher}`).toMatch(
+            /proxy_set_header\s+X-VBWD-Render\s+"";/,
+          )
+        }
+      })
+
+      it('location / sends HTML navigations to @frontend only after the geo-block', () => {
+        const body = locationBody(resolvedConf(conf.path), '/') ?? ''
+        if (usesGeoBlock(conf.path)) {
+          const directives = normalisedDirectives(body)
+          expect(directives).toEqual([
+            'set $vbwd_geo_pass_location $vbwd_page_location;',
+            'js_content geo.handle;',
+          ])
+        } else {
+          expect(body).toMatch(/error_page\s+418\s+=\s+@frontend;/)
+          expect(body).toMatch(/if \(\$vbwd_page_location = "@frontend"\) \{ return 418; \}/)
+          expect(body).toMatch(/error_page\s+419\s+=\s+@spa;/)
+          expect(body).toMatch(/recursive_error_pages\s+on;/)
+        }
+      })
+
+      it('/dashboard and /tuktuk go straight to @spa, never @frontend', () => {
+        const body = locationBody(resolvedConf(conf.path), SPA_ONLY_MATCHER)
+        expect(body, `missing location ${SPA_ONLY_MATCHER}`).not.toBeNull()
+        expect(body).not.toContain('@frontend')
+        expect(body).not.toContain('$vbwd_page_location')
+        if (usesGeoBlock(conf.path)) {
+          expect(normalisedDirectives(body ?? '')).toEqual([
+            'set $vbwd_geo_pass_location @spa;',
+            'js_content geo.handle;',
+          ])
+        } else {
+          expect(body).toMatch(/error_page\s+419\s+=\s+@spa;/)
+          expect(body).toMatch(/return 419;/)
+        }
+      })
+    })
+  }
+
+  it.each([
+    ['nginx.dev.conf', DEV_CONF_PATH],
+    ['nginx.prod.conf.template', PROD_CONF_PATH],
+  ])('%s includes the shared router snippets rather than inline copies', (_name, confPath) => {
+    const confText = readText(confPath)
+    expect(confText).toMatch(/include\s+\S*\/frontend-router-map\.conf;/)
+    expect(confText).toMatch(/include\s+\S*\/frontend-router\.conf;/)
+    expect(confText).not.toContain('location @frontend')
+    expect(confText).not.toContain(FORWARDED_PROTO_MAP_HEADER)
+  })
+
+  it('the prod template points the snippet $backend at $api_upstream', () => {
+    expect(readText(PROD_CONF_PATH)).toMatch(/set \$backend http:\/\/\$api_upstream;/)
+  })
+
+  it('the prod image ships both router snippets', () => {
+    const dockerfile = readText(DOCKERFILE_PATH)
+    for (const snippet of ['frontend-router.conf', 'frontend-router-map.conf']) {
+      expect(dockerfile).toContain(`COPY nginx/${snippet} /etc/nginx/snippets/${snippet}`)
+    }
+  })
+
+  it('the dev compose bind-mounts both router snippets', () => {
+    const compose = readText(DEV_COMPOSE_PATH)
+    for (const snippet of ['frontend-router.conf', 'frontend-router-map.conf']) {
+      expect(compose).toContain(`./nginx/${snippet}:/etc/nginx/snippets/${snippet}:ro`)
+    }
+  })
+
+  it.skipIf(!existsSync(PLATFORM_CONF_PATH))(
+    'vbwd-platform conf router blocks equal the shared snippets (drift guard)',
+    () => {
+      const snippetText = readText(ROUTER_SNIPPET_PATH)
+      const mapSnippetText = readText(ROUTER_MAP_SNIPPET_PATH)
+      const platformText = readText(PLATFORM_CONF_PATH)
+      for (const matcher of ['@frontend', RENDER_MATCHER]) {
+        const expected = normalisedDirectives(locationBody(snippetText, matcher) ?? '')
+        const actual = normalisedDirectives(locationBody(platformText, matcher) ?? '')
+        expect(actual, `platform location ${matcher} drifted from the snippet`).toEqual(expected)
+      }
+      for (const mapHeader of [PAGE_LOCATION_MAP_HEADER, FORWARDED_PROTO_MAP_HEADER]) {
+        const expected = normalisedDirectives(mapBody(mapSnippetText, mapHeader) ?? '')
+        const actual = normalisedDirectives(mapBody(platformText, mapHeader) ?? '')
+        expect(actual, `platform ${mapHeader} drifted from the snippet`).toEqual(expected)
+      }
+    },
+  )
+})
+
+/**
+ * S152-12c — nginx allows ONE error_page redirect per request unless the location
+ * that takes the first hop sets `recursive_error_pages on`. A location whose
+ * error_page targets a named location that itself redirects on error (a SECOND
+ * hop) must therefore opt in — otherwise the second hop is swallowed and the
+ * client gets a bare nginx error page. The pre-S152 bug: prod `@spa`'s crawler
+ * branch (418 → @seo_dynamic) consumed the hop, so a backend render 404 reached
+ * the crawler as a bare 404 instead of falling through to @seo_static.
+ */
+const ERROR_PAGE_TARGET = /error_page\s+[^;=]+=\s*(@[\w-]+);/g
+
+function errorPageTargets(locationText: string): string[] {
+  return [...locationText.matchAll(ERROR_PAGE_TARGET)].map((match) => match[1])
+}
+
+describe('S152-12c — chained error_page hops opt into recursive_error_pages', () => {
+  for (const conf of servedConfs) {
+    it(`${conf.name}: every location whose error_page target redirects again is recursive`, () => {
+      const blocks = locationBlocks(resolvedConf(conf.path))
+      const bodyByMatcher = new Map(blocks.map((block) => [block.matcher, block.body]))
+      for (const block of blocks) {
+        const chainsAgain = errorPageTargets(block.body).some(
+          (target) => errorPageTargets(bodyByMatcher.get(target) ?? '').length > 0,
+        )
+        if (!chainsAgain) continue
+        expect(block.body, `location ${block.matcher}`).toMatch(/recursive_error_pages\s+on;/)
+      }
+    })
+  }
+
+  it('prod @spa lets the crawler render fall back: 418 → @seo_dynamic → 404 → @seo_static', () => {
+    const confText = resolvedConf(PROD_CONF_PATH)
+    expect(locationBody(confText, '@spa')).toMatch(/recursive_error_pages\s+on;/)
+    expect(errorPageTargets(locationBody(confText, '@spa') ?? '')).toContain('@seo_dynamic')
+    expect(errorPageTargets(locationBody(confText, '@seo_dynamic') ?? '')).toContain('@seo_static')
+  })
+})

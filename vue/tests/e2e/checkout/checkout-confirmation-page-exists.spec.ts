@@ -25,12 +25,15 @@ test.describe('Checkout confirmation page (CMS slug seeded)', () => {
 
   test('CMS API exposes the checkout-confirmation page', async ({ request }) => {
     const apiBase = (process.env.E2E_BASE_URL || 'http://localhost:8080').replace(/\/$/, '');
-    const response = await request.get(`${apiBase}/api/v1/cms/pages/checkout-confirmation`);
+    // Pages are `cms_post` rows of type `page` since the legacy cms_page
+    // endpoint was retired (S105).
+    const response = await request.get(`${apiBase}/api/v1/cms/posts/checkout-confirmation`);
     expect(response.status()).toBe(200);
 
     const body = await response.json();
     expect(body.slug).toBe('checkout-confirmation');
-    expect(body.is_published).toBe(true);
+    expect(body.type).toBe('page');
+    expect(body.status).toBe('published');
     expect(body.layout_id).toBeTruthy();
   });
 });

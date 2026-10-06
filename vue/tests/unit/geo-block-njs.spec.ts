@@ -44,6 +44,7 @@ function makeRequest(opts: {
   headers?: Record<string, string>
   cookie?: string
   country?: string
+  passLocation?: string
 }) {
   const headersIn: Record<string, string> = { ...(opts.headers || {}) }
   if (opts.cookie) headersIn.Cookie = opts.cookie
@@ -54,7 +55,10 @@ function makeRequest(opts: {
     args: opts.args || {},
     headersIn,
     headersOut: result.headersOut,
-    variables: { geoip2_country_code: opts.country || '' },
+    variables: {
+      geoip2_country_code: opts.country || '',
+      ...(opts.passLocation === undefined ? {} : { vbwd_geo_pass_location: opts.passLocation }),
+    },
     return(code: number, location?: string) {
       result.status = code
       if (location !== undefined) result.location = location
@@ -153,6 +157,37 @@ describe('fail-open safety invariant', () => {
     const { r, result } = makeRequest({ uri: '/', country: 'FR' })
     handle(r)
     expect(result.internalRedirect).toBe('@spa')
+  })
+})
+
+describe('pass target (S152-11a — the location picks where "pass" lands)', () => {
+  it('passes to the location named by $vbwd_geo_pass_location', () => {
+    useConfig({ ...baseConfig, enabled: false })
+    const { r, result } = makeRequest({ uri: '/shop', passLocation: '@frontend' })
+    handle(r)
+    expect(result.internalRedirect).toBe('@frontend')
+  })
+
+  it('passes an allowed country to the location named by $vbwd_geo_pass_location', () => {
+    useConfig(baseConfig)
+    const { r, result } = makeRequest({ uri: '/shop', country: 'DE', passLocation: '@frontend' })
+    handle(r)
+    expect(result.internalRedirect).toBe('@frontend')
+  })
+
+  it('falls back to @spa when the location sets no pass target', () => {
+    useConfig({ ...baseConfig, enabled: false })
+    const { r, result } = makeRequest({ uri: '/shop', passLocation: '' })
+    handle(r)
+    expect(result.internalRedirect).toBe('@spa')
+  })
+
+  it('still blocks a blocked country whatever the pass target', () => {
+    useConfig(baseConfig)
+    const { r, result } = makeRequest({ uri: '/shop', country: 'FR', passLocation: '@frontend' })
+    handle(r)
+    expect(result.status).toBe(302)
+    expect(result.internalRedirect).toBeNull()
   })
 })
 

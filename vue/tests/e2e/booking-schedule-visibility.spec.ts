@@ -37,9 +37,18 @@ test.describe('Booking visible on Schedule API', () => {
   let bookingDate: string;
   let resourceId: string;
   let bookingId: string;
+  let expectedCustomerName: string;
 
   test.beforeAll(async () => {
     userToken = await getToken('test@example.com', 'TestPass123@');
+
+    // The schedule shows the booker's profile first name (or their email when
+    // the profile has none); other specs edit the shared test user's profile.
+    const detailsResp = await fetch(`${API}/user/details`, {
+      headers: { Authorization: `Bearer ${userToken}` },
+    });
+    const details = await detailsResp.json();
+    expectedCustomerName = (details.first_name || 'test@example.com').toLowerCase();
     adminToken = await getToken('admin@example.com', 'AdminPass123@');
     bookingDate = getNextWeekday(4); // Next Thursday
 
@@ -112,7 +121,7 @@ test.describe('Booking visible on Schedule API', () => {
       (s: { start: string }) => s.start === '15:00'
     );
     expect(slot).toBeTruthy();
-    expect(slot.customer_name).toContain('test');
+    expect(slot.customer_name.toLowerCase()).toContain(expectedCustomerName);
     expect(slot.booking_id).toBe(bookingId);
     expect(slot.booking_status).toBe('confirmed');
     console.log(`Slot 15:00: customer=${slot.customer_name}, status=${slot.booking_status}`);

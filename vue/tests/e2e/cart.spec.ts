@@ -9,39 +9,38 @@ test.describe('Shopping Cart', () => {
   });
 
   test('cart icon is visible in header', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await expect(page.locator('[data-testid="cart-icon"]')).toBeVisible();
   });
 
   test('cart shows zero count when empty', async ({ page }) => {
-    await page.goto('/plans');
-    const cartCount = page.locator('[data-testid="cart-count"]');
-    // Either not visible or shows 0
-    const count = await cartCount.textContent();
-    expect(count === null || count === '0' || count === '').toBeTruthy();
+    await page.goto('/dashboard/plans');
+    // The count badge is only rendered while the cart holds items.
+    await expect(page.locator('[data-testid="cart-icon"]')).toBeVisible();
+    await expect(page.locator('[data-testid="cart-count"]')).toHaveCount(0);
   });
 
   test('adding item updates cart count', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
   });
 
   test('adding multiple items updates cart count', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
     await page.locator('[data-testid^="add-to-cart-token-"]').nth(1).click();
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('2');
   });
 
   test('clicking cart icon opens dropdown', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await page.click('[data-testid="cart-icon"]');
     await expect(page.locator('[data-testid="cart-dropdown"]')).toBeVisible();
   });
 
   test('cart dropdown shows added items', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
 
     await page.click('[data-testid="cart-icon"]');
@@ -50,20 +49,19 @@ test.describe('Shopping Cart', () => {
   });
 
   test('can remove item from cart', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
 
     await page.click('[data-testid="cart-icon"]');
     await page.click('[data-testid^="remove-cart-item-"]');
 
-    // Cart should be empty or count reduced
-    const count = await page.locator('[data-testid="cart-count"]').textContent();
-    expect(count === null || count === '0' || count === '').toBeTruthy();
+    // The count badge disappears once the cart is empty again.
+    await expect(page.locator('[data-testid="cart-count"]')).toHaveCount(0);
   });
 
   test('cart shows total price', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
 
     await page.click('[data-testid="cart-icon"]');
@@ -71,7 +69,7 @@ test.describe('Shopping Cart', () => {
   });
 
   test('can navigate to checkout from cart', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
 
     await page.click('[data-testid="cart-icon"]');
@@ -81,16 +79,16 @@ test.describe('Shopping Cart', () => {
   });
 
   test('cart persists across page navigation', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
 
-    await page.goto('/add-ons');
+    await page.goto('/dashboard/add-ons');
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
   });
 
   test('cart persists after page refresh', async ({ page }) => {
-    await page.goto('/tokens');
+    await page.goto('/dashboard/tokens');
     await page.locator('[data-testid^="add-to-cart-token-"]').first().click();
     await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
 
@@ -99,7 +97,7 @@ test.describe('Shopping Cart', () => {
   });
 
   test('empty cart shows empty state message', async ({ page }) => {
-    await page.goto('/plans');
+    await page.goto('/dashboard/plans');
     await page.click('[data-testid="cart-icon"]');
     await expect(page.locator('[data-testid="cart-empty-message"]')).toBeVisible();
   });

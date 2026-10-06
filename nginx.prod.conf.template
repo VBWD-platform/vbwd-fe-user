@@ -47,16 +47,15 @@ map "${vbwd_is_crawler}${vbwd_render_loopback}${SEO_RENDER_ON}" $serve_dynamic_r
 }
 
 # TLS terminates at the OUTER (host) proxy; this container listens on plain :80,
-# so `$scheme` here is always "http". Relay the scheme the edge actually saw so
-# the backend can build `https://` redirect Locations (Flask reads it via
-# ProxyFix). Without this, any Werkzeug redirect — e.g. the `merge_slashes` 308
-# on a doubled-slash path like `/api/v1//ghrm/config` — emits an absolute
-# `http://` Location, which the browser blocks as mixed content on an HTTPS page.
-# Falls back to `$scheme` when the header is absent (direct container access).
-map $http_x_forwarded_proto $forwarded_proto {
-    default $http_x_forwarded_proto;
-    ""      $scheme;
-}
+# so `$scheme` here is always "http". `$forwarded_proto` relays the scheme the
+# edge actually saw so the backend can build `https://` redirect Locations (Flask
+# reads it via ProxyFix). Without this, any Werkzeug redirect — e.g. the
+# `merge_slashes` 308 on a doubled-slash path like `/api/v1//ghrm/config` — emits
+# an absolute `http://` Location, which the browser blocks as mixed content on an
+# HTTPS page. S152-11a — that map now lives in the shared frontend-router map
+# snippet (baked into the image at /etc/nginx/snippets/), next to
+# `$vbwd_page_location` (HTML navigation → @frontend, else @spa).
+include /etc/nginx/snippets/frontend-router-map.conf;
 
 # S120.1 — nginx-layer geo-block. The njs handler owns `location /` and either
 # passes to the unchanged SPA/prerender chain (`@spa`) or blocks / grants a
@@ -94,6 +93,8 @@ server {
     resolver 127.0.0.11 valid=10s ipv6=off;
     set $api_upstream ${API_UPSTREAM};
     set $plugin_api_upstream ${PLUGIN_API_UPSTREAM};
+    # S152-11a — the shared frontend-router snippet proxies to `$backend`.
+    set $backend http://$api_upstream;
 
     # Proxy uploaded media files to backend
     location /uploads/ {
@@ -102,6 +103,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
 
@@ -113,6 +115,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
     location ~ ^/sitemap-\d+\.xml$ {
@@ -121,6 +124,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
     location = /robots.txt {
@@ -129,6 +133,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
 
@@ -141,6 +146,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
 
@@ -157,6 +163,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_buffering off;
         proxy_cache off;
         proxy_read_timeout 3600s;
@@ -170,8 +177,15 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
+
+    # S152-11a — the frontend router: @frontend (HTML navigations ask the backend
+    # first, fall back to @spa) + /_render/* (theme fragments/assets). Shared
+    # snippet baked into the image at /etc/nginx/snippets/. Every other backend
+    # proxy here blanks X-VBWD-Render so a client can never mark a themed render.
+    include /etc/nginx/snippets/frontend-router.conf;
 
     # Proxy /_plugins/* to the plugin-api sidecar (HMAC-authenticated endpoint
     # called by the fe-admin User Plugins tab).
@@ -205,15 +219,25 @@ server {
     # (shared with the backend prerender writer). Content changes never touch
     # this conf.
     # S120.1 — the njs geo-block handler decides pass / block / bypass for every
-    # page request. "pass" → internalRedirect to @spa (the unchanged serving
-    # chain below), so with the feature OFF (or config/DB missing) serving is
-    # byte-identical to pre-S120.1.
+    # page request. "pass" → internalRedirect to $vbwd_geo_pass_location
+    # (S152-11a): @frontend for HTML navigations (backend first, 404/5xx → @spa),
+    # @spa (the unchanged serving chain below) for everything else. With the geo
+    # feature OFF (or config/DB missing) every request passes, as before.
     location / {
+        set $vbwd_geo_pass_location $vbwd_page_location;
         js_content geo.handle;
     }
 
-    # SPA + prerender serving (the pre-S120.1 `location /` body, unchanged). Only
-    # reached via the geo handler's internalRedirect('@spa').
+    # S152-11a (D7) — SPA-only areas: same geo-block, but a pass ALWAYS lands in
+    # @spa, never @frontend. Segment-aware: /dashboard, /dashboard/…, /tuktuk,
+    # /tuktuk/… (not /dashboardx).
+    location ~ ^/(dashboard|tuktuk)(/|$) {
+        set $vbwd_geo_pass_location @spa;
+        js_content geo.handle;
+    }
+
+    # SPA + prerender serving (the pre-S120.1 `location /` body, unchanged).
+    # Reached via the geo handler's pass, or @frontend's 404/5xx fallback.
     location @spa {
         root /usr/share/nginx/html;
         index index.html;
@@ -222,6 +246,11 @@ server {
         # humans, and the renderer's loopback fetch — falls through to try_files:
         # $seo_prefix="/seo" only for crawlers (static prerender), "" for humans
         # (SPA shell). `return` inside `if` is one of the safe `if` uses.
+        # S152-12c — nginx allows ONE error_page hop per request unless the
+        # location taking it opts in. The 418 hop is the first; @seo_dynamic's
+        # 404/5xx → @seo_static is the second, so without this a render miss
+        # reached the crawler as a bare nginx 404 instead of the static fallback.
+        recursive_error_pages on;
         error_page 418 = @seo_dynamic;
         if ($serve_dynamic_render) { return 418; }
         # Entry documents (the SPA shell and the prerendered .html snapshots) must
@@ -251,6 +280,7 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $forwarded_proto;
+        proxy_set_header X-VBWD-Render "";
         proxy_set_header X-VBWD-Render-Token "${SEO_RENDER_TOKEN}";
         # A cold headless render can take a few seconds; keep it bounded.
         proxy_read_timeout 35s;

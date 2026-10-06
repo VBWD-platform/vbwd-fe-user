@@ -4,7 +4,7 @@ import { loginAsTestUser } from './fixtures/checkout.fixtures';
 test.describe('Invoices Page', () => {
   test.beforeEach(async ({ page }) => {
     await loginAsTestUser(page);
-    await page.goto('/invoices');
+    await page.goto('/dashboard/subscription/invoices');
   });
 
   test('displays invoices page', async ({ page }) => {
@@ -27,24 +27,21 @@ test.describe('Invoices Page', () => {
     const table = page.locator('[data-testid="invoices-table"]');
     const empty = page.locator('[data-testid="no-invoices"]');
 
-    const hasTable = await table.isVisible().catch(() => false);
-    const hasEmpty = await empty.isVisible().catch(() => false);
-
-    expect(hasTable || hasEmpty).toBe(true);
+    await expect(table.or(empty)).toBeVisible();
   });
 
   test('can filter invoices by status', async ({ page }) => {
     await page.waitForSelector('[data-testid="invoices-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
-    // Select pending filter
-    await page.selectOption('[data-testid="status-filter"]', 'pending');
+    // Select pending filter (option values are the backend status enum)
+    await page.selectOption('[data-testid="status-filter"]', 'PENDING');
 
     // Wait for filter to apply
     await page.waitForTimeout(500);
 
     // Check that filter is applied
     const filter = await page.locator('[data-testid="status-filter"]').inputValue();
-    expect(filter).toBe('pending');
+    expect(filter).toBe('PENDING');
   });
 
   test('can search invoices', async ({ page }) => {
@@ -73,7 +70,7 @@ test.describe('Invoices Page', () => {
       await firstRow.click();
 
       // Should navigate to invoice detail
-      await expect(page).toHaveURL(/\/invoices\/[a-f0-9-]+$/);
+      await expect(page).toHaveURL(/\/dashboard\/invoice\/[a-f0-9-]+$/);
     }
   });
 
@@ -85,7 +82,7 @@ test.describe('Invoices Page', () => {
 
     if (hasViewBtn) {
       await viewBtn.click();
-      await expect(page).toHaveURL(/\/invoices\/[a-f0-9-]+$/);
+      await expect(page).toHaveURL(/\/dashboard\/invoice\/[a-f0-9-]+$/);
     }
   });
 
@@ -105,7 +102,7 @@ test.describe('Invoices Page', () => {
     await page.waitForSelector('[data-testid="invoices-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     // Filter to pending only
-    await page.selectOption('[data-testid="status-filter"]', 'pending');
+    await page.selectOption('[data-testid="status-filter"]', 'PENDING');
     await page.waitForTimeout(500);
 
     const payBtn = page.locator('[data-testid="pay-invoice-btn"]').first();
@@ -113,7 +110,7 @@ test.describe('Invoices Page', () => {
 
     if (hasPayBtn) {
       await payBtn.click();
-      await expect(page).toHaveURL(/\/invoices\/[a-f0-9-]+\/pay$/);
+      await expect(page).toHaveURL(/\/dashboard\/invoice\/[a-f0-9-]+\/pay$/);
     }
   });
 });
@@ -124,7 +121,7 @@ test.describe('Invoice Detail Page', () => {
   });
 
   test('displays invoice detail when navigating from invoices list', async ({ page }) => {
-    await page.goto('/invoices');
+    await page.goto('/dashboard/subscription/invoices');
     await page.waitForSelector('[data-testid="invoices-loading"]', { state: 'hidden', timeout: 10000 }).catch(() => {});
 
     const viewBtn = page.locator('[data-testid="view-invoice-btn"]').first();

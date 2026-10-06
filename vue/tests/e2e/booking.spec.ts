@@ -1,6 +1,18 @@
 import { test, expect, type Page } from '@playwright/test';
 
 const API = process.env.API_BASE_URL || 'http://localhost:5000/api/v1';
+// The booking form is a CMS page whose slug is the plugin's `bookingFormSlug` config.
+const BOOKING_FORM_SLUG = 'booking-form';
+const MONDAY = 1;
+
+/** The next given weekday (0 = Sunday) strictly after today, as YYYY-MM-DD. */
+function nextWeekday(targetDay: number): string {
+  const now = new Date();
+  const daysUntilTarget = (targetDay - now.getDay() + 7) % 7 || 7;
+  const target = new Date(now);
+  target.setDate(now.getDate() + daysUntilTarget);
+  return target.toISOString().split('T')[0];
+}
 
 async function loginAsUser(page: Page) {
   await page.goto('/login');
@@ -93,13 +105,13 @@ test.describe('Booking — Public Pages', () => {
     await page.goto(`/booking/${resourceSlug}`);
     await page.waitForLoadState('networkidle');
 
-    // Price visible
-    await expect(page.getByText('50.00')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText('EUR')).toBeVisible();
+    // Price visible (formatted with the currency symbol, e.g. "€50.00")
+    await expect(page.locator('[data-testid="price-amount"]').first()).toContainText('50.00', { timeout: 10000 });
+    await expect(page.locator('input[type="date"]').first()).toBeVisible();
   });
 
   test('booking form page loads for resource', async ({ page }) => {
-    await page.goto(`/booking/${resourceSlug}/book`);
+    await page.goto(`/${BOOKING_FORM_SLUG}/${resourceSlug}`);
     await page.waitForLoadState('networkidle');
 
     // Should show booking form or resource name
@@ -129,8 +141,18 @@ test.describe('Booking — Checkout Page', () => {
   });
 
   test('checkout page shows login prompt when not authenticated', async ({ page }) => {
-    await page.goto(`/booking/${resourceSlug}/book/pay`);
+    // The pay page needs a pending booking, created by the slot → form flow.
+    await page.goto(`/booking/${resourceSlug}`);
+    const dateInput = page.locator('input[type="date"]').first();
+    await dateInput.waitFor({ timeout: 15000 });
+    await dateInput.fill(nextWeekday(MONDAY));
+    await dateInput.dispatchEvent('change');
+    await page.locator('.booking-slot:not(.full)').first().click();
+    await page.locator('.ghrm-cta-btn').click();
+    await page.waitForURL(new RegExp(`/${BOOKING_FORM_SLUG}/${resourceSlug}`));
     await page.waitForLoadState('networkidle');
+    await page.locator('.ghrm-cta-btn').click();
+    await page.waitForURL(/\/book\/pay/);
 
     // Should show email/login block
     const emailInput = page.locator('input[type="email"]');
@@ -233,13 +255,14 @@ test.describe('Booking — API Integration', () => {
     expect(resp.status).toBe(200);
 
     const data = await resp.json();
-    expect(data.resources).toBeDefined();
-    expect(data.resources.length).toBeGreaterThan(0);
+    // Catalogue list wire contract: {items, total, page, per_page, pages}
+    expect(data.items).toBeDefined();
+    expect(data.items.length).toBeGreaterThan(0);
   });
 
   test('public availability API returns slots', async () => {
     const resp = await fetch(
-      `${API}/booking/resources/${resourceSlug}/availability?date=2026-05-04`
+      `${API}/booking/resources/${resourceSlug}/availability?date=${nextWeekday(MONDAY)}`
     );
     expect(resp.status).toBe(200);
 

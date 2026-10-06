@@ -8,7 +8,7 @@ import { test, expect } from '@playwright/test';
  * Run: E2E_BASE_URL=https://vbwd.cc npx playwright test prod-cms-plugin
  */
 
-test.describe('vbwd.cc — CMS plugin', () => {
+test.describe('vbwd.cc — CMS plugin', { tag: '@prod' }, () => {
   test('user /plugins.json has cms enabled', async ({ request }) => {
     const response = await request.get('/plugins.json');
     expect(response.status()).toBe(200);

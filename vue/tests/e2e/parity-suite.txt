@@ -1,0 +1,42 @@
+# S152 parity suite: the e2e specs that must stay green on the Vue SPA
+# (VBWD_FRONTEND_MODE=vue) and, from S152-11, in theme mode too.
+# One spec path per line, relative to vbwd-fe-user/. Lines starting with # are
+# comments. A trailing "@stripe" marks a spec that runs only when Stripe test
+# keys are configured (STRIPE_TEST_SECRET_KEY); without keys it self-skips.
+# Run:  E2E_BASE_URL=http://localhost:8080 npx playwright test $(grep -v '^#' vue/tests/e2e/parity-suite.txt | awk '{print $1}')
+vue/tests/e2e/auth.spec.ts
+vue/tests/e2e/stale-session-no-flash.spec.ts
+vue/tests/e2e/valid-session-no-chrome-flash.spec.ts
+vue/tests/e2e/dashboard.spec.ts
+vue/tests/e2e/profile.spec.ts
+vue/tests/e2e/cms-pages.spec.ts
+vue/tests/e2e/cart.spec.ts
+vue/tests/e2e/addons-page.spec.ts
+vue/tests/e2e/tokens-page.spec.ts
+vue/tests/e2e/invoices.spec.ts
+vue/tests/e2e/plan-switching.spec.ts
+vue/tests/e2e/subscription.spec.ts
+vue/tests/e2e/subscription-page.spec.ts
+vue/tests/e2e/subscription-data.spec.ts
+vue/tests/e2e/checkout/addons.spec.ts
+vue/tests/e2e/checkout/checkout-confirmation-page-exists.spec.ts
+vue/tests/e2e/checkout/checkout-display.spec.ts
+vue/tests/e2e/checkout/checkout-submit.spec.ts
+vue/tests/e2e/checkout/coupon-admin-injected.spec.ts
+vue/tests/e2e/checkout/coupon-private.spec.ts
+vue/tests/e2e/checkout/coupon-public.spec.ts
+vue/tests/e2e/checkout/post-checkout.spec.ts
+vue/tests/e2e/checkout/token-bundles.spec.ts
+vue/tests/e2e/shop-shopping-flow.spec.ts
+vue/tests/e2e/booking.spec.ts
+vue/tests/e2e/booking-authorize.spec.ts
+vue/tests/e2e/booking-invoice-payment.spec.ts
+vue/tests/e2e/booking-schedule-visibility.spec.ts
+vue/tests/e2e/booking-checkout.spec.ts @stripe
+plugins/checkout/tests/e2e/draft-checkout.spec.ts
+plugins/cms/tests/e2e/cms-breadcrumb-flow.spec.ts
+plugins/cms/tests/e2e/cms-search-quicksearch.spec.ts
+plugins/cms/tests/e2e/cms-search-results-flow.spec.ts
+plugins/dataset/tests/e2e/data-store-browse.spec.ts
+plugins/dataset/tests/e2e/dataset-checkout.spec.ts
+plugins/dataset/tests/e2e/dataset-dashboard.spec.ts

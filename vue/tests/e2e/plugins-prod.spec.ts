@@ -10,7 +10,7 @@ import { test, expect } from '@playwright/test';
  * Run against production:
  *   E2E_BASE_URL=https://vbwd.cc npx playwright test plugins-prod
  */
-test.describe('user plugins load cleanly in production', () => {
+test.describe('user plugins load cleanly in production', { tag: '@prod' }, () => {
   test('/ has no fatal JS errors and fetches plugins.json', async ({ page }) => {
     const consoleErrors: string[] = [];
     const pageErrors: string[] = [];

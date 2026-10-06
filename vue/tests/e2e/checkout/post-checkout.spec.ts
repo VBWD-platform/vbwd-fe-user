@@ -13,18 +13,18 @@ test.describe('Post-Checkout Navigation', () => {
   test('can navigate to subscription page', async ({ page }) => {
     await page.click('[data-testid="view-subscription-btn"]');
 
-    await expect(page).toHaveURL('/subscription');
+    await expect(page).toHaveURL('/dashboard/subscription');
   });
 
   test('can navigate to invoices page', async ({ page }) => {
     await page.click('[data-testid="view-invoice-btn"]');
 
-    await expect(page).toHaveURL(/\/invoices/);
+    await expect(page).toHaveURL(/\/dashboard\/invoice\//);
   });
 
   test('can go back to plans', async ({ page }) => {
     await page.click('[data-testid="back-to-plans-btn"]');
 
-    await expect(page).toHaveURL('/plans');
+    await expect(page).toHaveURL('/dashboard/plans');
   });
 });
