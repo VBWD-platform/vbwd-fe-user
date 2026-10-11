@@ -6,8 +6,9 @@
  *
  * Environment Variables:
  *   TEST_DATA_CLEANUP: When 'true', removes test data after tests
+ *   VBWD_BACKEND_DIR: vbwd-backend checkout (default: sibling ../vbwd-backend)
  */
-import { execSync } from 'child_process';
+import { runBackendFlaskCommand } from './backend-cli';
 
 async function globalTeardown() {
   console.log('Cleaning up E2E test environment...');
@@ -16,13 +17,7 @@ async function globalTeardown() {
   if (process.env.TEST_DATA_CLEANUP === 'true') {
     try {
       console.log('Cleaning up test data...');
-      execSync(
-        'cd ../../../vbwd-backend && TEST_DATA_CLEANUP=true docker-compose exec -T api flask cleanup-test-data',
-        {
-          stdio: 'inherit',
-          timeout: 30000,
-        }
-      );
+      runBackendFlaskCommand('cleanup-test-data', 'TEST_DATA_CLEANUP');
       console.log('Test data cleaned up successfully');
     } catch (error) {
       console.warn('Could not cleanup test data:', error);
