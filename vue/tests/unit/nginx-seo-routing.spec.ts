@@ -206,6 +206,8 @@ const SPA_ONLY_MATCHER = '~ ^/(dashboard|tuktuk)(/|$)'
 const RENDER_MATCHER = '^~ /_render/'
 const PAGE_LOCATION_MAP_HEADER = 'map "$request_method:$http_accept" $vbwd_page_location {'
 const FORWARDED_PROTO_MAP_HEADER = 'map $http_x_forwarded_proto $forwarded_proto {'
+const PRIVATE_ROBOTS_MAP_HEADER = 'map $request_uri $vbwd_private_robots_tag {'
+const PRIVATE_ROBOTS_ADD_HEADER = 'add_header X-Robots-Tag $vbwd_private_robots_tag always;'
 const BACKEND_PROXY_PASS = /proxy_pass\s+(\$backend|http:\/\/\$api_upstream)\S*;/
 
 /** Conf text with comments dropped, so prose never looks like a directive. */
@@ -344,6 +346,7 @@ describe('S152-11a — frontend router in every served conf (D5/D7/W2)', () => {
           expect(directives).toEqual([
             'set $vbwd_geo_pass_location $vbwd_page_location;',
             'js_content geo.handle;',
+            PRIVATE_ROBOTS_ADD_HEADER,
           ])
         } else {
           expect(body).toMatch(/error_page\s+418\s+=\s+@frontend;/)
@@ -362,6 +365,7 @@ describe('S152-11a — frontend router in every served conf (D5/D7/W2)', () => {
           expect(normalisedDirectives(body ?? '')).toEqual([
             'set $vbwd_geo_pass_location @spa;',
             'js_content geo.handle;',
+            PRIVATE_ROBOTS_ADD_HEADER,
           ])
         } else {
           expect(body).toMatch(/error_page\s+419\s+=\s+@spa;/)
@@ -411,7 +415,11 @@ describe('S152-11a — frontend router in every served conf (D5/D7/W2)', () => {
         const actual = normalisedDirectives(locationBody(platformText, matcher) ?? '')
         expect(actual, `platform location ${matcher} drifted from the snippet`).toEqual(expected)
       }
-      for (const mapHeader of [PAGE_LOCATION_MAP_HEADER, FORWARDED_PROTO_MAP_HEADER]) {
+      for (const mapHeader of [
+        PAGE_LOCATION_MAP_HEADER,
+        FORWARDED_PROTO_MAP_HEADER,
+        PRIVATE_ROBOTS_MAP_HEADER,
+      ]) {
         const expected = normalisedDirectives(mapBody(mapSnippetText, mapHeader) ?? '')
         const actual = normalisedDirectives(mapBody(platformText, mapHeader) ?? '')
         expect(actual, `platform ${mapHeader} drifted from the snippet`).toEqual(expected)
@@ -508,4 +516,126 @@ describe('theme not-found (X-VBWD-Not-Found: 1) answers a real 404', () => {
   it('the shared @frontend snippet is untouched (the branch lives in @spa)', () => {
     expect(readText(ROUTER_SNIPPET_PATH)).not.toContain('x_vbwd_not_found')
   })
+})
+
+/**
+ * Private areas are never indexed. Every response for a path under /pay,
+ * /software, /dashboard or /tuktuk (segment-aware) carries
+ * `X-Robots-Tag: noindex, nofollow`, whichever branch serves it; every other
+ * path carries no X-Robots-Tag at all (an empty map value omits the header).
+ * The map keys on `$request_uri` — `$uri` is rewritten to /seo/<path>.html or
+ * /index.html by try_files. `add_header` is NOT inherited into a location that
+ * sets its own, so EVERY page-serving location (`/`, the SPA-only location and
+ * every named location) carries the directive itself. Deliberately no
+ * robots.txt Disallow: a crawler must fetch the page to see the noindex.
+ * Behaviour proof: bin/test-nginx-private-noindex.sh.
+ */
+function privateRobotsMapping(): { pattern: RegExp; value: string; defaultValue: string } {
+  const body = mapBody(readText(ROUTER_MAP_SNIPPET_PATH), PRIVATE_ROBOTS_MAP_HEADER)
+  if (body === null) throw new Error('frontend-router-map.conf holds no private-robots map')
+  const regexLine = body.match(/"~(\*?)(.+)"\s+"([^"]*)";/)
+  const defaultLine = body.match(/^\s*default\s+"([^"]*)";$/m)
+  if (!regexLine || !defaultLine) throw new Error('private-robots map lacks default/regex lines')
+  return {
+    pattern: new RegExp(regexLine[2], regexLine[1] === '*' ? 'i' : ''),
+    value: regexLine[3],
+    defaultValue: defaultLine[1],
+  }
+}
+
+/** Request URIs as nginx sees them in `$request_uri` (path + raw query). */
+const PRIVATE_REQUEST_URIS = [
+  '/pay',
+  '/pay/',
+  '/pay/stripe',
+  '/pay/yookassa?invoice=1',
+  '/pay?invoice=1',
+  '/software',
+  '/software/payments',
+  '/software/missing',
+  '/dashboard',
+  '/dashboard/subscriptions',
+  '/dashboard?tab=1',
+  '/tuktuk',
+  '/tuktuk/reports',
+  '/DASHBOARD',
+  '//pay/stripe',
+]
+
+const PUBLIC_REQUEST_URIS = [
+  '/',
+  '/real',
+  '/missing',
+  '/payments-guide',
+  '/pay-later',
+  '/softwarex',
+  '/dashboardx',
+  '/shop/dashboard',
+  '/blog/pay',
+  '/assets/x.js',
+  '/?next=/pay',
+]
+
+describe('private areas are never indexed (X-Robots-Tag: noindex, nofollow)', () => {
+  it('the map defaults to an empty value (header omitted) and marks private paths', () => {
+    const mapping = privateRobotsMapping()
+    expect(mapping.defaultValue).toBe('')
+    expect(mapping.value).toBe('noindex, nofollow')
+  })
+
+  it.each(PRIVATE_REQUEST_URIS)('marks %s private', (requestUri) => {
+    expect(privateRobotsMapping().pattern.test(requestUri)).toBe(true)
+  })
+
+  it.each(PUBLIC_REQUEST_URIS)('leaves %s indexable', (requestUri) => {
+    expect(privateRobotsMapping().pattern.test(requestUri)).toBe(false)
+  })
+
+  it('covers every SPA-only area (the two lists stay related)', () => {
+    const mapping = privateRobotsMapping()
+    for (const spaOnlyArea of ['/dashboard', '/tuktuk']) {
+      expect(mapping.pattern.test(spaOnlyArea)).toBe(true)
+    }
+  })
+
+  it('keys on $request_uri, which try_files / named hops never rewrite', () => {
+    expect(readText(ROUTER_MAP_SNIPPET_PATH)).toContain(PRIVATE_ROBOTS_MAP_HEADER)
+  })
+
+  for (const conf of servedConfs) {
+    describe(conf.name, () => {
+      it('carries the private-robots map', () => {
+        expect(resolvedConf(conf.path)).toContain(PRIVATE_ROBOTS_MAP_HEADER)
+      })
+
+      it('every page-serving location adds the X-Robots-Tag header itself', () => {
+        const pageLocations = locationBlocks(resolvedConf(conf.path)).filter(
+          (block) =>
+            block.matcher === '/' ||
+            block.matcher === SPA_ONLY_MATCHER ||
+            block.matcher.startsWith('@'),
+        )
+        expect(pageLocations.map((block) => block.matcher)).toEqual(
+          expect.arrayContaining(['/', SPA_ONLY_MATCHER, '@frontend', '@spa']),
+        )
+        for (const block of pageLocations) {
+          expect(normalisedDirectives(block.body), `location ${block.matcher}`).toContain(
+            PRIVATE_ROBOTS_ADD_HEADER,
+          )
+        }
+      })
+
+      it('no other location sets X-Robots-Tag', () => {
+        const otherLocations = locationBlocks(resolvedConf(conf.path)).filter(
+          (block) =>
+            block.matcher !== '/' &&
+            block.matcher !== SPA_ONLY_MATCHER &&
+            !block.matcher.startsWith('@'),
+        )
+        for (const block of otherLocations) {
+          expect(block.body, `location ${block.matcher}`).not.toContain('X-Robots-Tag')
+        }
+      })
+    })
+  }
 })

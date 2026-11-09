@@ -223,9 +223,16 @@ server {
     # (S152-11a): @frontend for HTML navigations (backend first, 404/5xx → @spa),
     # @spa (the unchanged serving chain below) for everything else. With the geo
     # feature OFF (or config/DB missing) every request passes, as before.
+    # Private areas — never indexed: every page-serving location below (and
+    # @frontend in the router snippet) adds X-Robots-Tag from
+    # $vbwd_private_robots_tag ("noindex, nofollow" under /pay, /software,
+    # /dashboard, /tuktuk; "" ⇒ no header elsewhere — see frontend-router-map.conf).
+    # Per location, because add_header is not inherited into a location that sets
+    # its own. A noindex header rather than robots.txt Disallow so crawlers see it.
     location / {
         set $vbwd_geo_pass_location $vbwd_page_location;
         js_content geo.handle;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
     }
 
     # S152-11a (D7) — SPA-only areas: same geo-block, but a pass ALWAYS lands in
@@ -234,6 +241,7 @@ server {
     location ~ ^/(dashboard|tuktuk)(/|$) {
         set $vbwd_geo_pass_location @spa;
         js_content geo.handle;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
     }
 
     # SPA + prerender serving (the pre-S120.1 `location /` body, unchanged).
@@ -269,6 +277,7 @@ server {
         # shell shipped with no Cache-Control at all. Hashed assets are unaffected:
         # they match the `location /assets/` block above (immutable, 1y).
         add_header Cache-Control "no-cache" always;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
         # SPA-shell fallback goes to the named @seo_shell (serves /index.html)
         # instead of the bare `/index.html`, which would internal-redirect back
         # into `location /` (now the js_content geo handler) and re-evaluate —
@@ -297,6 +306,7 @@ server {
         # a crawler because of the renderer.
         proxy_intercept_errors on;
         error_page 404 500 502 503 504 = @seo_static;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
     }
 
     # Static fallback for crawlers when the render misses/errs: the content-only
@@ -307,6 +317,7 @@ server {
         root /usr/share/nginx/html;
         # Same reasoning as @spa: this arm can serve the shell or a prerender.
         add_header Cache-Control "no-cache" always;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
         try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri @seo_shell;
     }
     # A themed URL the backend reported missing (X-VBWD-Not-Found, see @spa). A
@@ -317,6 +328,7 @@ server {
     location @theme_not_found {
         root /usr/share/nginx/html;
         add_header Cache-Control "no-cache" always;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
         error_page 404 =404 @seo_shell;
         try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri =404;
     }
@@ -327,6 +339,7 @@ server {
         # heuristically cache index.html and keep requesting the previous build's
         # (now-404) chunk hashes.
         add_header Cache-Control "no-cache" always;
+        add_header X-Robots-Tag $vbwd_private_robots_tag always;
         try_files /index.html =404;
     }
 }
