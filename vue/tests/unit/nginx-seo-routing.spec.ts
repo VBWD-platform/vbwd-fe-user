@@ -457,3 +457,55 @@ describe('S152-12c — chained error_page hops opt into recursive_error_pages', 
     expect(errorPageTargets(locationBody(confText, '@seo_dynamic') ?? '')).toContain('@seo_static')
   })
 })
+
+/**
+ * Soft-404 fix — a themed URL whose resource is missing. The backend answers 404
+ * WITH `X-VBWD-Not-Found: 1` (a plain 404 still means "not a themed route, hand
+ * to the SPA"). @spa reads that upstream header (still set after @frontend's
+ * `= @spa` hop) and sends the request to @theme_not_found BEFORE any crawler
+ * branch: a prerender for the path is served (200, the sitemap safety net),
+ * otherwise the SPA shell with a real 404 — never the crawler dynamic render,
+ * never a re-entry into `location /`. Behaviour proof: bin/test-nginx-not-found.sh.
+ */
+const NOT_FOUND_BRANCH = 'if ($upstream_http_x_vbwd_not_found) { return 419; }'
+const NOT_FOUND_ERROR_PAGE = 'error_page 419 = @theme_not_found;'
+
+describe('theme not-found (X-VBWD-Not-Found: 1) answers a real 404', () => {
+  it.each([
+    ['nginx.dev.conf', DEV_CONF_PATH, 'return 418;'],
+    ['nginx.prod.conf.template', PROD_CONF_PATH, 'return 418;'],
+  ])('%s @spa takes the not-found branch before the 418 branch', (_name, confPath, laterBranch) => {
+    const directives = normalisedDirectives(locationBody(resolvedConf(confPath), '@spa') ?? '')
+    const notFoundIndex = directives.indexOf(NOT_FOUND_BRANCH)
+    expect(directives).toContain(NOT_FOUND_ERROR_PAGE)
+    expect(notFoundIndex).toBeGreaterThanOrEqual(0)
+    const laterBranchIndex = directives.findIndex((line) => line.includes(laterBranch))
+    expect(notFoundIndex).toBeLessThan(laterBranchIndex)
+  })
+
+  it('prod @theme_not_found serves a prerender, else the shell via @seo_shell as a 404', () => {
+    const body = locationBody(resolvedConf(PROD_CONF_PATH), '@theme_not_found')
+    expect(body, 'missing location @theme_not_found').not.toBeNull()
+    const directives = normalisedDirectives(body ?? '')
+    expect(directives).toContain(
+      'try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri =404;',
+    )
+    expect(directives).toContain('error_page 404 =404 @seo_shell;')
+    expect(directives).toContain('add_header Cache-Control "no-cache" always;')
+    expect(body).not.toContain('@seo_dynamic')
+    expect(body).not.toContain('$serve_dynamic_render')
+  })
+
+  it('dev @theme_not_found gives crawlers the prerender, everyone else Vite as a 404', () => {
+    const body = locationBody(resolvedConf(DEV_CONF_PATH), '@theme_not_found')
+    expect(body, 'missing location @theme_not_found').not.toBeNull()
+    const directives = normalisedDirectives(body ?? '')
+    expect(directives).toContain('error_page 404 =404 @vite;')
+    expect(directives).toContain('if ($vbwd_is_crawler = 0) { return 404; }')
+    expect(directives).toContain('try_files /seo$uri.html /seo$uri/index.html =404;')
+  })
+
+  it('the shared @frontend snippet is untouched (the branch lives in @spa)', () => {
+    expect(readText(ROUTER_SNIPPET_PATH)).not.toContain('x_vbwd_not_found')
+  })
+})

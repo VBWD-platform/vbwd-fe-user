@@ -251,6 +251,14 @@ server {
         # 404/5xx → @seo_static is the second, so without this a render miss
         # reached the crawler as a bare nginx 404 instead of the static fallback.
         recursive_error_pages on;
+        # Soft-404 fix — a theme plugin answers a URL it owns but cannot find with
+        # 404 + `X-VBWD-Not-Found: 1`; the upstream header is still readable here
+        # after @frontend's `= @spa` hop. Checked FIRST, so a missing themed page
+        # never reaches the crawler render below (which would answer 200) and
+        # never becomes the 200 SPA shell. A plain backend 404 (vue mode, a route
+        # no theme owns) carries no header and keeps the chain below unchanged.
+        error_page 419 = @theme_not_found;
+        if ($upstream_http_x_vbwd_not_found) { return 419; }
         error_page 418 = @seo_dynamic;
         if ($serve_dynamic_render) { return 418; }
         # Entry documents (the SPA shell and the prerendered .html snapshots) must
@@ -300,6 +308,17 @@ server {
         # Same reasoning as @spa: this arm can serve the shell or a prerender.
         add_header Cache-Control "no-cache" always;
         try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri @seo_shell;
+    }
+    # A themed URL the backend reported missing (X-VBWD-Not-Found, see @spa). A
+    # prerender for the path still wins with 200 — the safety net for SPA pages
+    # listed in the sitemap. Otherwise the SPA shell (its router shows "Page not
+    # found") with a real 404: `=404` keeps the status through @seo_shell, which
+    # serves /index.html without re-entering `location /` (the njs geo handler).
+    location @theme_not_found {
+        root /usr/share/nginx/html;
+        add_header Cache-Control "no-cache" always;
+        error_page 404 =404 @seo_shell;
+        try_files ${seo_prefix}$uri.html ${seo_prefix}$uri/index.html $uri =404;
     }
     location @seo_shell {
         root /usr/share/nginx/html;
