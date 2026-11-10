@@ -7,6 +7,9 @@
 # dev conf) against a stub backend via bin/lib/nginx-behaviour-harness.sh and
 # asserts what a browser / crawler gets. Prod runs with SEO_RENDER_ON=1 so the
 # crawler dynamic-render branch is LIVE — the not-found path must still skip it.
+# Also: every sitemap chunk — legacy /sitemap-<n>.xml and S154 per-provider
+# /sitemap-<provider>-<n>.xml — reaches the backend instead of the SPA shell's
+# soft 200 HTML.
 #
 # Needs only docker. Containers, network and temp files are removed on exit.
 #   bin/test-nginx-not-found.sh
@@ -20,6 +23,14 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib/nginx-behaviour-harnes
 PROD_CONTAINER="$RUN_ID-prod"
 DEV_CONTAINER="$RUN_ID-dev"
 PRERENDER_MARKER='PRERENDER missing'
+
+# check_sitemap_chunks <label> <base url>
+check_sitemap_chunks() {
+    local label="$1" base_url="$2" sitemap_path
+    for sitemap_path in /sitemap-1.xml /sitemap-cms-1.xml /sitemap-shop-products-12.xml; do
+        expect_sitemap_proxied "$label" "$base_url" "$sitemap_path"
+    done
+}
 
 check_prod() {
     local base_url human="$HUMAN_USER_AGENT"
@@ -40,6 +51,7 @@ check_prod() {
     expect_response "prod crawler" "$base_url" /missing "$CRAWLER_USER_AGENT" 200 "$PRERENDER_MARKER"
     expect_response prod "$base_url" /missing "$human" 404 "$SPA_SHELL_MARKER"
     rm -f "$WORK_DIRECTORY/html/seo/missing.html"
+    check_sitemap_chunks "prod sitemap" "$base_url"
 }
 
 check_dev() {
@@ -54,6 +66,7 @@ check_dev() {
     printf '<html>%s</html>\n' "$PRERENDER_MARKER" > "$WORK_DIRECTORY/html/seo/missing.html"
     expect_response "dev crawler" "$base_url" /missing "$CRAWLER_USER_AGENT" 200 "$PRERENDER_MARKER"
     rm -f "$WORK_DIRECTORY/html/seo/missing.html"
+    check_sitemap_chunks "dev sitemap" "$base_url"
 }
 
 write_fixtures

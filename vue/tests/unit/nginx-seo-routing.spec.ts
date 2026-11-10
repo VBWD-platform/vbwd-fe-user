@@ -4,8 +4,9 @@
  * Reads the served nginx confs as text (same approach as geo-block-njs.spec.ts)
  * and asserts the structure the SEO seam depends on:
  *
- *   Phase 2 — every served conf routes /robots.txt, /sitemap.xml,
- *             /sitemap-<n>.xml and the IndexNow key file to the backend, forwarding
+ *   Phase 2 — every served conf routes /robots.txt, /sitemap.xml, the sitemap
+ *             chunks (legacy /sitemap-<n>.xml and S154 per-provider
+ *             /sitemap-<provider>-<n>.xml) and the IndexNow key file to the backend, forwarding
  *             `Host $http_host` (keeps the port, defect D4) and X-Forwarded-Proto.
  *             The vbwd-platform conf mirrors the shared snippet (drift guard, D5).
  *   Phase 3 — ONE crawler user-agent regex (nginx/crawler-user-agents.conf) that
@@ -24,10 +25,13 @@ const DEV_CONF_PATH = resolve(REPO_ROOT, 'nginx.dev.conf')
 const PROD_CONF_PATH = resolve(REPO_ROOT, 'nginx.prod.conf.template')
 const PLATFORM_CONF_PATH = resolve(REPO_ROOT, '../vbwd-platform/fe-user/nginx.conf')
 
+const SITEMAP_CHUNK_REGEX = '^/sitemap-(?:[a-z0-9]+(?:-[a-z0-9]+)*-)?\\d+\\.xml$'
+const SITEMAP_CHUNK_MATCHER = `~ ${SITEMAP_CHUNK_REGEX}`
+
 const SEO_LOCATION_MATCHERS = [
   '= /robots.txt',
   '= /sitemap.xml',
-  '~ ^/sitemap-\\d+\\.xml$',
+  SITEMAP_CHUNK_MATCHER,
   '~ "^/[A-Za-z0-9-]{8,128}\\.txt$"',
 ]
 
@@ -108,6 +112,37 @@ describe('S150 Phase 2 — SEO files reach the backend with the real host', () =
       }
     },
   )
+})
+
+/**
+ * S154 P1 — /sitemap.xml is a sitemapindex of per-provider chunks
+ * /sitemap-<provider>-<n>.xml (provider `^[a-z0-9]+(?:-[a-z0-9]+)*$`); the legacy
+ * /sitemap-<n>.xml still works. ONE case-sensitive location accepts both, so a
+ * named chunk never falls through to the SPA shell (200 HTML).
+ * Behaviour proof: bin/test-nginx-not-found.sh (sitemap chunks reach the backend).
+ */
+describe('S154 — sitemap chunks (legacy + per-provider) reach the backend', () => {
+  const chunkPattern = new RegExp(SITEMAP_CHUNK_REGEX)
+
+  it.each(['/sitemap-1.xml', '/sitemap-cms-1.xml', '/sitemap-shop-products-12.xml'])(
+    'the chunk location matches %s',
+    (path) => {
+      expect(chunkPattern.test(path)).toBe(true)
+    },
+  )
+
+  it.each(['/sitemap-.xml', '/sitemap-CMS-1.xml', '/sitemap-cms.xml', '/sitemaps-1.xml', '/sitemap.xml'])(
+    'the chunk location does not match %s',
+    (path) => {
+      expect(chunkPattern.test(path)).toBe(false)
+    },
+  )
+
+  it('no conf keeps the legacy-only digits matcher', () => {
+    for (const confPath of [SEO_SNIPPET_PATH, ...servedConfs.map((conf) => conf.path)]) {
+      expect(readText(confPath), confPath).not.toContain('location ~ ^/sitemap-\\d+\\.xml$')
+    }
+  })
 })
 
 function crawlerRegex(): RegExp {
@@ -520,7 +555,7 @@ describe('theme not-found (X-VBWD-Not-Found: 1) answers a real 404', () => {
 
 /**
  * Private areas are never indexed. Every response for a path under /pay,
- * /software, /dashboard or /tuktuk (segment-aware) carries
+ * /dashboard or /tuktuk (segment-aware) carries
  * `X-Robots-Tag: noindex, nofollow`, whichever branch serves it; every other
  * path carries no X-Robots-Tag at all (an empty map value omits the header).
  * The map keys on `$request_uri` — `$uri` is rewritten to /seo/<path>.html or
@@ -528,6 +563,8 @@ describe('theme not-found (X-VBWD-Not-Found: 1) answers a real 404', () => {
  * sets its own, so EVERY page-serving location (`/`, the SPA-only location and
  * every named location) carries the directive itself. Deliberately no
  * robots.txt Disallow: a crawler must fetch the page to see the noindex.
+ * The ghrm catalogue is PUBLIC and its base is admin-configurable (S154 D9), so
+ * no catalogue path is private and none may be hardcoded here.
  * Behaviour proof: bin/test-nginx-private-noindex.sh.
  */
 function privateRobotsMapping(): { pattern: RegExp; value: string; defaultValue: string } {
@@ -550,9 +587,6 @@ const PRIVATE_REQUEST_URIS = [
   '/pay/stripe',
   '/pay/yookassa?invoice=1',
   '/pay?invoice=1',
-  '/software',
-  '/software/payments',
-  '/software/missing',
   '/dashboard',
   '/dashboard/subscriptions',
   '/dashboard?tab=1',
@@ -568,6 +602,11 @@ const PUBLIC_REQUEST_URIS = [
   '/missing',
   '/payments-guide',
   '/pay-later',
+  '/software',
+  '/software/',
+  '/software/x',
+  '/software/payments',
+  '/SOFTWARE/missing',
   '/softwarex',
   '/dashboardx',
   '/shop/dashboard',
@@ -581,6 +620,11 @@ describe('private areas are never indexed (X-Robots-Tag: noindex, nofollow)', ()
     const mapping = privateRobotsMapping()
     expect(mapping.defaultValue).toBe('')
     expect(mapping.value).toBe('noindex, nofollow')
+  })
+
+  it('lists exactly the fixed private prefixes — no configurable catalogue base', () => {
+    const alternation = privateRobotsMapping().pattern.source.match(/\(([a-z|]+)\)/)
+    expect(alternation?.[1].split('|').sort()).toEqual(['dashboard', 'pay', 'tuktuk'])
   })
 
   it.each(PRIVATE_REQUEST_URIS)('marks %s private', (requestUri) => {

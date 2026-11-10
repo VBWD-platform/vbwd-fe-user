@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 # Private areas are never indexed — behaviour test for `X-Robots-Tag`.
 #
-# Every response for a path under /pay, /software, /dashboard, /tuktuk
-# (segment-aware) must carry exactly `X-Robots-Tag: noindex, nofollow`, whichever
+# Every response for a path under /pay, /dashboard, /tuktuk (segment-aware)
+# must carry exactly `X-Robots-Tag: noindex, nofollow`, whichever
 # nginx branch serves it: @frontend (themed page), @spa (SPA shell), the static
 # prerender (try_files rewrites $uri to /seo/<path>.html), @seo_dynamic,
 # @seo_static, @seo_shell, @theme_not_found (404) and the SPA-only location.
-# Every other path carries no X-Robots-Tag at all. Runs the REAL nginx confs
+# Every other path carries no X-Robots-Tag at all — including the ghrm catalogue,
+# which is PUBLIC with an admin-configurable base (S154 D9; /software below is
+# just one sample public base). Runs the REAL nginx confs
 # against a stub backend via bin/lib/nginx-behaviour-harness.sh:
 #   prod-render — prod template, SEO_RENDER_ON=1 (crawler dynamic render live)
 #   prod-static — prod template, SEO_RENDER_ON=0 (crawler static prerender)
@@ -56,14 +58,20 @@ remove_prerenders() { find "$WORK_DIRECTORY/html/seo" -mindepth 1 -delete; }
 check_shared_branches() {
     local label="$1" base_url="$2" human="$HUMAN_USER_AGENT" tag="$PRIVATE_ROBOTS_TAG"
     local private_path
-    for private_path in /software /software/payments /pay /pay/yookassa '/pay?invoice=1' \
+    local public_path
+    for private_path in /pay /pay/yookassa '/pay?invoice=1' \
         /dashboard /dashboard/subscriptions /tuktuk /DASHBOARD //pay/yookassa; do
         expect_robots_tag "$label human" "$base_url" "$private_path" "$human" 200 "$SPA_SHELL_MARKER" "$tag"
     done
     expect_robots_tag "$label human" "$base_url" /pay/stripe "$human" 200 "$THEMED_MARKER" "$tag"
     expect_robots_tag "$label crawler" "$base_url" /pay/stripe "$CRAWLER_USER_AGENT" 200 "$THEMED_MARKER" "$tag"
-    expect_robots_tag "$label human" "$base_url" /software/missing "$human" 404 "$SPA_SHELL_MARKER" "$tag"
-    expect_robots_tag "$label crawler" "$base_url" /software/missing "$CRAWLER_USER_AGENT" 404 "$SPA_SHELL_MARKER" "$tag"
+    expect_robots_tag "$label human" "$base_url" /pay/missing "$human" 404 "$SPA_SHELL_MARKER" "$tag"
+    expect_robots_tag "$label crawler" "$base_url" /pay/missing "$CRAWLER_USER_AGENT" 404 "$SPA_SHELL_MARKER" "$tag"
+    for public_path in /software /software/payments /SOFTWARE/x; do
+        expect_robots_tag "$label human" "$base_url" "$public_path" "$human" 200 "$SPA_SHELL_MARKER" ""
+    done
+    expect_robots_tag "$label human" "$base_url" /software/missing "$human" 404 "$SPA_SHELL_MARKER" ""
+    expect_robots_tag "$label crawler" "$base_url" /software/missing "$CRAWLER_USER_AGENT" 404 "$SPA_SHELL_MARKER" ""
     expect_robots_tag "$label human" "$base_url" /real "$human" 200 "$THEMED_MARKER" ""
     expect_robots_tag "$label human" "$base_url" /missing "$human" 404 "$SPA_SHELL_MARKER" ""
     expect_robots_tag "$label human" "$base_url" /payments-guide "$human" 200 "$SPA_SHELL_MARKER" ""
@@ -80,17 +88,21 @@ check_prod_render() {
     check_shared_branches prod-render "$base_url"
     expect_robots_tag prod-render "$base_url" /assets/x.js "$HUMAN_USER_AGENT" 404 "" ""
     # @seo_dynamic — the crawler render, incl. the SPA-only location.
-    for private_path in /software /software/payments /pay/yookassa /dashboard /tuktuk; do
+    for private_path in /pay /pay/yookassa /dashboard /tuktuk; do
         expect_robots_tag "prod-render crawler" "$base_url" "$private_path" "$crawler" 200 "$DYNAMIC_RENDER_MARKER" "$tag"
     done
-    expect_robots_tag "prod-render crawler" "$base_url" /payments-guide "$crawler" 200 "$DYNAMIC_RENDER_MARKER" ""
+    for public_path in /payments-guide /software /software/payments; do
+        expect_robots_tag "prod-render crawler" "$base_url" "$public_path" "$crawler" 200 "$DYNAMIC_RENDER_MARKER" ""
+    done
     # @seo_static → @seo_shell (render miss, no prerender), then @seo_static's prerender.
-    expect_robots_tag "prod-render crawler" "$base_url" /software/render-miss "$crawler" 200 "$SPA_SHELL_MARKER" "$tag"
-    write_prerender /software/render-miss
-    expect_robots_tag "prod-render crawler" "$base_url" /software/render-miss "$crawler" 200 "$PRERENDER_MARKER" "$tag"
+    expect_robots_tag "prod-render crawler" "$base_url" /pay/render-miss "$crawler" 200 "$SPA_SHELL_MARKER" "$tag"
+    write_prerender /pay/render-miss
+    expect_robots_tag "prod-render crawler" "$base_url" /pay/render-miss "$crawler" 200 "$PRERENDER_MARKER" "$tag"
     # @theme_not_found — a prerender for the missing themed path still wins (200).
+    write_prerender /pay/missing
+    expect_robots_tag "prod-render crawler" "$base_url" /pay/missing "$crawler" 200 "$PRERENDER_MARKER" "$tag"
     write_prerender /software/missing
-    expect_robots_tag "prod-render crawler" "$base_url" /software/missing "$crawler" 200 "$PRERENDER_MARKER" "$tag"
+    expect_robots_tag "prod-render crawler" "$base_url" /software/missing "$crawler" 200 "$PRERENDER_MARKER" ""
     remove_prerenders
 }
 
@@ -98,11 +110,13 @@ check_prod_static() {
     local base_url tag="$PRIVATE_ROBOTS_TAG" crawler="$CRAWLER_USER_AGENT"
     base_url="$(base_url_of "$PROD_STATIC_CONTAINER")"
     wait_until_ready "$base_url" || { fail "prod-static nginx never answered"; docker logs "$PROD_STATIC_CONTAINER"; return; }
-    # @spa try_files serves seo/software.html — $uri is rewritten, $request_uri is not.
-    write_prerender /software
+    # @spa try_files serves seo/pay/yookassa.html — $uri is rewritten, $request_uri is not.
+    write_prerender /pay/yookassa
     write_prerender /public-page
-    expect_robots_tag "prod-static crawler" "$base_url" /software "$crawler" 200 "$PRERENDER_MARKER" "$tag"
+    write_prerender /software
+    expect_robots_tag "prod-static crawler" "$base_url" /pay/yookassa "$crawler" 200 "$PRERENDER_MARKER" "$tag"
     expect_robots_tag "prod-static crawler" "$base_url" /public-page "$crawler" 200 "$PRERENDER_MARKER" ""
+    expect_robots_tag "prod-static crawler" "$base_url" /software "$crawler" 200 "$PRERENDER_MARKER" ""
     expect_robots_tag "prod-static crawler" "$base_url" /dashboard "$crawler" 200 "$SPA_SHELL_MARKER" "$tag"
     expect_robots_tag "prod-static crawler" "$base_url" /softwarex "$crawler" 200 "$SPA_SHELL_MARKER" ""
     remove_prerenders
@@ -113,8 +127,10 @@ check_dev() {
     base_url="$(base_url_of "$DEV_CONTAINER")"
     wait_until_ready "$base_url" || { fail "dev nginx never answered"; docker logs "$DEV_CONTAINER"; return; }
     check_shared_branches dev "$base_url"
+    write_prerender /pay/yookassa
     write_prerender /software
-    expect_robots_tag "dev crawler" "$base_url" /software "$crawler" 200 "$PRERENDER_MARKER" "$tag"
+    expect_robots_tag "dev crawler" "$base_url" /pay/yookassa "$crawler" 200 "$PRERENDER_MARKER" "$tag"
+    expect_robots_tag "dev crawler" "$base_url" /software "$crawler" 200 "$PRERENDER_MARKER" ""
     expect_robots_tag "dev crawler" "$base_url" /dashboard "$crawler" 200 "$SPA_SHELL_MARKER" "$tag"
     expect_robots_tag "dev crawler" "$base_url" /softwarex "$crawler" 200 "$SPA_SHELL_MARKER" ""
     remove_prerenders

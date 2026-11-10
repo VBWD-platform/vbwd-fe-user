@@ -31,6 +31,7 @@ CRAWLER_USER_AGENT='Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.c
 SPA_SHELL_MARKER='<title>VBWD User Portal</title>'
 THEMED_MARKER='THEMED PAGE'
 DYNAMIC_RENDER_MARKER='DYNAMIC RENDER'
+SITEMAP_MARKER='STUB SITEMAP'
 
 failure_count=0
 
@@ -45,10 +46,11 @@ cleanup() {
 trap cleanup EXIT
 
 # Backend (:5000) + Vite dev server (:5173). /real and /pay/stripe* are themed
-# pages; /missing* and /software/missing* are themed URLs whose resource is gone
+# pages; /missing*, /pay/missing* and /software/missing* are themed URLs whose
+# resource is gone
 # (404 + X-VBWD-Not-Found); every other unknown path is a plain "not mine" 404.
 # The crawler render misses (404 → static fallback) for any path naming
-# "render-miss".
+# "render-miss". /sitemap-*.xml answers an XML sitemap (cms plugin stand-in).
 write_fixtures() {
     mkdir -p "$WORK_DIRECTORY/html/seo" "$WORK_DIRECTORY/stub"
     printf '<!doctype html><html><head>%s</head><body><div id="app"></div></body></html>\n' \
@@ -61,7 +63,8 @@ BACKEND_PORT = 5000
 VITE_PORT = 5173
 SPA_SHELL = b'<!doctype html><html><head><title>VBWD User Portal</title></head></html>'
 THEMED_PATHS = ("/real", "/pay/stripe")
-NOT_FOUND_PREFIXES = ("/missing", "/software/missing")
+SITEMAP_XML = b'<?xml version="1.0" encoding="UTF-8"?><urlset>STUB SITEMAP</urlset>'
+NOT_FOUND_PREFIXES = ("/missing", "/pay/missing", "/software/missing")
 
 
 class BackendHandler(BaseHTTPRequestHandler):
@@ -72,6 +75,8 @@ class BackendHandler(BaseHTTPRequestHandler):
                 self.answer(404, b"render miss")
             else:
                 self.answer(200, b"<html>DYNAMIC RENDER</html>")
+        elif path_only.startswith("/sitemap-") and path_only.endswith(".xml"):
+            self.answer(200, SITEMAP_XML, content_type="application/xml")
         elif path_only in THEMED_PATHS:
             self.answer(200, b"<html>THEMED PAGE</html>")
         elif path_only.startswith(NOT_FOUND_PREFIXES):
@@ -79,9 +84,9 @@ class BackendHandler(BaseHTTPRequestHandler):
         else:
             self.answer(404, b"not a themed route")
 
-    def answer(self, status, body, extra_headers=None):
+    def answer(self, status, body, extra_headers=None, content_type="text/html"):
         self.send_response(status)
-        self.send_header("Content-Type", "text/html")
+        self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(body)))
         for header_name, header_value in (extra_headers or {}).items():
             self.send_header(header_name, header_value)
@@ -185,6 +190,24 @@ expect_response() {
         fail "$label: $path lacks header '$expected_header'"
     else
         pass "$label: $path → $expected_status ${body_marker:+($body_marker)}"
+    fi
+}
+
+# expect_sitemap_proxied <label> <base url> <path> — a crawler's sitemap fetch
+# (Accept: application/xml) reaches the backend: 200, application/xml, the stub
+# sitemap body — never the SPA shell.
+expect_sitemap_proxied() {
+    local label="$1" base_url="$2" path="$3" actual_status
+    actual_status="$(curl -s -D "$WORK_DIRECTORY/headers" -o "$WORK_DIRECTORY/body" -w '%{http_code}' \
+        -H "Accept: application/xml" -A "$CRAWLER_USER_AGENT" "$base_url$path")"
+    if [ "$actual_status" != 200 ]; then
+        fail "$label: $path → $actual_status (expected 200)"
+    elif ! grep -qi '^content-type: application/xml' "$WORK_DIRECTORY/headers"; then
+        fail "$label: $path is not application/xml: $(grep -i '^content-type:' "$WORK_DIRECTORY/headers")"
+    elif ! grep -qF -- "$SITEMAP_MARKER" "$WORK_DIRECTORY/body"; then
+        fail "$label: $path body is not the backend sitemap: $(head -c 200 "$WORK_DIRECTORY/body")"
+    else
+        pass "$label: $path → 200 application/xml ($SITEMAP_MARKER)"
     fi
 }
 

@@ -109,6 +109,7 @@ server {
 
     # SEO — sitemap + robots are DYNAMIC backend routes (cms plugin) served at
     # root; proxy them to the backend so they don't fall through to the SPA.
+    # Chunks: legacy /sitemap-<n>.xml and S154 per-provider /sitemap-<provider>-<n>.xml.
     location = /sitemap.xml {
         proxy_pass http://$api_upstream;
         proxy_set_header Host $http_host;
@@ -118,7 +119,7 @@ server {
         proxy_set_header X-VBWD-Render "";
         proxy_read_timeout 60s;
     }
-    location ~ ^/sitemap-\d+\.xml$ {
+    location ~ ^/sitemap-(?:[a-z0-9]+(?:-[a-z0-9]+)*-)?\d+\.xml$ {
         proxy_pass http://$api_upstream;
         proxy_set_header Host $http_host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -225,8 +226,8 @@ server {
     # feature OFF (or config/DB missing) every request passes, as before.
     # Private areas — never indexed: every page-serving location below (and
     # @frontend in the router snippet) adds X-Robots-Tag from
-    # $vbwd_private_robots_tag ("noindex, nofollow" under /pay, /software,
-    # /dashboard, /tuktuk; "" ⇒ no header elsewhere — see frontend-router-map.conf).
+    # $vbwd_private_robots_tag ("noindex, nofollow" under /pay, /dashboard,
+    # /tuktuk; "" ⇒ no header elsewhere — see frontend-router-map.conf).
     # Per location, because add_header is not inherited into a location that sets
     # its own. A noindex header rather than robots.txt Disallow so crawlers see it.
     location / {
