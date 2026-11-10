@@ -41,6 +41,10 @@
   },
   {
     "plugin": "ghrm",
+    "path": "/software/category/:category_slug"
+  },
+  {
+    "plugin": "ghrm",
     "path": "/software/search"
   },
   {

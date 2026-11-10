@@ -126,6 +126,11 @@
   },
   {
     "plugin": "ghrm",
+    "path": "/software/category/:category_slug",
+    "sample": "/software/category/backend"
+  },
+  {
+    "plugin": "ghrm",
     "path": "/software/search",
     "sample": "/software/search?q=backend"
   },
@@ -278,6 +283,16 @@
     "plugin": "stripe-payment",
     "path": "/pay/stripe/success",
     "sample": "/pay/stripe/success"
+  },
+  {
+    "plugin": "subscription",
+    "path": "/plans",
+    "sample": "/plans"
+  },
+  {
+    "plugin": "subscription",
+    "path": "/plans/:planSlug",
+    "sample": "/plans/starter"
   },
   {
     "plugin": "toss-payments-payment",
